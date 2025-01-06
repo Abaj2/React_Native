@@ -41,9 +41,9 @@ const verifyToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ error: "Invalid or expired token" })
+    return res.status(401).json({ error: "Invalid or expired token" });
   }
-}
+};
 
 const generateJWT = (user) => {
   return jwt.sign(
@@ -157,21 +157,45 @@ app.post("/skills", verifyToken, async (req, res) => {
   const { skill, progression, current, goal, user_id } = req.body;
 
   try {
-    console.log(req.user);
+    const progressionsArray = [progression];
+    const currentArray = [current];
+    const goalArray = [goal];
 
     if (req.user.user_id !== user_id) {
-      return res.status(403).json({ error: "Unauthorized to modify this data"})
+      return res
+        .status(403)
+        .json({ error: "Unauthorized to modify this data" });
     }
 
-    const result = await pool.query("INSERT INTO skills (skill, progressions, current, goal, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING skill, progressions, current, goal, user_id",
-    [skill, progression, current, goal, user_id])
+    const result = await pool.query(
+      "INSERT INTO skills (skill, progressions, current, goal, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING skill, progressions, current, goal, user_id",
+      [skill, progressionsArray, currentArray, goalArray, user_id]
+    );
 
-    res.status(200).json({ message: "Successfully inserted skills" })
+    res.status(200).json({ message: "Successfully inserted skills" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" })
+    res.status(500).json({ error: "Server error" });
   }
-})
+});
+
+app.get("/fetchskills", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+
+    const result = await pool.query("SELECT * FROM skills WHERE user_id = $1", [
+      userId,
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "No skill found"});
+    }
+    res.status(200).json({ skills: result.rows })
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

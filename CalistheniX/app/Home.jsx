@@ -54,6 +54,10 @@ const Home = () => {
     android: "http://10.0.2.2:4003/skills",
     ios: "http://192.168.1.155:4003/skills",
   });
+  const SERVER_URL2 = Platform.select({
+    android: "http://10.0.2.2:4003/fetchskills",
+    ios: "http://192.168.1.155:4003/fetchskills",
+  });
 
   const [skillsData, setSkillsData] = useState([
     {
@@ -74,17 +78,29 @@ const Home = () => {
     const loadUserData = async () => {
       try {
         const token = await AsyncStorage.getItem("jwtToken");
-        if (token) {
-          // Decode or get user data from AsyncStorage
-          const user = JSON.parse(await AsyncStorage.getItem("userData"));
-          if (user) {
-            setUserData(user);
-          } else {
-            console.log("No user data found in AsyncStorage");
-          }
-        } else {
+        const storedUserData = await AsyncStorage.getItem("userData");
+
+        if (!token) {
           console.log("No JWT token found");
-          navigation.navigate("Sign-in");
+          navigation.navigate("Sign-in"); // Redirect to sign-in if no token
+          return;
+        }
+        if (storedUserData) {
+          const parsedUserData = JSON.parse(storedUserData);
+          setUserData(parsedUserData); // Set the user data from storage
+          console.log("Loaded user data from storage:", parsedUserData);
+        }
+
+        const response = await axios.get(SERVER_URL2, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          setSkillsData(response.data.skills)
+        } else {
+          console.log("Failed to fetch user data from server");
         }
       } catch (error) {
         console.error("Error retrieving data from AsyncStorage:", error);
@@ -109,19 +125,23 @@ const Home = () => {
     }; */
 
     try {
-      const response = await axios.post(SERVER_URL, {
-        skill,
-        progression,
-        current,
-        goal,
-        user_id,
-      }, {
-        headers: {
-          'Authorization': `Bearer ${await AsyncStorage.getItem("jwtToken")}`
+      const response = await axios.post(
+        SERVER_URL,
+        {
+          skill,
+          progression,
+          current,
+          goal,
+          user_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${await AsyncStorage.getItem("jwtToken")}`,
+          },
         }
-      });
+      );
       if (response.status === 200) {
-        console.log("Successfully inserted skills")
+        console.log("Successfully inserted skills");
         setSkill("");
         setProgression("");
         setCurrent(0);
@@ -134,8 +154,6 @@ const Home = () => {
       }
     }
   };
-
- 
 
   const handleModalClose = () => {
     setModalVisible(false);
