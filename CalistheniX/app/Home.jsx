@@ -21,7 +21,6 @@ import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 import Icon from "react-native-vector-icons/Feather";
 import RNPickerSelect from "react-native-picker-select";
 import { Dropdown } from "react-native-element-dropdown";
-import { BlurView } from "@react-native-community/blur";
 import Skill from "../components/skill.jsx";
 import axios from "axios";
 
@@ -50,6 +49,8 @@ const Home = () => {
   const [currentList, setCurrentList] = useState([]);
   const [goalList, setGoalList] = useState([]);
 
+  const [blurOpacity, setBlurOpacity] = useState(1);
+
   const SERVER_URL = Platform.select({
     android: "http://10.0.2.2:4003/skills",
     ios: "http://192.168.1.155:4003/skills",
@@ -61,54 +62,58 @@ const Home = () => {
 
   const [skillsData, setSkillsData] = useState([
     {
-      skill: "Front Lever",
-      progressions: ["Advanced Tuck", "One Leg Hold"],
-      current: [9, 10],
+      skill: "Example skills",
+      progressions: ["Example progression 1", "Example progression 2"],
+      current: [9, 12],
       goal: [12, 15],
-    },
-    {
-      skill: "Pull-ups",
-      progressions: ["Full Pull-ups", "Negative Pull-ups"],
-      current: [5, 8],
-      goal: [10, 12],
     },
   ]);
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const token = await AsyncStorage.getItem("jwtToken");
-        const storedUserData = await AsyncStorage.getItem("userData");
+  const loadUserData = async () => {
+    try {
+      const token = await AsyncStorage.getItem("jwtToken");
+      const storedUserData = await AsyncStorage.getItem("userData");
 
-        if (!token) {
-          console.log("No JWT token found");
-          navigation.navigate("Sign-in"); // Redirect to sign-in if no token
-          return;
-        }
-        if (storedUserData) {
-          const parsedUserData = JSON.parse(storedUserData);
-          setUserData(parsedUserData); // Set the user data from storage
-          console.log("Loaded user data from storage:", parsedUserData);
-        }
-
-        const response = await axios.get(SERVER_URL2, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.status === 200) {
-          setSkillsData(response.data.skills)
-        } else {
-          console.log("Failed to fetch user data from server");
-        }
-      } catch (error) {
-        console.error("Error retrieving data from AsyncStorage:", error);
-      } finally {
-        setIsLoading(false);
+      if (!token) {
+        console.log("No JWT token found");
+        navigation.navigate("Sign-in"); // Redirect to sign-in if no token
+        return;
       }
-    };
+      if (storedUserData) {
+        const parsedUserData = JSON.parse(storedUserData);
+        setUserData(parsedUserData); // Set the user data from storage
+        console.log("Loaded user data from storage:", parsedUserData);
+      }
 
+      const response = await axios.get(SERVER_URL2, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setSkillsData(response.data.skills);
+      } else {
+        console.log("Failed to fetch user data from server");
+      }
+    } catch (error) {
+      console.error("Error retrieving data from AsyncStorage:", error);
+      if (
+        error.response &&
+        (error.response.status === 401 ||
+          error.response.data.error === "Token expired")
+      ) {
+        console.log("Token expired, logging out");
+
+        await AsyncStorage.multiRemove(["jwtToken", "userData"]);
+        navigation.replace("Sign-in");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadUserData();
   }, []);
 
@@ -142,6 +147,7 @@ const Home = () => {
       );
       if (response.status === 200) {
         console.log("Successfully inserted skills");
+        loadUserData();
         setSkill("");
         setProgression("");
         setCurrent(0);
@@ -201,7 +207,6 @@ const Home = () => {
   const email = userData?.email || routeEmail || "No email";
   const username = userData?.username || routeUsername || "Unknown";
   const user_id = userData?.user_id || "unknown";
-  console.log(email, username, user_id);
 
   const numbers = Array.from({ length: 90 }, (_, i) => ({
     label: `${i + 1}`,
@@ -215,7 +220,11 @@ const Home = () => {
           <SafeAreaView>
             <View style={tw`p-5`}>
               {skillsData.map((skillData, index) => (
-                <Skill key={index} skillData={skillData} />
+                <Skill
+                  key={index}
+                  skillData={skillData}
+                  loadUserData={loadUserData}
+                />
               ))}
             </View>
           </SafeAreaView>
@@ -228,10 +237,20 @@ const Home = () => {
         return <Text>Select a tab</Text>;
     }
   };
+  const handleScroll = (event) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const maxOffset = 100; // Adjust based on how quickly you want the blur to disappear
+    const newOpacity = Math.max(0, 1 - offsetY / maxOffset);
+    setBlurOpacity(newOpacity);
+  };
 
   return (
-    <SafeAreaView>
-      <ScrollView>
+    <SafeAreaView style={[tw`z-1`, {}]}>
+      <ScrollView
+        contentContainerStyle={tw`pb-20`}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
         <StatusBar barStyle={"dark-content"} />
         <View style={tw`flex-row justify-between`}>
           <TouchableOpacity onPress={handleLogout}>
@@ -243,7 +262,7 @@ const Home = () => {
             <Icon style={tw`m-5`} name="settings" size={32} color="black" />
           </TouchableOpacity>
         </View>
-        <View style={tw`flex-row justify-around mb-5`}>
+        <View style={tw`flex-row justify-around`}>
           <TouchableOpacity
             style={[
               tw`p-2`,
@@ -306,18 +325,8 @@ const Home = () => {
           </TouchableOpacity>
         </View>
         <View style={tw`p-5`}>{renderContent()}</View>
-        <View style={tw`justify-center items-center`}>
-          <TouchableOpacity
-            onPress={() => setModalVisible(true)}
-            style={tw`justify-center items-center rounded-full w-12 h-12 bg-black`}
-          >
-            <Ionicons name="add" size={30} color="white" />
-          </TouchableOpacity>
-          <Modal
-            transparent={true}
-            visible={modalVisible}
-            animationType="slide"
-          >
+        <View style={[tw`justify-center items-center`, {}]}>
+          <Modal transparent={true} visible={modalVisible} animationType="fade">
             <SafeAreaView
               style={tw`flex-1 justify-center items-center bg-black/70`}
             >
@@ -335,7 +344,11 @@ const Home = () => {
                     ]}
                   >
                     <TouchableOpacity onPress={handleModalClose}>
-                      <Ionicons name="close" size={40} color="black" />
+                      <Ionicons
+                        name="close-circle-outline"
+                        size={40}
+                        color="black"
+                      />
                     </TouchableOpacity>
                   </View>
                   <View>
@@ -343,7 +356,7 @@ const Home = () => {
                       <Text style={tw`self-center font-bold text-2xl`}>
                         Add new skill
                       </Text>
-                      <Text style={[tw`mt-5 ml-10 text-xl`, { fontSize: 18 }]}>
+                      <Text style={[tw`mt-5 ml-5 text-xl`, { fontSize: 18 }]}>
                         Skill
                       </Text>
                       <TextInput
@@ -352,11 +365,11 @@ const Home = () => {
                         placeholder="e.g. front lever"
                         placeholderTextColor={"gray"}
                         style={[
-                          tw`self-center border border-gray-300 rounded-lg pl-10`,
+                          tw`text-center self-center border border-[#294241] rounded-lg`,
                           { width: width * 0.72, height: height * 0.04 },
                         ]}
                       ></TextInput>
-                      <Text style={[tw`mt-5 ml-10 text-xl`, { fontSize: 18 }]}>
+                      <Text style={[tw`mt-5 ml-5 text-xl`, { fontSize: 18 }]}>
                         Progression
                       </Text>
                       <TextInput
@@ -365,11 +378,11 @@ const Home = () => {
                         placeholder="e.g. advanced tuck"
                         placeholderTextColor={"gray"}
                         style={[
-                          tw`self-center border border-gray-300 rounded-lg pl-10`,
+                          tw`text-center self-center border border-[#294241] rounded-lg`,
                           { width: width * 0.72, height: height * 0.04 },
                         ]}
                       ></TextInput>
-                      <Text style={[tw`mt-5 ml-10 text-xl`, { fontSize: 18 }]}>
+                      <Text style={[tw`mt-5 ml-5 text-xl`, { fontSize: 18 }]}>
                         Current
                       </Text>
                       <View style={[tw``, { width: width * 0.8 }]}>
@@ -380,7 +393,7 @@ const Home = () => {
                           valueField="value"
                           placeholder="Select a number (reps/seconds)"
                           placeholderStyle={[
-                            tw`text-xl`,
+                            tw`text-xl text-center`,
                             {
                               fontSize: 15,
                               color: Platform.OS === "ios" ? "gray" : "757575",
@@ -392,12 +405,12 @@ const Home = () => {
                           ]}
                           value={current}
                           style={[
-                            tw`self-center border border-gray-300 rounded-lg pl-10`,
+                            tw`self-center border border-[#294241] rounded-lg`,
                             { width: width * 0.72, height: height * 0.04 },
                           ]}
                         />
                       </View>
-                      <Text style={[tw`mt-5 ml-10 text-xl`, { fontSize: 18 }]}>
+                      <Text style={[tw`mt-5 ml-5 text-xl`, { fontSize: 18 }]}>
                         Goal
                       </Text>
                       <View style={[tw``, { width: width * 0.8 }]}>
@@ -408,7 +421,7 @@ const Home = () => {
                           valueField="value"
                           placeholder="Select a number (reps/seconds)"
                           placeholderStyle={[
-                            tw`text-xl`,
+                            tw`text-xl text-center`,
                             {
                               fontSize: 15,
                               color: Platform.OS === "ios" ? "gray" : "757575",
@@ -420,7 +433,7 @@ const Home = () => {
                           ]}
                           value={goal}
                           style={[
-                            tw`self-center border border-gray-300 rounded-lg pl-10`,
+                            tw`self-center border border-[#294241] rounded-lg`,
                             { width: width * 0.72, height: height * 0.04 },
                           ]}
                         />
@@ -446,6 +459,22 @@ const Home = () => {
           </Modal>
         </View>
       </ScrollView>
+      <View style={[tw`absolute w-full items-center`]}>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={[
+            tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 bg-black`,
+            {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              top: height * 0.85,
+            },
+          ]}
+        >
+          <Ionicons name="add" size={40} color="white" />
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
