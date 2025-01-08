@@ -41,11 +41,10 @@ const verifyToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    if (err.name === 'TokenExpiredError') {
+    if (err.name === "TokenExpiredError") {
       return res.status(401).json({ error: "Token expired" });
     }
     return res.status(401).json({ error: "Invalid token" });
-
   }
 };
 
@@ -173,7 +172,7 @@ app.post("/skills", verifyToken, async (req, res) => {
 
     const result = await pool.query(
       "INSERT INTO skills (skill, progressions, current, goal, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING skill, progressions, current, goal, user_id",
-      [skill, progressionsArray, currentArray, goalArray, user_id]
+      [skill.trim(), progressionsArray, currentArray, goalArray, user_id]
     );
 
     res.status(200).json({ message: "Successfully inserted skills" });
@@ -203,14 +202,15 @@ app.get("/fetchskills", verifyToken, async (req, res) => {
 
 app.post("/addprogression", verifyToken, async (req, res) => {
   try {
-    const { skill, addProgression, addCurrent, addGoal, user_id } = req.body;
+    const { skill, addProgressionTrimmed, addCurrent, addGoal, user_id } =
+      req.body;
 
     const result = await pool.query(
-      'UPDATE skills set progressions = CASE WHEN user_id = $1 AND skill = $2 THEN array_append(progressions, $3) ELSE progressions END, current = CASE WHEN user_id = $1 AND skill = $2 THEN array_append(current, $4) ELSE current END, goal = CASE WHEN user_id = $1 AND skill = $2 THEN array_append(goal, $5) ELSE goal END WHERE user_id = $1 AND skill = $2',
-      [user_id, skill, addProgression, addCurrent, addGoal]
+      "UPDATE skills set progressions = CASE WHEN user_id = $1 AND skill = $2 THEN array_append(progressions, $3) ELSE progressions END, current = CASE WHEN user_id = $1 AND skill = $2 THEN array_append(current, $4) ELSE current END, goal = CASE WHEN user_id = $1 AND skill = $2 THEN array_append(goal, $5) ELSE goal END WHERE user_id = $1 AND skill = $2",
+      [user_id, skill, addProgressionTrimmed, addCurrent, addGoal]
     );
 
-    console.log("Inserted progressions")
+    console.log("Inserted progressions");
 
     if (req.user.user_id !== user_id) {
       return res
@@ -224,6 +224,61 @@ app.post("/addprogression", verifyToken, async (req, res) => {
   }
 });
 
+app.post("/editprogression", verifyToken, async (req, res) => {
+  try {
+    const {
+      skill,
+      editProgression,
+      editCurrent,
+      oldCurrent,
+      editGoal,
+      oldGoal,
+      editIndex,
+      editProgressionNameTrimmed,
+      user_id,
+    } = req.body;
+
+    console.log(
+      "SQL Variables:",
+      editIndex,
+      editProgressionNameTrimmed,
+      user_id,
+      skill
+    );
+
+    if (editProgression !== editProgressionNameTrimmed) {
+      const updateName = await pool.query(
+        `UPDATE skills SET progressions[$1] = $2 WHERE user_id = $3 AND skill = $4`,
+        [editIndex + 1, editProgressionNameTrimmed, user_id, skill]
+      );
+      console.log(`Number of rows affected: ${updateName.rowCount}`);
+    }
+    if (editCurrent !== oldCurrent) {
+      const updateCurrent = await pool.query(
+        `UPDATE skills SET current[$1] = $2 WHERE user_id = $3 AND skill = $4`,
+        [editIndex + 1, editCurrent, user_id, skill]
+      );
+    }
+    if (editGoal !== oldGoal) {
+      const updateGoal = await pool.query(
+        `UPDATE skills SET goal[$1] = $2 WHERE user_id = $3 AND skill = $4`,
+        [editIndex + 1, editGoal, user_id, skill]
+      );
+    }
+    res.status(201).json({ message: "Updated name for progression" });
+
+    console.log("Edited Progressions");
+
+    if (req.user.user_id !== user_id) {
+      return res
+        .status(403)
+        .json({ error: "Unauthorized to modify this data" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

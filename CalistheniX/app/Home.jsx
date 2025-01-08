@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import tw from "twrnc";
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
-import Icon from "react-native-vector-icons/Feather";
+import Icon from 'react-native-vector-icons/Feather';
 import RNPickerSelect from "react-native-picker-select";
 import { Dropdown } from "react-native-element-dropdown";
 import Skill from "../components/skill.jsx";
@@ -37,6 +37,7 @@ const Home = () => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState("Tab1");
 
@@ -115,6 +116,7 @@ const Home = () => {
 
   useEffect(() => {
     loadUserData();
+    console.log(userData)
   }, []);
 
   const submitSkill = async () => {
@@ -222,6 +224,7 @@ const Home = () => {
               {skillsData.map((skillData, index) => (
                 <Skill
                   key={index}
+                  isDarkMode={isDarkMode}
                   skillData={skillData}
                   loadUserData={loadUserData}
                 />
@@ -230,7 +233,11 @@ const Home = () => {
           </SafeAreaView>
         );
       case "Tab2":
-        return <Text>This is content for Tab 2</Text>;
+        return (
+          <View>
+
+          </View>
+        );
       case "Tab3":
         return <Text>This is content for Tab 3</Text>;
       default:
@@ -245,22 +252,31 @@ const Home = () => {
   };
 
   return (
-    <SafeAreaView style={[tw`z-1`, {}]}>
+    <SafeAreaView style={[tw`flex-1`, {backgroundColor: `${isDarkMode ? 'black' : 'white'}`}]}>
       <ScrollView
         contentContainerStyle={tw`pb-20`}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
       >
         <StatusBar barStyle={"dark-content"} />
-        <View style={tw`flex-row justify-between`}>
+        <View style={[tw`flex-row justify-between`, {backgroundColor: ''}]}>
           <TouchableOpacity onPress={handleLogout}>
-            <Text style={[tw`text-3xl font-bold m-5`, { fontSize: 28 }]}>
+            <Text style={[tw`text-3xl ${isDarkMode ? 'text-white' : 'text-black'} font-bold m-5`, { fontSize: 28 }]}>
               CalistheniX
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Icon style={tw`m-5`} name="settings" size={32} color="black" />
+          <View style={tw`flex-row`}>
+            <TouchableOpacity onPress={() => setIsDarkMode(!isDarkMode)}>
+          <Icon style={tw`mt-5`}name={isDarkMode ? 'sun' : 'moon'}
+          size={30}
+          color={isDarkMode ? 'orange' : 'lightskyblue'} />
           </TouchableOpacity>
+          <TouchableOpacity>
+            <Icon style={tw`m-5`} name="settings" size={32} color={isDarkMode ? 'white' : 'black'} />
+          </TouchableOpacity>
+          </View>
         </View>
         <View style={tw`flex-row justify-around`}>
           <TouchableOpacity
@@ -272,7 +288,7 @@ const Home = () => {
           >
             <Text
               style={tw`${
-                selectedTab === "Tab1" ? "black" : "text-gray-500"
+                selectedTab === "Tab1" ? (isDarkMode ? "text-white" : "text-black") : "text-gray-500"
               } font-bold`}
             >
               Skills
@@ -287,7 +303,7 @@ const Home = () => {
           >
             <Text
               style={tw`${
-                selectedTab === "Tab2" ? "black" : "text-gray-500"
+                selectedTab === "Tab2" ? (isDarkMode ? "text-white" : "text-black") : "text-gray-500"
               } font-bold`}
             >
               Workout
@@ -302,7 +318,7 @@ const Home = () => {
           >
             <Text
               style={tw`${
-                selectedTab === "Tab3" ? "black" : "text-gray-500"
+                selectedTab === "Tab3" ? (isDarkMode ? "text-white" : "text-black") : "text-gray-500"
               } font-bold`}
             >
               Progress
@@ -317,7 +333,7 @@ const Home = () => {
           >
             <Text
               style={tw`${
-                selectedTab === "Tab4" ? "black" : "text-gray-500"
+                selectedTab === "Tab4" ? (isDarkMode ? "text-white" : "text-black") : "text-gray-500"
               } font-bold`}
             >
               Community
@@ -463,7 +479,7 @@ const Home = () => {
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
           style={[
-            tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 bg-black`,
+            tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 ${isDarkMode ? "bg-orange-400" : "bg-blue-400"}`,
             {
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 4 },
@@ -472,7 +488,7 @@ const Home = () => {
             },
           ]}
         >
-          <Ionicons name="add" size={40} color="white" />
+          <Ionicons name="add" size={40} color={isDarkMode ? "black" : "white"} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
