@@ -182,7 +182,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
   return (
     <View
       style={[
-        tw`flex-1 self-center border ${isDarkMode ? "border-gray-700" : "border-gray-300"} rounded-xl mb-5`,
+        tw`flex-1 self-center border ${isDarkMode ? "border-gray-700 bg-[#0d121d]" : "border-gray-300"} rounded-xl mb-5`,
         { width: width * 0.95 },
       ]}
     >

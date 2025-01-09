@@ -22,6 +22,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import RNPickerSelect from "react-native-picker-select";
 import { Dropdown } from "react-native-element-dropdown";
 import Skill from "../components/skill.jsx";
+import Workouts from "../components/workouts.jsx";
 import axios from "axios";
 
 const { width, height } = Dimensions.get("window");
@@ -234,9 +235,13 @@ const Home = () => {
         );
       case "Tab2":
         return (
-          <View>
 
-          </View>
+          <SafeAreaView>
+            <View>
+              <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
+              <Workouts isDarkMode={isDarkMode}/>
+            </View>
+          </SafeAreaView>
         );
       case "Tab3":
         return <Text>This is content for Tab 3</Text>;
@@ -476,20 +481,23 @@ const Home = () => {
         </View>
       </ScrollView>
       <View style={[tw`absolute w-full items-center`]}>
-        <TouchableOpacity
-          onPress={() => setModalVisible(true)}
-          style={[
-            tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 ${isDarkMode ? "bg-orange-400" : "bg-blue-400"}`,
-            {
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              top: height * 0.85,
-            },
-          ]}
-        >
-          <Ionicons name="add" size={40} color={isDarkMode ? "black" : "white"} />
-        </TouchableOpacity>
+        {selectedTab === 'Tab1' && (
+           <TouchableOpacity
+           onPress={() => setModalVisible(true)}
+           style={[
+             tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 ${isDarkMode ? "bg-orange-400" : "bg-blue-400"}`,
+             {
+               shadowColor: "#000",
+               shadowOffset: { width: 0, height: 4 },
+               shadowOpacity: 0.3,
+               top: height * 0.85,
+             },
+           ]}
+         >
+           <Ionicons name="add" size={40} color={isDarkMode ? "black" : "white"} />
+         </TouchableOpacity>
+        )}
+       
       </View>
     </SafeAreaView>
   );

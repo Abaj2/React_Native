@@ -8,6 +8,7 @@ import { jwtDecode } from "jwt-decode";
 import SignIn from "./auth/signIn.jsx";
 import SignUp from "./auth/signUp.jsx";
 import Home from "./Home.jsx";
+import WorkoutSession from "./workoutSession.jsx";
 
 const Stack = createNativeStackNavigator();
 
@@ -59,6 +60,10 @@ export default function RootLayout() {
         options={{ headerShown: false, gesturedEnabled: false }}
         component={Home}
       />
+      <Stack.Screen 
+      name="Workout-Session"
+      options={{ headerShown: false}}
+      component={WorkoutSession} />
     </Stack.Navigator>
   );
 }

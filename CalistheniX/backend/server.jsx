@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT || 4003;
+const port = process.env.PORT || 4005;
 const postgresPassword = process.env.PASSWORD;
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
