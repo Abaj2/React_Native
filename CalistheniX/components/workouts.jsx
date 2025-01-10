@@ -183,10 +183,15 @@ const Workouts = ({ isDarkMode }) => {
 
   const selectLevel = (level) => {
     setIsLevelModalVisible(false)
-    setSelectedLevel(level);
+
+    const exercises = workouts.find((workout) => workout.title === selectedWorkout.title)
+    ?.levels.find((level) => level.level ===  level.level)
+    ?.exercises
+    
     navigation.navigate("Workout-Session", {
       title: selectedWorkout.title,
-      level: selectedLevel,
+      level: level.level,
+      exercises2: exercises
     })
   }
 
@@ -201,9 +206,9 @@ const Workouts = ({ isDarkMode }) => {
             <View
               style={[
                 tw`mb-5 ${
-                  isDarkMode ? "bg-[#0d121d]" : "bg-white"
+                  isDarkMode ? "bg-[#18181b]" : "bg-white"
                 } border rounded-xl ${
-                  isDarkMode ? "border-gray-700" : "border-gray-300"
+                  isDarkMode ? "border-orange-500" : "border-gray-300"
                 }`,
                 { width: width * 0.9, height: height * 0.12 },
               ]}
@@ -277,7 +282,7 @@ const Workouts = ({ isDarkMode }) => {
                     {level.exercises.map((exercise, index) => (
                       <View
                         key={index}
-                        style={tw`mb-4 p-4 rounded-xl bg-gray-900 border border-gray-800`}
+                        style={tw`mb-4 p-4 rounded-xl bg-[#18181b] border border-gray-800`}
                       >
                         <Text style={tw`text-lg font-bold mb-2 text-white`}>
                           {exercise.name}
@@ -359,7 +364,7 @@ const Workouts = ({ isDarkMode }) => {
         ]}
       >
         <View style={tw`border-b border-gray-800 pb-4 flex-row justify-between items-center`}>
-          <Text style={tw`text-xl font-bold text-white`}>Select Level</Text>
+          <Text style={tw`text-xl font-bold text-white`}>Select Difficulty</Text>
           <TouchableOpacity
             onPress={() => setIsLevelModalVisible(false)}
             style={tw`p-2`}
@@ -372,7 +377,7 @@ const Workouts = ({ isDarkMode }) => {
           {selectedWorkout?.levels.map((level, index) => (
             <TouchableOpacity
               key={index}
-              style={tw`mb-4 p-4 rounded-xl bg-gray-900 border border-gray-800`}
+              style={tw`mb-4 p-4 rounded-xl bg-[#18181b] border border-gray-800`}
               onPress={() => {
                 selectLevel(level)
                 

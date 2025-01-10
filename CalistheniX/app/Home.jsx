@@ -23,6 +23,7 @@ import RNPickerSelect from "react-native-picker-select";
 import { Dropdown } from "react-native-element-dropdown";
 import Skill from "../components/skill.jsx";
 import Workouts from "../components/workouts.jsx";
+import ProgressCard from "../components/progressCard.jsx";
 import axios from "axios";
 
 const { width, height } = Dimensions.get("window");
@@ -54,12 +55,12 @@ const Home = () => {
   const [blurOpacity, setBlurOpacity] = useState(1);
 
   const SERVER_URL = Platform.select({
-    android: "http://10.0.2.2:4003/skills",
-    ios: "http://192.168.1.155:4003/skills",
+    android: "http://10.0.2.2:4005/skills",
+    ios: "http://192.168.1.155:4005/skills",
   });
   const SERVER_URL2 = Platform.select({
-    android: "http://10.0.2.2:4003/fetchskills",
-    ios: "http://192.168.1.155:4003/fetchskills",
+    android: "http://10.0.2.2:4005/fetchskills",
+    ios: "http://192.168.1.155:4005/fetchskills",
   });
 
   const [skillsData, setSkillsData] = useState([
@@ -244,7 +245,14 @@ const Home = () => {
           </SafeAreaView>
         );
       case "Tab3":
-        return <Text>This is content for Tab 3</Text>;
+        return (
+          <SafeAreaView>
+            <View>
+            <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
+            <ProgressCard isDarkMode={isDarkMode} />
+            </View>
+          </SafeAreaView>
+        )
       default:
         return <Text>Select a tab</Text>;
     }
@@ -266,7 +274,7 @@ const Home = () => {
         showsHorizontalScrollIndicator={false}
       >
         <StatusBar barStyle={"dark-content"} />
-        <View style={[tw`flex-row justify-between`, {backgroundColor: ''}]}>
+        <View style={[tw`mt-4 flex-row justify-between`, {backgroundColor: ''}]}>
           <TouchableOpacity onPress={handleLogout}>
             <Text style={[tw`text-3xl ${isDarkMode ? 'text-white' : 'text-black'} font-bold m-5`, { fontSize: 28 }]}>
               CalistheniX
@@ -485,7 +493,7 @@ const Home = () => {
            <TouchableOpacity
            onPress={() => setModalVisible(true)}
            style={[
-             tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 ${isDarkMode ? "bg-orange-400" : "bg-blue-400"}`,
+             tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 ${isDarkMode ? "bg-orange-600" : "bg-blue-400"}`,
              {
                shadowColor: "#000",
                shadowOffset: { width: 0, height: 4 },

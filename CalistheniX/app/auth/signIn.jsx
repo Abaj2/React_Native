@@ -21,8 +21,8 @@ import tw from "twrnc";
 const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
-  android: "http://10.0.2.2:4003/signin",
-  ios: "http://192.168.1.155:4003/signin",
+  android: "http://10.0.2.2:4005/signin",
+  ios: "http://192.168.1.155:4005/signin",
 });
 
 const SignIn = () => {
@@ -54,12 +54,10 @@ const SignIn = () => {
         navigation.navigate("Home", { email, username, user_id });
       }
     } catch (err) {
-      if (err.response) {
-        handleError(err.response.status);
+      handleError(err.response.status);
+      console.error("Error details:", err.response || err.message || err);
+      Alert.alert("Sign-In Failed", "Unable to process your request. Please try again.");
       }
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleError = (status) => {

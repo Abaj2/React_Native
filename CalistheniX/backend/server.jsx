@@ -87,7 +87,6 @@ app.post("/signup", async (req, res) => {
       res.status(404).json({ error: "Username exists." });
       return;
     } else if (!email || !password || !confirmPassword || !username) {
-      // at the top to check instantly
       res.status(406).json({ error: "Enter all details" });
       return;
     }
@@ -278,6 +277,60 @@ app.post("/editprogression", verifyToken, async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
+});
+app.post("/submitworkout", verifyToken, async (req, res) => {
+  try {
+    console.log("received workout");
+    const { workoutSummary, user_id } = req.body;
+    //console.log("Workout Summary:", JSON.stringify(workoutSummary, null, 2));
+    console.log(JSON.stringify(workoutSummary, null, 2));
+    console.log(user_id);
+    console.log(workoutSummary.title);
+    console.log(workoutSummary.level);
+    console.log(workoutSummary.date);
+
+    const addWorkout = await pool.query(
+      `INSERT INTO workouts(user_id, title, level, date) VALUES($1, $2, $3, $4) RETURNING workout_id`,
+      [user_id, workoutSummary.title, workoutSummary.level, workoutSummary.date]
+    );
+    console.log(`Number of rows affected: ${addWorkout.rowCount}`);
+    const workout_id = addWorkout.rows[0].workout_id;
+
+    for (const exercise of workoutSummary.exercises) {
+      const addExercises = await pool.query(
+        `INSERT INTO exercises(workout_id, name, user_id) VALUES($1, $2, $3) RETURNING exercise_id`,
+        [workout_id, exercise.name, user_id]
+      );
+      console.log(`Number of rows affected: ${addExercises.rowCount}`);
+      const exercise_id = addExercises.rows[0].exercise_id;
+
+      for (const set of exercise.sets) {
+        await pool.query(
+          `INSERT INTO sets(exercise_id, reps, duration, notes, completed, user_id, workout_id) VALUES($1, $2, $3, $4, $5, $6, $7)`,
+          [exercise_id, set.reps, set.duration, set.notes, set.completed, user_id, workout_id]
+        );
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+app.get("/getworkouts", verifyToken, async (req, res) => {
+  console.log("Received Request")
+  const userId = req.user.user_id;
+
+  const userWorkouts = await pool.query("SELECT * FROM workouts WHERE user_id = $1", [
+    userId
+  ]);
+  const userExercises = await pool.query("SELECT * FROM exercises WHERE user_id = $1", [
+    userId
+  ])
+  const userSets = await pool.query("SELECT * FROM sets WHERE user_id = $1", [
+    userId
+  ])
+  
+  res.status(200).json({ workouts: userWorkouts.rows, exercises: userExercises.rows, sets: userSets.rows });
 });
 
 app.listen(port, () => {
