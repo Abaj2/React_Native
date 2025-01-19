@@ -22,6 +22,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import Icon from "react-native-vector-icons/Feather";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Svg, { Circle } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 
 const numbers = Array.from({ length: 90 }, (_, i) => ({
   label: `${i + 1}`,
@@ -32,11 +33,11 @@ const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
   android: "http://10.0.2.2:4005/addprogression",
-  ios: "http://10.0.0.122:4005/addprogression",
+  ios: "http://192.168.1.155:4005/addprogression",
 });
 const EDIT_PROGRESSION_URL = Platform.select({
   android: "http://10.0.2.2:4005/editprogression",
-  ios: "http://10.0.0.122:4005/editprogression",
+  ios: "http://192.168.1.155:4005/editprogression",
 });
 
 const Skill = ({ skillData, loadUserData, isDarkMode }) => {
@@ -204,7 +205,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
 
   const SKILL_DELETE_URL = Platform.select({
     android: "http://10.0.2.2:4005/deleteskill",
-    ios: "http://10.0.0.122:4005/deleteskill",
+    ios: "http://192.168.1.155:4005/deleteskill",
   });
 
   const handleSkillDelete = async (item) => {
@@ -294,6 +295,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
     );
   };
   return (
+  
     <SafeAreaView style={[tw`flex-1`, {}]}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
       <View style={tw`flex-1 w-full`}>
@@ -302,12 +304,13 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[tw` items-center w-full px-2`, {}]}
         >
+        
           <View
             style={[
-              tw`mb-4 rounded-xl shadow-md border border-orange-400`,
+              tw`mb-4 rounded-xl shadow-md border-2 border-orange-500`,
               {
                 backgroundColor: isDarkMode ? "#18181b" : "#f3f4f6",
-                width: width * 0.79,
+                width: width * 0.88,
               },
             ]}
           >

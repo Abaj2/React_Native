@@ -350,7 +350,7 @@ const Workouts = ({ isDarkMode }) => {
             onPress={() => handleWorkoutPress(workout)}
           >
             <View
-              style={tw`bg-zinc-900 border border-orange-500 mb-5 rounded-xl p-4`}
+              style={tw`bg-zinc-900 border-l-4 border-l-orange-500 mb-5 rounded-3xl p-4`}
             >
               <View style={tw`flex-row justify-between items-center mb-2`}>
                 <Text style={tw`text-lg font-bold text-white`}>
@@ -401,12 +401,12 @@ const Workouts = ({ isDarkMode }) => {
           <SafeAreaView style={[tw`items-center flex-1 bg-black/90`, {}]}>
             <View
               style={[
-                tw`flex-1 bg-black border border-gray-800 rounded-t-3xl mt-20`,
+                tw`flex-1 bg-black border border-orange-500 rounded-t-3xl mt-20`,
                 { width: width * 0.95 },
               ]}
             >
               <View
-                style={tw`border-b border-gray-800 p-4 flex-row justify-between items-start`}
+                style={tw`border-b border-orange-800 p-4 flex-row justify-between items-start`}
               >
                 <View>
                   <Text style={tw`text-xl font-bold text-white`}>
@@ -503,16 +503,16 @@ const Workouts = ({ isDarkMode }) => {
           transparent={true}
           animationType="slide"
         >
-          <View style={tw`flex-1 bg-black/90`}>
+          <View style={tw`flex-1 bg-black/90 items-center justify-center`}>
             <SafeAreaView style={tw`flex-1 items-center`}>
               <View
                 style={[
-                  tw`bg-black border border-gray-800 rounded-3xl mt-20 p-4`,
-                  { width: width * 0.9, minHeight: height * 0.3 },
+                  tw`bg-black border border-orange-500 rounded-3xl mt-20 p-4`,
+                  { width: width * 0.9, minHeight: height * 0.3, top: height * 0.1 },
                 ]}
               >
                 <View
-                  style={tw`border-b border-gray-800 pb-4 flex-row justify-between items-center`}
+                  style={tw`border-b border-orange-400 pb-4 flex-row justify-between items-center`}
                 >
                   <Text style={tw`text-xl font-bold text-white`}>
                     Select Difficulty
