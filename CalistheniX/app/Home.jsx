@@ -18,12 +18,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import tw from "twrnc";
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
-import Icon from 'react-native-vector-icons/Feather';
+import Icon from "react-native-vector-icons/Feather";
 import RNPickerSelect from "react-native-picker-select";
 import { Dropdown } from "react-native-element-dropdown";
 import Skill from "../components/skill.jsx";
 import Workouts from "../components/workouts.jsx";
-import ProgressCard from "../components/progressCard.jsx";
+import HistoryCard from "../components/historyCard.jsx";
 import axios from "axios";
 
 const { width, height } = Dimensions.get("window");
@@ -56,21 +56,14 @@ const Home = () => {
 
   const SERVER_URL = Platform.select({
     android: "http://10.0.2.2:4005/skills",
-    ios: "http://192.168.1.155:4005/skills",
+    ios: "http://10.0.0.122:4005/skills",
   });
   const SERVER_URL2 = Platform.select({
     android: "http://10.0.2.2:4005/fetchskills",
-    ios: "http://192.168.1.155:4005/fetchskills",
+    ios: "http://10.0.0.122:4005/fetchskills",
   });
 
-  const [skillsData, setSkillsData] = useState([
-    {
-      skill: "Example skills",
-      progressions: ["Example progression 1", "Example progression 2"],
-      current: [9, 12],
-      goal: [12, 15],
-    },
-  ]);
+  const [skillsData, setSkillsData] = useState([]);
 
   const loadUserData = async () => {
     try {
@@ -96,6 +89,7 @@ const Home = () => {
 
       if (response.status === 200) {
         setSkillsData(response.data.skills);
+        console.log(JSON.stringify(response.data.skills, null, 2));
       } else {
         console.log("Failed to fetch user data from server");
       }
@@ -118,7 +112,7 @@ const Home = () => {
 
   useEffect(() => {
     loadUserData();
-    console.log(userData)
+    console.log(userData);
   }, []);
 
   const submitSkill = async () => {
@@ -236,11 +230,12 @@ const Home = () => {
         );
       case "Tab2":
         return (
-
           <SafeAreaView>
             <View>
-              <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
-              <Workouts isDarkMode={isDarkMode}/>
+              <StatusBar
+                barStyle={isDarkMode ? "light-content" : "dark-content"}
+              />
+              <Workouts isDarkMode={isDarkMode} />
             </View>
           </SafeAreaView>
         );
@@ -248,11 +243,13 @@ const Home = () => {
         return (
           <SafeAreaView>
             <View>
-            <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
-            <ProgressCard isDarkMode={isDarkMode} />
+              <StatusBar
+                barStyle={isDarkMode ? "light-content" : "dark-content"}
+              />
+              <HistoryCard isDarkMode={isDarkMode} />
             </View>
           </SafeAreaView>
-        )
+        );
       default:
         return <Text>Select a tab</Text>;
     }
@@ -265,7 +262,12 @@ const Home = () => {
   };
 
   return (
-    <SafeAreaView style={[tw`flex-1`, {backgroundColor: `${isDarkMode ? 'black' : 'white'}`}]}>
+    <SafeAreaView
+      style={[
+        tw`flex-1`,
+        { backgroundColor: `${isDarkMode ? "black" : "white"}` },
+      ]}
+    >
       <ScrollView
         contentContainerStyle={tw`pb-20`}
         onScroll={handleScroll}
@@ -274,21 +276,38 @@ const Home = () => {
         showsHorizontalScrollIndicator={false}
       >
         <StatusBar barStyle={"dark-content"} />
-        <View style={[tw`mt-4 flex-row justify-between`, {backgroundColor: ''}]}>
+        <View
+          style={[tw`mt-4 flex-row justify-between`, { backgroundColor: "" }]}
+        >
           <TouchableOpacity onPress={handleLogout}>
-            <Text style={[tw`text-3xl ${isDarkMode ? 'text-white' : 'text-black'} font-bold m-5`, { fontSize: 28 }]}>
+            <Text
+              style={[
+                tw`text-3xl ${
+                  isDarkMode ? "text-white" : "text-black"
+                } font-bold m-5`,
+                { fontSize: 28 },
+              ]}
+            >
               CalistheniX
             </Text>
           </TouchableOpacity>
           <View style={tw`flex-row`}>
             <TouchableOpacity onPress={() => setIsDarkMode(!isDarkMode)}>
-          <Icon style={tw`mt-5`}name={isDarkMode ? 'sun' : 'moon'}
-          size={30}
-          color={isDarkMode ? 'orange' : 'lightskyblue'} />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Icon style={tw`m-5`} name="settings" size={32} color={isDarkMode ? 'white' : 'black'} />
-          </TouchableOpacity>
+              <Icon
+                style={tw`mt-5`}
+                name={isDarkMode ? "sun" : "moon"}
+                size={30}
+                color={isDarkMode ? "orange" : "lightskyblue"}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <Icon
+                style={tw`m-5`}
+                name="settings"
+                size={32}
+                color={isDarkMode ? "white" : "black"}
+              />
+            </TouchableOpacity>
           </View>
         </View>
         <View style={tw`flex-row justify-around`}>
@@ -301,7 +320,11 @@ const Home = () => {
           >
             <Text
               style={tw`${
-                selectedTab === "Tab1" ? (isDarkMode ? "text-white" : "text-black") : "text-gray-500"
+                selectedTab === "Tab1"
+                  ? isDarkMode
+                    ? "text-white"
+                    : "text-black"
+                  : "text-gray-500"
               } font-bold`}
             >
               Skills
@@ -316,7 +339,11 @@ const Home = () => {
           >
             <Text
               style={tw`${
-                selectedTab === "Tab2" ? (isDarkMode ? "text-white" : "text-black") : "text-gray-500"
+                selectedTab === "Tab2"
+                  ? isDarkMode
+                    ? "text-white"
+                    : "text-black"
+                  : "text-gray-500"
               } font-bold`}
             >
               Workout
@@ -331,10 +358,14 @@ const Home = () => {
           >
             <Text
               style={tw`${
-                selectedTab === "Tab3" ? (isDarkMode ? "text-white" : "text-black") : "text-gray-500"
+                selectedTab === "Tab3"
+                  ? isDarkMode
+                    ? "text-white"
+                    : "text-black"
+                  : "text-gray-500"
               } font-bold`}
             >
-              Progress
+              History
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -346,10 +377,14 @@ const Home = () => {
           >
             <Text
               style={tw`${
-                selectedTab === "Tab4" ? (isDarkMode ? "text-white" : "text-black") : "text-gray-500"
+                selectedTab === "Tab4"
+                  ? isDarkMode
+                    ? "text-white"
+                    : "text-black"
+                  : "text-gray-500"
               } font-bold`}
             >
-              Community
+              Progress
             </Text>
           </TouchableOpacity>
         </View>
@@ -362,7 +397,9 @@ const Home = () => {
               <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                 <View
                   style={[
-                    tw`bg-white rounded-2xl`,
+                    tw`${
+                      isDarkMode ? "bg-[#18181b]" : "bg-[#f3f4f6]"
+                    } rounded-2xl`,
                     { width: 0.8 * width, height: 0.6 * height },
                   ]}
                 >
@@ -376,16 +413,27 @@ const Home = () => {
                       <Ionicons
                         name="close-circle-outline"
                         size={40}
-                        color="black"
+                        color={`${isDarkMode ? "white" : "black"}`}
                       />
                     </TouchableOpacity>
                   </View>
                   <View>
                     <View style={tw``}>
-                      <Text style={tw`self-center font-bold text-2xl`}>
+                      <Text
+                        style={tw`${
+                          isDarkMode ? "text-white" : "text-black"
+                        } self-center font-bold text-2xl`}
+                      >
                         Add new skill
                       </Text>
-                      <Text style={[tw`mt-5 ml-5 text-xl`, { fontSize: 18 }]}>
+                      <Text
+                        style={[
+                          tw`${
+                            isDarkMode ? "text-white" : "text-black"
+                          } mt-5 ml-5 text-xl`,
+                          { fontSize: 18 },
+                        ]}
+                      >
                         Skill
                       </Text>
                       <TextInput
@@ -394,11 +442,20 @@ const Home = () => {
                         placeholder="e.g. front lever"
                         placeholderTextColor={"gray"}
                         style={[
-                          tw`text-center self-center border border-[#294241] rounded-lg`,
+                          tw`${
+                            isDarkMode ? "bg-gray-800" : ""
+                          } text-center self-center border border-[#294241] rounded-lg`,
                           { width: width * 0.72, height: height * 0.04 },
                         ]}
                       ></TextInput>
-                      <Text style={[tw`mt-5 ml-5 text-xl`, { fontSize: 18 }]}>
+                      <Text
+                        style={[
+                          tw`${
+                            isDarkMode ? "text-white" : "text-black"
+                          } mt-5 ml-5 text-xl`,
+                          { fontSize: 18 },
+                        ]}
+                      >
                         Progression
                       </Text>
                       <TextInput
@@ -407,11 +464,20 @@ const Home = () => {
                         placeholder="e.g. advanced tuck"
                         placeholderTextColor={"gray"}
                         style={[
-                          tw`text-center self-center border border-[#294241] rounded-lg`,
+                          tw`${
+                            isDarkMode ? "bg-gray-800" : ""
+                          } text-center self-center border border-[#294241] rounded-lg`,
                           { width: width * 0.72, height: height * 0.04 },
                         ]}
                       ></TextInput>
-                      <Text style={[tw`mt-5 ml-5 text-xl`, { fontSize: 18 }]}>
+                      <Text
+                        style={[
+                          tw`${
+                            isDarkMode ? "text-white" : "text-black"
+                          } mt-5 ml-5 text-xl`,
+                          { fontSize: 18 },
+                        ]}
+                      >
                         Current
                       </Text>
                       <View style={[tw``, { width: width * 0.8 }]}>
@@ -434,12 +500,21 @@ const Home = () => {
                           ]}
                           value={current}
                           style={[
-                            tw`self-center border border-[#294241] rounded-lg`,
+                            tw`${
+                              isDarkMode ? "bg-gray-800" : ""
+                            } self-center border border-[#294241] rounded-lg`,
                             { width: width * 0.72, height: height * 0.04 },
                           ]}
                         />
                       </View>
-                      <Text style={[tw`mt-5 ml-5 text-xl`, { fontSize: 18 }]}>
+                      <Text
+                        style={[
+                          tw`${
+                            isDarkMode ? "text-white" : "text-black"
+                          } mt-5 ml-5 text-xl`,
+                          { fontSize: 18 },
+                        ]}
+                      >
                         Goal
                       </Text>
                       <View style={[tw``, { width: width * 0.8 }]}>
@@ -462,7 +537,9 @@ const Home = () => {
                           ]}
                           value={goal}
                           style={[
-                            tw`self-center border border-[#294241] rounded-lg`,
+                            tw`${
+                              isDarkMode ? "bg-gray-800" : ""
+                            } self-center border border-[#294241] rounded-lg`,
                             { width: width * 0.72, height: height * 0.04 },
                           ]}
                         />
@@ -470,7 +547,9 @@ const Home = () => {
                       <TouchableOpacity
                         onPress={submitSkill}
                         style={[
-                          tw`bg-black self-center justify-center items-center mt-8`,
+                          tw`${
+                            isDarkMode ? "bg-orange-400" : "bg-black"
+                          } self-center justify-center items-center mt-8`,
                           { width: width * 0.72, height: height * 0.045 },
                         ]}
                       >
@@ -489,23 +568,28 @@ const Home = () => {
         </View>
       </ScrollView>
       <View style={[tw`absolute w-full items-center`]}>
-        {selectedTab === 'Tab1' && (
-           <TouchableOpacity
-           onPress={() => setModalVisible(true)}
-           style={[
-             tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 ${isDarkMode ? "bg-orange-600" : "bg-blue-400"}`,
-             {
-               shadowColor: "#000",
-               shadowOffset: { width: 0, height: 4 },
-               shadowOpacity: 0.3,
-               top: height * 0.85,
-             },
-           ]}
-         >
-           <Ionicons name="add" size={40} color={isDarkMode ? "black" : "white"} />
-         </TouchableOpacity>
+        {selectedTab === "Tab1" && (
+          <TouchableOpacity
+            onPress={() => setModalVisible(true)}
+            style={[
+              tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 ${
+                isDarkMode ? "bg-orange-600" : "bg-blue-400"
+              }`,
+              {
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                top: height * 0.8,
+              },
+            ]}
+          >
+            <Ionicons
+              name="add"
+              size={40}
+              color={isDarkMode ? "black" : "white"}
+            />
+          </TouchableOpacity>
         )}
-       
       </View>
     </SafeAreaView>
   );

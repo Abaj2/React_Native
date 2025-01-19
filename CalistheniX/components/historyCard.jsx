@@ -26,10 +26,10 @@ import axios from "axios";
 const { width, height } = Dimensions.get("window");
 const GET_WORKOUTS_URL = Platform.select({
   android: "http://10.0.2.2:4005/getworkouts",
-  ios: "http://192.168.1.155:4005/getworkouts",
+  ios: "http://10.0.0.122:4005/getworkouts",
 });
 
-const ProgressCard = ({ isDarkMode }) => {
+const HistoryCard = ({ isDarkMode }) => {
   const [workoutsData, setWorkoutsData] = useState([]);
   const [exercisesData, setExercisesData] = useState({});
   const [setsData, setSetsData] = useState({});
@@ -70,14 +70,43 @@ const ProgressCard = ({ isDarkMode }) => {
 
   return (
     <SafeAreaView style={tw``}>
-      <View style={[tw`items-center flex-row justify-between self-center bg-[#000000] rounded-lg mb-3`, {width: width * 0.9, height: height * 0.1}]}>
-            <Text style={[tw`text-white ml-5 font-bold text-xl`, {fontSize: 16}]}>{`${workoutsData.length} Workouts Completed`}</Text>
-            <Text style={[tw`text-white mr-5 font-bold text-xl`, {fontSize: 16}]}>1 Daily Streak</Text>
-          </View>
+      <View
+        style={[
+          tw`items-center flex-row justify-between self-center bg-gray-800 rounded-lg mb-3`,
+          { width: width * 0.9, height: height * 0.1 },
+        ]}
+      >
+        <View
+          style={tw`border-r border-white pr-22 flex-column items-center justify-center`}
+        >
+          <Text
+            style={[
+              tw`text-orange-500 ml-5 font-bold text-xl`,
+              { fontSize: 22 },
+            ]}
+          >{`${workoutsData.length}`}</Text>
+          <Text style={tw`text-white ml-5`}>Workouts</Text>
+        </View>
+        <View style={tw`flex-column items-center justify-center`}>
+          <Text
+            style={[
+              tw`text-orange-500 mr-5 font-bold text-xl`,
+              { fontSize: 22 },
+            ]}
+          >
+            1
+          </Text>
+          <Text style={tw`text-white mr-5`}>Daily Streak</Text>
+        </View>
+      </View>
       <ScrollView>
         <View>
           {workoutsData.map((workout) => (
-            <View style={tw`border ${isDarkMode ? 'border-orange-500' : 'border-gray-700'} rounded-lg mb-5 p-4`}>
+            <View
+              style={tw`border ${
+                isDarkMode ? "border-orange-500" : "border-gray-700"
+              } rounded-lg mb-5 p-4`}
+            >
               <View style={tw`flex-row justify-between`}>
                 <Text
                   style={[
@@ -131,16 +160,40 @@ const ProgressCard = ({ isDarkMode }) => {
                             { width: width * 0.8, height: height * 0.07 },
                           ]}
                         >
-                          <Text style={tw`m-5 ${isDarkMode ? 'text-gray-500' : 'text-gray-700'}`}>{`Set ${index + 1}`}</Text>
-                          <Text style={tw`${isDarkMode ? 'text-gray-500' : 'text-gray-700'}`}>{set.notes || ""}</Text>
-                          <View style={[tw`justify-center items-center mr-2 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-gray-400'}`, {width: width * 0.13, height: height * 0.05}]}>
                           <Text
-                            style={[tw`${
-                              isDarkMode ? "text-gray-400" : "text-gray-700"
-                            }`, {}]}
+                            style={tw`m-5 ${
+                              isDarkMode ? "text-gray-500" : "text-gray-700"
+                            }`}
+                          >{`Set ${index + 1}`}</Text>
+                          <Text
+                            style={tw`${
+                              isDarkMode ? "text-gray-500" : "text-gray-700"
+                            }`}
                           >
-                            {set.duration ? `${set.duration}s` : (set.reps ? `${set.reps} reps` : "N/A")}
+                            {set.notes || ""}
                           </Text>
+                          <View
+                            style={[
+                              tw`justify-center items-center mr-2 rounded-xl ${
+                                isDarkMode ? "bg-gray-800" : "bg-gray-400"
+                              }`,
+                              { width: width * 0.13, height: height * 0.05 },
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                tw`${
+                                  isDarkMode ? "text-gray-400" : "text-gray-700"
+                                }`,
+                                {},
+                              ]}
+                            >
+                              {set.duration
+                                ? `${set.duration}s`
+                                : set.reps
+                                ? `${set.reps} reps`
+                                : "N/A"}
+                            </Text>
                           </View>
                         </View>
                       ))}
@@ -154,4 +207,4 @@ const ProgressCard = ({ isDarkMode }) => {
   );
 };
 
-export default ProgressCard;
+export default HistoryCard;

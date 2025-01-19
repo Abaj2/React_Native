@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, StatusBar } from "react-native";
+import { View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
+import { Home as HomeIcon, Dumbbell, User, History } from "lucide-react-native";
 
 import SignIn from "./auth/signIn.jsx";
 import SignUp from "./auth/signUp.jsx";
@@ -11,6 +13,84 @@ import Home from "./Home.jsx";
 import WorkoutSession from "./workoutSession.jsx";
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function TabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#000000",
+          height: 90,
+          paddingBottom: 8,
+          paddingTop: 8,
+          borderTopWidth: 1,
+          borderTopColor: "#FF7900",
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+
+          elevation: 5,
+        },
+        tabBarActiveTintColor: "#FF7900",
+        tabBarInactiveTintColor: "#8E8E93",
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "500",
+        },
+      }}
+    >
+      <Tab.Screen
+        name="HomeTab"
+        component={Home}
+        options={{
+          tabBarLabel: "Home",
+          tabBarIcon: ({ color, size, focused }) => (
+            <HomeIcon
+              size={24}
+              color={color}
+              strokeWidth={focused ? 2.5 : 2} // Makes the active icon slightly bolder
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Workouts"
+        component={Home} // Replace with your Workouts component when ready
+        options={{
+          tabBarLabel: "Workouts",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Dumbbell size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="History"
+        component={Home} // Replace with your History component when ready
+        options={{
+          tabBarLabel: "History",
+          tabBarIcon: ({ color, size, focused }) => (
+            <History size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={Home} // Replace with your Profile component when ready
+        options={{
+          tabBarLabel: "Profile",
+          tabBarIcon: ({ color, size, focused }) => (
+            <User size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
 
 export default function RootLayout() {
   const [isLoading, setIsLoading] = useState(true);
@@ -47,23 +127,24 @@ export default function RootLayout() {
     <Stack.Navigator initialRouteName={initialRoute}>
       <Stack.Screen
         name="Sign-in"
-        options={{ headerShown: false, gesturedEnabled: false }}
+        options={{ headerShown: false, gestureEnabled: false }}
         component={SignIn}
       />
       <Stack.Screen
         name="Sign-up"
-        options={{ headerShown: false, gesturedEnabled: false }}
+        options={{ headerShown: false, gestureEnabled: false }}
         component={SignUp}
       />
       <Stack.Screen
         name="Home"
-        options={{ headerShown: false, gesturedEnabled: false }}
-        component={Home}
+        options={{ headerShown: false, gestureEnabled: false }}
+        component={TabNavigator}
       />
-      <Stack.Screen 
-      name="Workout-Session"
-      options={{ headerShown: false}}
-      component={WorkoutSession} />
+      <Stack.Screen
+        name="Workout-Session"
+        options={{ headerShown: false }}
+        component={WorkoutSession}
+      />
     </Stack.Navigator>
   );
 }

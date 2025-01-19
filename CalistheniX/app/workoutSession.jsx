@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   Dimensions,
   Alert,
-  Platform
+  Platform,
 } from "react-native";
 import tw from "twrnc";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,24 +18,56 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
-  const SUBMIT_WORKOUT_URL = Platform.select({
-    android: "http://10.0.2.2:4005/submitworkout",
-    ios: "http://192.168.1.155:4005/submitworkout",
-  });
+const SUBMIT_WORKOUT_URL = Platform.select({
+  android: "http://10.0.2.2:4005/submitworkout",
+  ios: "http://10.0.0.122:4005/submitworkout",
+});
 
 const WorkoutSession = () => {
-  const route = useRoute();
   const navigation = useNavigation();
+  const [time, setTime] = useState(0); // Time in seconds
+  const [isRunning, setIsRunning] = useState(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    startTimer(); // Automatically start the timer when the component mounts
+
+    // Cleanup timer when the component unmounts
+    return () => {
+      clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const startTimer = () => {
+    if (isRunning) return; // Prevent multiple intervals
+    setIsRunning(true);
+
+    timerRef.current = setInterval(() => {
+      setTime((prevTime) => prevTime + 1);
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    clearInterval(timerRef.current);
+    setIsRunning(false);
+  };
+
+  const formatTime = (seconds) => {
+    const hrs = String(Math.floor(seconds / 3600)).padStart(2, "0");
+    const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+    const secs = String(seconds % 60).padStart(2, "0");
+    return `${hrs}:${mins}:${secs}`;
+  };
+  const formattedTime = formatTime(time);
+
+  const route = useRoute();
 
   const { title, level, exercises2 } = route.params;
-  console.log(title);
-  console.log(level);
-  console.log(exercises2);
 
   const workout = {
     title: title,
     level: level,
-   /* exercises: [
+    /* exercises: [
       {
         name: "Front Lever",
         targetSets: "3-4",
@@ -105,6 +137,7 @@ const WorkoutSession = () => {
   };
 
   const submitWorkout = async () => {
+    console.log(formattedTime);
     const isoDate = new Date().toISOString();
 
     const date = new Date(isoDate);
@@ -135,28 +168,32 @@ const WorkoutSession = () => {
         })),
       })),
     };
-    console.log("Workout Summary:", JSON.stringify(workoutSummary, null, 2));
-    const jwtToken = await AsyncStorage.getItem("jwtToken")
+    const jwtToken = await AsyncStorage.getItem("jwtToken");
     const userData = JSON.parse(await AsyncStorage.getItem("userData"));
 
-
     try {
-      const response = await axios.post(SUBMIT_WORKOUT_URL, {
-      workoutSummary: workoutSummary,
-      user_id: userData.user_id
-    },
-  {
-    headers: {
-      Authorization: `Bearer ${jwtToken}`
+      const response = await axios.post(
+        SUBMIT_WORKOUT_URL,
+        {
+          workoutSummary: workoutSummary,
+          user_id: userData.user_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        console.log("Sent workout data");
+      }
+    } catch (err) {
+      console.error(
+        "Error sending complete workout data:",
+        err.message || err.response
+      );
     }
-  })
-  if (response.status === 200) {
-    console.log("Sent workout data");
-  }
-} catch (err) {
-  console.error("Error sending complete workout data:", err.message || err.response);
-}
-  }
+  };
 
   const finishWorkout = () => {
     Alert.alert(
@@ -172,6 +209,7 @@ const WorkoutSession = () => {
           text: "Finish",
           onPress: () => {
             submitWorkout();
+            navigation.navigate("Home");
           },
         },
       ],

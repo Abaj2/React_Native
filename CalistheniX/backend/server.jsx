@@ -159,9 +159,9 @@ app.post("/skills", verifyToken, async (req, res) => {
   const { skill, progression, current, goal, user_id } = req.body;
 
   try {
-    const progressionsArray = [progression];
-    const currentArray = [current];
-    const goalArray = [goal];
+    const progressionsArray = [progression.trim()];
+    const currentArray = JSON.stringify([[current]]);
+    const goalArray = JSON.stringify([[goal]]);
 
     if (req.user.user_id !== user_id) {
       return res
@@ -170,7 +170,7 @@ app.post("/skills", verifyToken, async (req, res) => {
     }
 
     const result = await pool.query(
-      "INSERT INTO skills (skill, progressions, current, goal, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING skill, progressions, current, goal, user_id",
+      "INSERT INTO skills (skill, progressions, current, goal, user_id) VALUES ($1, $2, $3::jsonb, $4::jsonb, $5) RETURNING skill, progressions, current, goal, user_id",
       [skill.trim(), progressionsArray, currentArray, goalArray, user_id]
     );
 
@@ -193,6 +193,7 @@ app.get("/fetchskills", verifyToken, async (req, res) => {
       return res.status(404).json({ message: "No skill found" });
     }
     res.status(200).json({ skills: result.rows });
+    console.log(JSON.stringify(result.rows));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -204,25 +205,67 @@ app.post("/addprogression", verifyToken, async (req, res) => {
     const { skill, addProgressionTrimmed, addCurrent, addGoal, user_id } =
       req.body;
 
-    const result = await pool.query(
-      "UPDATE skills set progressions = CASE WHEN user_id = $1 AND skill = $2 THEN array_append(progressions, $3) ELSE progressions END, current = CASE WHEN user_id = $1 AND skill = $2 THEN array_append(current, $4) ELSE current END, goal = CASE WHEN user_id = $1 AND skill = $2 THEN array_append(goal, $5) ELSE goal END WHERE user_id = $1 AND skill = $2",
-      [user_id, skill, addProgressionTrimmed, addCurrent, addGoal]
-    );
-
-    console.log("Inserted progressions");
-
     if (req.user.user_id !== user_id) {
       return res
         .status(403)
         .json({ error: "Unauthorized to modify this data" });
     }
-    res.status(200).json({ message: "Received skills" });
+
+    console.log("Incoming data:", {
+      user_id,
+      skill,
+      addProgressionTrimmed,
+      addCurrent,
+      addGoal,
+    });
+
+    const insertProgression = await pool.query(
+      `UPDATE skills 
+       SET progressions = array_append(progressions, $3)
+       WHERE user_id = $1 AND skill = $2`,
+      [user_id, skill, addProgressionTrimmed]
+    );
+
+    const getCurrentAndGoal = await pool.query(
+      `SELECT current, goal FROM skills WHERE user_id = $1 AND skill = $2`,
+      [user_id, skill]
+    );
+
+    const currentAndGoals = getCurrentAndGoal.rows[0];
+    console.log("Current and goal:", currentAndGoals);
+    console.log("Current:", currentAndGoals.current);
+    console.log("Goal:", currentAndGoals.goal);
+
+    currentAndGoals.current.push([addCurrent]);
+    currentAndGoals.goal.push([addGoal]);
+
+    console.log("Current updated", currentAndGoals.current);
+    console.log("Goal updated:", currentAndGoals.goal);
+
+    const currentJson = JSON.stringify(currentAndGoals.current);
+    const goalJson = JSON.stringify(currentAndGoals.goal);
+
+    const insertCurrentAndGoal = await pool.query(
+      `UPDATE skills SET current = $1, goal = $2 WHERE user_id = $3 AND skill = $4`,
+      [currentJson, goalJson, user_id, skill]
+    );
+
+    if (insertProgression.rowCount === 0) {
+      return res.status(404).json({ error: "Update failed" });
+    }
+
+    res.status(200).json({
+      message: "Progression added successfully",
+      updatedRecord: insertProgression.rows[0],
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error details:", err);
+    res.status(500).json({
+      error: "Server error",
+      details: err.message,
+    });
   }
 });
-
 app.post("/editprogression", verifyToken, async (req, res) => {
   try {
     const {
@@ -238,46 +281,92 @@ app.post("/editprogression", verifyToken, async (req, res) => {
     } = req.body;
 
     console.log(
-      "SQL Variables:",
+      "Received Data:",
+      skill,
       editIndex,
+      editProgression,
       editProgressionNameTrimmed,
       user_id,
-      skill
+      editCurrent,
+      oldCurrent,
+      oldGoal,
+      editGoal
+    );
+    const getCurrentAndGoal = await pool.query(
+      `SELECT current, goal FROM skills WHERE user_id = $1 AND skill = $2`,
+      [user_id, skill]
+    );
+    console.log("current and goal:", getCurrentAndGoal.rows[0]);
+    const currentAndGoals = getCurrentAndGoal.rows[0];
+
+    if (oldCurrent !== editCurrent && editCurrent) {
+      currentAndGoals.current[editIndex].push(editCurrent);
+    }
+    if (oldGoal !== editGoal && editGoal) {
+      currentAndGoals.goal[editIndex].push(editGoal);
+    }
+
+    const currentJson = JSON.stringify(currentAndGoals.current);
+    const goalJson = JSON.stringify(currentAndGoals.goal);
+
+    console.log("Current:", currentJson);
+    console.log("Goal:", goalJson);
+
+    const insertEdit = await pool.query(
+      `UPDATE skills SET current = $1, goal = $2 WHERE user_id = $3 AND skill = $4`,
+      [currentJson, goalJson, user_id, skill]
     );
 
-    if (editProgression !== editProgressionNameTrimmed) {
-      const updateName = await pool.query(
-        `UPDATE skills SET progressions[$1] = $2 WHERE user_id = $3 AND skill = $4`,
-        [editIndex + 1, editProgressionNameTrimmed, user_id, skill]
-      );
-      console.log(`Number of rows affected: ${updateName.rowCount}`);
-    }
-    if (editCurrent !== oldCurrent) {
-      const updateCurrent = await pool.query(
-        `UPDATE skills SET current[$1] = $2 WHERE user_id = $3 AND skill = $4`,
-        [editIndex + 1, editCurrent, user_id, skill]
-      );
-    }
-    if (editGoal !== oldGoal) {
-      const updateGoal = await pool.query(
-        `UPDATE skills SET goal[$1] = $2 WHERE user_id = $3 AND skill = $4`,
-        [editIndex + 1, editGoal, user_id, skill]
-      );
-    }
-    res.status(201).json({ message: "Updated name for progression" });
-
-    console.log("Edited Progressions");
-
+    // Check if user is authorized
     if (req.user.user_id !== user_id) {
       return res
         .status(403)
         .json({ error: "Unauthorized to modify this data" });
     }
+
+    // Update progression name
+    if (editProgression !== editProgressionNameTrimmed) {
+      try {
+        const updateName = await pool.query(
+          `UPDATE skills SET progressions[$1] = $2 WHERE user_id = $3 AND skill = $4`,
+          [editIndex + 1, editProgressionNameTrimmed, user_id, skill]
+        );
+        console.log(
+          `Progression name updated. Rows affected: ${updateName.rowCount}`
+        );
+      } catch (error) {
+        console.error("Error updating progression name:", error);
+        return res
+          .status(500)
+          .json({ error: "Failed to update progression name" });
+      }
+    }
+
+    // Update current
+
+    // Update goal
+    if (editGoal !== oldGoal) {
+      try {
+        const updateGoal = await pool.query(``, [
+          editIndex + 1,
+          editGoal,
+          user_id,
+          skill,
+        ]);
+        console.log(`Goal updated. Rows affected: ${updateGoal.rowCount}`);
+      } catch (error) {
+        console.error("Error updating goal:", error);
+        return res.status(500).json({ error: "Failed to update goal" });
+      }
+    }
+
+    res.status(200).json({ message: "Successfully updated progression" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error("Unexpected server error:", err);
+    res.status(500).json({ error: "Server error occurred" });
   }
 });
+
 app.post("/submitworkout", verifyToken, async (req, res) => {
   try {
     console.log("received workout");
@@ -290,8 +379,8 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
     console.log(workoutSummary.date);
 
     const addWorkout = await pool.query(
-      `INSERT INTO workouts(user_id, title, level, date) VALUES($1, $2, $3, $4) RETURNING workout_id`,
-      [user_id, workoutSummary.title, workoutSummary.level, workoutSummary.date]
+      `INSERT INTO workouts(user_id, title, level) VALUES($1, $2, $3) RETURNING workout_id`,
+      [user_id, workoutSummary.title, workoutSummary.level]
     );
     console.log(`Number of rows affected: ${addWorkout.rowCount}`);
     const workout_id = addWorkout.rows[0].workout_id;
@@ -307,7 +396,15 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
       for (const set of exercise.sets) {
         await pool.query(
           `INSERT INTO sets(exercise_id, reps, duration, notes, completed, user_id, workout_id) VALUES($1, $2, $3, $4, $5, $6, $7)`,
-          [exercise_id, set.reps, set.duration, set.notes, set.completed, user_id, workout_id]
+          [
+            exercise_id,
+            set.reps,
+            set.duration,
+            set.notes,
+            set.completed,
+            user_id,
+            workout_id,
+          ]
         );
       }
     }
@@ -317,20 +414,43 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
   }
 });
 app.get("/getworkouts", verifyToken, async (req, res) => {
-  console.log("Received Request")
+  console.log("Received Request");
   const userId = req.user.user_id;
 
-  const userWorkouts = await pool.query("SELECT * FROM workouts WHERE user_id = $1", [
-    userId
-  ]);
-  const userExercises = await pool.query("SELECT * FROM exercises WHERE user_id = $1", [
-    userId
-  ])
+  const userWorkouts = await pool.query(
+    "SELECT * FROM workouts WHERE user_id = $1",
+    [userId]
+  );
+  const userExercises = await pool.query(
+    "SELECT * FROM exercises WHERE user_id = $1",
+    [userId]
+  );
   const userSets = await pool.query("SELECT * FROM sets WHERE user_id = $1", [
-    userId
-  ])
-  
-  res.status(200).json({ workouts: userWorkouts.rows, exercises: userExercises.rows, sets: userSets.rows });
+    userId,
+  ]);
+
+  res.status(200).json({
+    workouts: userWorkouts.rows,
+    exercises: userExercises.rows,
+    sets: userSets.rows,
+  });
+});
+app.post("/deleteskill", verifyToken, async (req, res) => {
+  const { user_id, skill } = req.body;
+  console.log("user_id", user_id);
+  console.log("skill", skill);
+
+  try {
+    const deleteSkill = await pool.query(
+      "DELETE FROM skills WHERE skill = $1 AND user_id = $2",
+      [skill, user_id]
+    );
+    console.log(`Number of rows affected: ${deleteSkill.rowCount}`);
+    res.status(200).json({ success: "Deleted skill" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 app.listen(port, () => {

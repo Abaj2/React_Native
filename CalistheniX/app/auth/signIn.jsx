@@ -22,7 +22,7 @@ const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
   android: "http://10.0.2.2:4005/signin",
-  ios: "http://192.168.1.155:4005/signin",
+  ios: "http://10.0.0.122:4005/signin",
 });
 
 const SignIn = () => {
@@ -43,21 +43,27 @@ const SignIn = () => {
       const response = await axios.post(SERVER_URL, { email, password });
       if (response.status === 200) {
         await AsyncStorage.setItem("jwtToken", response.data.token);
-        await AsyncStorage.setItem("userData", JSON.stringify({
-          username: response.data.user.username,
-          email: response.data.user.email,
-          user_id: response.data.user.user_id,
-        }))
-        const username = response.data.user.username
-        const email = response.data.user.email
-        const user_id = response.data.user.user_id
+        await AsyncStorage.setItem(
+          "userData",
+          JSON.stringify({
+            username: response.data.user.username,
+            email: response.data.user.email,
+            user_id: response.data.user.user_id,
+          })
+        );
+        const username = response.data.user.username;
+        const email = response.data.user.email;
+        const user_id = response.data.user.user_id;
         navigation.navigate("Home", { email, username, user_id });
       }
     } catch (err) {
       handleError(err.response.status);
       console.error("Error details:", err.response || err.message || err);
-      Alert.alert("Sign-In Failed", "Unable to process your request. Please try again.");
-      }
+      Alert.alert(
+        "Sign-In Failed",
+        "Unable to process your request. Please try again."
+      );
+    }
   };
 
   const handleError = (status) => {
@@ -114,7 +120,9 @@ const SignIn = () => {
             <Text style={[tw`ml-8 mt-3 text-xl font-bold`, { fontSize: 16 }]}>
               Password
             </Text>
-            <Text style={[tw`mr-8 mt-3 text-xl text-blue-500`, { fontSize: 15 }]}>
+            <Text
+              style={[tw`mr-8 mt-3 text-xl text-blue-500`, { fontSize: 15 }]}
+            >
               Forgot Password?
             </Text>
           </View>

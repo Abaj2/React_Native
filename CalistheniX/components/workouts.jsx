@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import tw from "twrnc";
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Dropdown } from "react-native-element-dropdown";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -27,7 +28,11 @@ const workouts = [
   {
     id: 1,
     title: "Front Lever",
-    description: "Mater the front lever through progressive training.",
+    description: "Master the front lever through progressive training.",
+    totalsets: "7-8",
+    totalexercises: "2",
+    totallevels: "3",
+    totaltime: "25",
     levels: [
       {
         level: "Beginner",
@@ -92,6 +97,10 @@ const workouts = [
     id: 2,
     title: "Muscle Up",
     description: "Progress from pull-ups to clean muscle ups",
+    totalsets: "6-7",
+    totalexercises: "2-3",
+    totallevels: "3",
+    totaltime: "22",
     levels: [
       {
         level: "Beginner",
@@ -146,7 +155,7 @@ const workouts = [
             sets: "3",
             reps: "3-5",
             rest: "180s",
-            notes: "Control descent and instantly go into the next muslce up",
+            notes: "Control descent and instantly go into the next muscle up",
           },
           {
             name: "Negative Muscle Ups",
@@ -154,6 +163,143 @@ const workouts = [
             reps: "3-5",
             rest: "180s",
             notes: "Be as slow as possible",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 3,
+    title: "Planche",
+    description: "Achieve the planche through focused progressions.",
+    totalsets: "6-8",
+    totalexercises: "3",
+    totallevels: "3",
+    totaltime: "30",
+    levels: [
+      {
+        level: "Beginner",
+        exercises: [
+          {
+            name: "Planche Leans",
+            sets: "3-4",
+            duration: "15-20s",
+            rest: "90s",
+            notes:
+              "Lean forward as far as possible while keeping arms straight.",
+          },
+          {
+            name: "Tuck Planche",
+            sets: "3",
+            duration: "10-15s",
+            rest: "120s",
+            notes: "Focus on maintaining shoulder protraction.",
+          },
+        ],
+      },
+      {
+        level: "Intermediate",
+        exercises: [
+          {
+            name: "Advanced Tuck Planche",
+            sets: "3-4",
+            duration: "10-12s",
+            rest: "120s",
+            notes: "Slightly extend legs out from tuck position.",
+          },
+          {
+            name: "Pseudo Planche Push-Ups",
+            sets: "3",
+            reps: "6-8",
+            rest: "120s",
+            notes: "Lean forward as you push up, keep core tight.",
+          },
+        ],
+      },
+      {
+        level: "Advanced",
+        exercises: [
+          {
+            name: "Straddle Planche Hold",
+            sets: "4",
+            duration: "5-7s",
+            rest: "180s",
+            notes: "Open legs to straddle position to reduce difficulty.",
+          },
+          {
+            name: "Planche Push-Ups",
+            sets: "3",
+            reps: "4-6",
+            rest: "180s",
+            notes: "Push through scapular protraction, maintain straight arms.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 4,
+    title: "Handstand",
+    description: "Master balance and strength for a freestanding handstand.",
+    totalsets: "5-7",
+    totalexercises: "3",
+    totallevels: "3",
+    totaltime: "20",
+    levels: [
+      {
+        level: "Beginner",
+        exercises: [
+          {
+            name: "Wall-Assisted Handstand (Back to Wall)",
+            sets: "3-4",
+            duration: "20-30s",
+            rest: "90s",
+            notes: "Focus on alignment and straight arms.",
+          },
+          {
+            name: "Wall Walks",
+            sets: "3",
+            reps: "4-5",
+            rest: "90s",
+            notes: "Walk up the wall slowly and return under control.",
+          },
+        ],
+      },
+      {
+        level: "Intermediate",
+        exercises: [
+          {
+            name: "Wall-Assisted Handstand (Face to Wall)",
+            sets: "4",
+            duration: "15-25s",
+            rest: "120s",
+            notes: "Get as close to the wall as possible.",
+          },
+          {
+            name: "Freestanding Handstand Attempts",
+            sets: "3",
+            duration: "10-15s",
+            rest: "120s",
+            notes: "Kick up and hold balance without support.",
+          },
+        ],
+      },
+      {
+        level: "Advanced",
+        exercises: [
+          {
+            name: "Handstand Hold",
+            sets: "4-5",
+            duration: "20-30s",
+            rest: "180s",
+            notes: "Maintain perfect alignment and core tension.",
+          },
+          {
+            name: "Handstand Push-Ups",
+            sets: "3",
+            reps: "4-6",
+            rest: "180s",
+            notes: "Lower under control, keep a straight body line.",
           },
         ],
       },
@@ -175,25 +321,25 @@ const Workouts = ({ isDarkMode }) => {
 
   const startWorkout = () => {
     //navigation.navigate("Workout-Session", {
-      //title: selectedWorkout.title
+    //title: selectedWorkout.title
     //})
     setIsModalVisible(false);
-    setIsLevelModalVisible(true)
+    setIsLevelModalVisible(true);
   };
 
   const selectLevel = (level) => {
-    setIsLevelModalVisible(false)
+    setIsLevelModalVisible(false);
 
-    const exercises = workouts.find((workout) => workout.title === selectedWorkout.title)
-    ?.levels.find((level) => level.level ===  level.level)
-    ?.exercises
-    
+    const exercises = workouts
+      .find((workout) => workout.title === selectedWorkout.title)
+      ?.levels.find((level) => level.level === level.level)?.exercises;
+
     navigation.navigate("Workout-Session", {
       title: selectedWorkout.title,
       level: level.level,
-      exercises2: exercises
-    })
-  }
+      exercises2: exercises,
+    });
+  };
 
   return (
     <SafeAreaView>
@@ -204,43 +350,45 @@ const Workouts = ({ isDarkMode }) => {
             onPress={() => handleWorkoutPress(workout)}
           >
             <View
-              style={[
-                tw`mb-5 ${
-                  isDarkMode ? "bg-[#18181b]" : "bg-white"
-                } border rounded-xl ${
-                  isDarkMode ? "border-orange-500" : "border-gray-300"
-                }`,
-                { width: width * 0.9, height: height * 0.12 },
-              ]}
+              style={tw`bg-zinc-900 border border-orange-500 mb-5 rounded-xl p-4`}
             >
-              <View style={tw`flex-row justify-between`}>
-                <Text
-                  style={[
-                    tw`font-bold ${
-                      isDarkMode ? "text-white" : "text-black"
-                    } mb-3 ml-3 mt-6`,
-                    { fontSize: 16 },
-                  ]}
-                >
+              <View style={tw`flex-row justify-between items-center mb-2`}>
+                <Text style={tw`text-lg font-bold text-white`}>
                   {workout.title}
                 </Text>
-                <Ionicons
-                  style={tw`mt-6 mr-5`}
-                  name="chevron-forward"
-                  size={20}
-                  color={isDarkMode ? "#f97316" : "lightblue"}
-                />
+                <Ionicons name="chevron-forward" size={20} color="#f97316" />
               </View>
-              <Text
-                style={[
-                  tw`ml-3 mr-3 ${
-                    isDarkMode ? "text-gray-400" : "text-gray-700"
-                  }`,
-                  { fontSize: 14 },
-                ]}
-              >
-                {workout.description}
-              </Text>
+              <Text style={tw`text-zinc-400 mb-4`}>{workout.description}</Text>
+              <View style={tw`flex-row flex-wrap justify-between`}>
+                <View style={tw`flex-row items-center mb-2 w-1/2`}>
+                  <Ionicons name="layers-outline" size={16} color="#f97316" />
+                  <Text style={tw`text-zinc-300 text-sm ml-2`}>
+                    {workout.totallevels} Levels
+                  </Text>
+                </View>
+                <View style={tw`flex-row items-center mb-2 w-1/2`}>
+                  <MaterialIcons
+                    name="fitness-center"
+                    size={16}
+                    color="#f97316"
+                  />
+                  <Text style={tw`text-zinc-300 text-sm ml-2`}>
+                    {workout.totalexercises} Exercises
+                  </Text>
+                </View>
+                <View style={tw`flex-row items-center mb-2 w-1/2`}>
+                  <FontAwesome5 name="dumbbell" size={13} color="#f97316" />
+                  <Text style={tw`text-zinc-300 text-sm ml-2`}>
+                    {workout.totalsets} Sets
+                  </Text>
+                </View>
+                <View style={tw`flex-row items-center mb-2 w-1/2`}>
+                  <Ionicons name="time-outline" size={16} color="#f97316" />
+                  <Text style={tw`text-zinc-300 text-sm ml-2`}>
+                    {`Approx ${workout.totaltime} min`}
+                  </Text>
+                </View>
+              </View>
             </View>
           </TouchableOpacity>
         ))}
@@ -351,51 +499,54 @@ const Workouts = ({ isDarkMode }) => {
           </SafeAreaView>
         </Modal>
         <Modal
-  visible={isLevelModalVisible}
-  transparent={true}
-  animationType="slide"
->
-  <View style={tw`flex-1 bg-black/90`}>
-    <SafeAreaView style={tw`flex-1 items-center`}>
-      <View
-        style={[
-          tw`bg-black border border-gray-800 rounded-3xl mt-20 p-4`,
-          { width: width * 0.9, minHeight: height * 0.3 },
-        ]}
-      >
-        <View style={tw`border-b border-gray-800 pb-4 flex-row justify-between items-center`}>
-          <Text style={tw`text-xl font-bold text-white`}>Select Difficulty</Text>
-          <TouchableOpacity
-            onPress={() => setIsLevelModalVisible(false)}
-            style={tw`p-2`}
-          >
-            <Ionicons name="close" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
-        
-        <View style={tw`mt-4`}>
-          {selectedWorkout?.levels.map((level, index) => (
-            <TouchableOpacity
-              key={index}
-              style={tw`mb-4 p-4 rounded-xl bg-[#18181b] border border-gray-800`}
-              onPress={() => {
-                selectLevel(level)
-                
-              }}
-            >
-              <Text style={tw`text-lg font-bold text-orange-500`}>
-                {level.level}
-              </Text>
-              <Text style={tw`text-sm text-gray-400 mt-2`}>
-                {level.exercises.length} exercises
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-    </SafeAreaView>
-  </View>
-</Modal>
+          visible={isLevelModalVisible}
+          transparent={true}
+          animationType="slide"
+        >
+          <View style={tw`flex-1 bg-black/90`}>
+            <SafeAreaView style={tw`flex-1 items-center`}>
+              <View
+                style={[
+                  tw`bg-black border border-gray-800 rounded-3xl mt-20 p-4`,
+                  { width: width * 0.9, minHeight: height * 0.3 },
+                ]}
+              >
+                <View
+                  style={tw`border-b border-gray-800 pb-4 flex-row justify-between items-center`}
+                >
+                  <Text style={tw`text-xl font-bold text-white`}>
+                    Select Difficulty
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setIsLevelModalVisible(false)}
+                    style={tw`p-2`}
+                  >
+                    <Ionicons name="close" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={tw`mt-4`}>
+                  {selectedWorkout?.levels.map((level, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={tw`mb-4 p-4 rounded-xl bg-[#18181b] border border-gray-800`}
+                      onPress={() => {
+                        selectLevel(level);
+                      }}
+                    >
+                      <Text style={tw`text-lg font-bold text-orange-500`}>
+                        {level.level}
+                      </Text>
+                      <Text style={tw`text-sm text-gray-400 mt-2`}>
+                        {level.exercises.length} exercises
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </SafeAreaView>
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
