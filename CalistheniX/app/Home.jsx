@@ -23,8 +23,12 @@ import RNPickerSelect from "react-native-picker-select";
 import { Dropdown } from "react-native-element-dropdown";
 import Skill from "../components/skill.jsx";
 import Workouts from "../components/workouts.jsx";
+import { LinearGradient } from "expo-linear-gradient";
+
 import HistoryCard from "../components/historyCard.jsx";
+
 import axios from "axios";
+import Progress from "../components/progress.jsx";
 
 const { width, height } = Dimensions.get("window");
 
@@ -56,11 +60,11 @@ const Home = () => {
 
   const SERVER_URL = Platform.select({
     android: "http://10.0.2.2:4005/skills",
-    ios: "http://10.0.0.122:4005/skills",
+    ios: "http://192.168.1.155:4005/skills",
   });
   const SERVER_URL2 = Platform.select({
     android: "http://10.0.2.2:4005/fetchskills",
-    ios: "http://10.0.0.122:4005/fetchskills",
+    ios: "http://192.168.1.155:4005/fetchskills",
   });
 
   const [skillsData, setSkillsData] = useState([]);
@@ -113,6 +117,7 @@ const Home = () => {
   useEffect(() => {
     loadUserData();
     console.log(userData);
+    console.log(skillsData)
   }, []);
 
   const submitSkill = async () => {
@@ -228,25 +233,14 @@ const Home = () => {
             </View>
           </SafeAreaView>
         );
-      case "Tab2":
+      case "Tab4":
         return (
           <SafeAreaView>
             <View>
               <StatusBar
                 barStyle={isDarkMode ? "light-content" : "dark-content"}
               />
-              <Workouts isDarkMode={isDarkMode} />
-            </View>
-          </SafeAreaView>
-        );
-      case "Tab3":
-        return (
-          <SafeAreaView>
-            <View>
-              <StatusBar
-                barStyle={isDarkMode ? "light-content" : "dark-content"}
-              />
-              <HistoryCard isDarkMode={isDarkMode} />
+              <Progress isDarkMode={isDarkMode} userData={userData} skillsData={skillsData} />
             </View>
           </SafeAreaView>
         );
@@ -260,338 +254,297 @@ const Home = () => {
     const newOpacity = Math.max(0, 1 - offsetY / maxOffset);
     setBlurOpacity(newOpacity);
   };
+  const styles = {
+    gradientBackground: {
+      flex: 1,
+      backgroundColor: "linear-gradient(to bottom, black, orange)",
+    },
+  };
 
   return (
-    <SafeAreaView
-      style={[
-        tw`flex-1`,
-        { backgroundColor: `${isDarkMode ? "black" : "white"}` },
-      ]}
-    >
-      <ScrollView
-        contentContainerStyle={tw`pb-20`}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}
-      >
-        <StatusBar barStyle={"dark-content"} />
-        <View
-          style={[tw`mt-4 flex-row justify-between`, { backgroundColor: "" }]}
+    <LinearGradient
+    colors={isDarkMode ? ["#000", "#1a1a1a"] : ["#f9f9f9", "#e3e3e3"]}
+    style={tw`flex-1`}
+  >
+      <SafeAreaView style={[tw`flex-1`, {}]}>
+        <ScrollView
+          contentContainerStyle={tw`pb-20`}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          style={tw`w-full`}
         >
-          <TouchableOpacity onPress={handleLogout}>
-            <Text
-              style={[
-                tw`text-3xl ${
-                  isDarkMode ? "text-white" : "text-black"
-                } font-bold m-5`,
-                { fontSize: 28 },
-              ]}
-            >
-              CalistheniX
-            </Text>
-          </TouchableOpacity>
-          <View style={tw`flex-row`}>
-            <TouchableOpacity onPress={() => setIsDarkMode(!isDarkMode)}>
-              <Icon
-                style={tw`mt-5`}
-                name={isDarkMode ? "sun" : "moon"}
-                size={30}
-                color={isDarkMode ? "orange" : "lightskyblue"}
-              />
+          <StatusBar barStyle={"dark-content"} />
+          <View
+            style={[tw`mt-4 flex-row justify-between`, { backgroundColor: "" }]}
+          >
+            <TouchableOpacity onPress={handleLogout}>
+              <Text
+                style={[
+                  tw`text-3xl ${
+                    isDarkMode ? "text-white" : "text-black"
+                  } font-bold m-5`,
+                  { fontSize: 28 },
+                ]}
+              >
+                CalistheniX
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Icon
-                style={tw`m-5`}
-                name="settings"
-                size={32}
-                color={isDarkMode ? "white" : "black"}
-              />
-            </TouchableOpacity>
+            <View style={tw`flex-row`}>
+              <TouchableOpacity onPress={() => setIsDarkMode(!isDarkMode)}>
+                <Icon
+                  style={tw`mt-5`}
+                  name={isDarkMode ? "sun" : "moon"}
+                  size={30}
+                  color={isDarkMode ? "#f97316" : "lightskyblue"}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <Icon
+                  style={tw`m-5`}
+                  name="settings"
+                  size={32}
+                  color={isDarkMode ? "white" : "black"}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-        <View style={tw`flex-row justify-around`}>
-          <TouchableOpacity
-            style={[
-              tw`p-2`,
-              selectedTab === "Tab1" && tw`border border-gray-300 rounded-lg`,
-            ]}
-            onPress={() => setSelectedTab("Tab1")}
-          >
-            <Text
-              style={tw`${
-                selectedTab === "Tab1"
-                  ? isDarkMode
-                    ? "text-white"
-                    : "text-black"
-                  : "text-gray-500"
-              } font-bold`}
-            >
-              Skills
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              tw`p-2`,
-              selectedTab === "Tab2" && tw`border border-gray-300 rounded-lg`,
-            ]}
-            onPress={() => setSelectedTab("Tab2")}
-          >
-            <Text
-              style={tw`${
-                selectedTab === "Tab2"
-                  ? isDarkMode
-                    ? "text-white"
-                    : "text-black"
-                  : "text-gray-500"
-              } font-bold`}
-            >
-              Workout
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              tw`p-2`,
-              selectedTab === "Tab3" && tw`border border-gray-300 rounded-lg`,
-            ]}
-            onPress={() => setSelectedTab("Tab3")}
-          >
-            <Text
-              style={tw`${
-                selectedTab === "Tab3"
-                  ? isDarkMode
-                    ? "text-white"
-                    : "text-black"
-                  : "text-gray-500"
-              } font-bold`}
-            >
-              History
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              tw`p-2`,
-              selectedTab === "Tab4" && tw`border border-gray-300 rounded-lg`,
-            ]}
-            onPress={() => setSelectedTab("Tab4")}
-          >
-            <Text
-              style={tw`${
-                selectedTab === "Tab4"
-                  ? isDarkMode
-                    ? "text-white"
-                    : "text-black"
-                  : "text-gray-500"
-              } font-bold`}
-            >
-              Progress
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={tw`p-5`}>{renderContent()}</View>
-        <View style={[tw`justify-center items-center`, {}]}>
-          <Modal transparent={true} visible={modalVisible} animationType="fade">
-            <SafeAreaView
-              style={tw`flex-1 justify-center items-center bg-black/70`}
-            >
-              <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-                <View
+          <View style={tw`flex-row justify-around py-4 rounded-xl`}>
+            {["Tab1", "Tab4"].map((tab, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  tw`px-6 py-2 rounded-full`,
+                  selectedTab === tab &&
+                    (isDarkMode ? tw`bg-orange-500` : tw`bg-blue-500`),
+                ]}
+                onPress={() => setSelectedTab(tab)}
+              >
+                <Text
                   style={[
-                    tw`${
-                      isDarkMode ? "bg-[#18181b]" : "bg-[#f3f4f6]"
-                    } rounded-2xl`,
-                    { width: 0.8 * width, height: 0.6 * height },
+                    tw`text-base font-semibold`,
+                    selectedTab === tab
+                      ? tw`text-white`
+                      : tw`${isDarkMode ? "text-gray-400" : "text-gray-600"}`,
                   ]}
                 >
+                  {tab === "Tab1" ? "Skills" : "Progress"}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View style={tw``}>{renderContent()}</View>
+          <View style={[tw`justify-center items-center`, {}]}>
+            <Modal
+              transparent={true}
+              visible={modalVisible}
+              animationType="fade"
+            >
+              <SafeAreaView
+                style={tw`flex-1 justify-center items-center bg-black/70`}
+              >
+                <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                   <View
                     style={[
-                      tw``,
-                      { width: width * 0.1, height: height * 0.05 },
+                      tw`${
+                        isDarkMode ? "bg-[#18181b]" : "bg-[#f3f4f6]"
+                      } rounded-2xl`,
+                      { width: 0.8 * width, height: 0.6 * height },
                     ]}
                   >
-                    <TouchableOpacity onPress={handleModalClose}>
-                      <Ionicons
-                        name="close-circle-outline"
-                        size={40}
-                        color={`${isDarkMode ? "white" : "black"}`}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <View>
-                    <View style={tw``}>
-                      <Text
-                        style={tw`${
-                          isDarkMode ? "text-white" : "text-black"
-                        } self-center font-bold text-2xl`}
-                      >
-                        Add new skill
-                      </Text>
-                      <Text
-                        style={[
-                          tw`${
-                            isDarkMode ? "text-white" : "text-black"
-                          } mt-5 ml-5 text-xl`,
-                          { fontSize: 18 },
-                        ]}
-                      >
-                        Skill
-                      </Text>
-                      <TextInput
-                        value={skill}
-                        onChangeText={(text) => setSkill(text)}
-                        placeholder="e.g. front lever"
-                        placeholderTextColor={"gray"}
-                        style={[
-                          tw`${
-                            isDarkMode ? "bg-gray-800" : ""
-                          } text-center self-center border border-[#294241] rounded-lg`,
-                          { width: width * 0.72, height: height * 0.04 },
-                        ]}
-                      ></TextInput>
-                      <Text
-                        style={[
-                          tw`${
-                            isDarkMode ? "text-white" : "text-black"
-                          } mt-5 ml-5 text-xl`,
-                          { fontSize: 18 },
-                        ]}
-                      >
-                        Progression
-                      </Text>
-                      <TextInput
-                        value={progression}
-                        onChangeText={(text) => setProgression(text)}
-                        placeholder="e.g. advanced tuck"
-                        placeholderTextColor={"gray"}
-                        style={[
-                          tw`${
-                            isDarkMode ? "bg-gray-800" : ""
-                          } text-center self-center border border-[#294241] rounded-lg`,
-                          { width: width * 0.72, height: height * 0.04 },
-                        ]}
-                      ></TextInput>
-                      <Text
-                        style={[
-                          tw`${
-                            isDarkMode ? "text-white" : "text-black"
-                          } mt-5 ml-5 text-xl`,
-                          { fontSize: 18 },
-                        ]}
-                      >
-                        Current
-                      </Text>
-                      <View style={[tw``, { width: width * 0.8 }]}>
-                        <Dropdown
-                          onChange={(item) => setCurrent(item.value)}
-                          data={numbers}
-                          labelField="label"
-                          valueField="value"
-                          placeholder="Select a number (reps/seconds)"
-                          placeholderStyle={[
-                            tw`text-xl text-center`,
-                            {
-                              fontSize: 15,
-                              color: Platform.OS === "ios" ? "gray" : "757575",
-                              fontFamily:
-                                Platform.OS === "ios"
-                                  ? "SF Pro Text"
-                                  : "Roboto",
-                            },
-                          ]}
-                          value={current}
-                          style={[
-                            tw`${
-                              isDarkMode ? "bg-gray-800" : ""
-                            } self-center border border-[#294241] rounded-lg`,
-                            { width: width * 0.72, height: height * 0.04 },
-                          ]}
+                    <View
+                      style={[
+                        tw``,
+                        { width: width * 0.1, height: height * 0.05 },
+                      ]}
+                    >
+                      <TouchableOpacity onPress={handleModalClose}>
+                        <Ionicons
+                          name="close-circle-outline"
+                          size={40}
+                          color={`${isDarkMode ? "white" : "black"}`}
                         />
-                      </View>
-                      <Text
-                        style={[
-                          tw`${
-                            isDarkMode ? "text-white" : "text-black"
-                          } mt-5 ml-5 text-xl`,
-                          { fontSize: 18 },
-                        ]}
-                      >
-                        Goal
-                      </Text>
-                      <View style={[tw``, { width: width * 0.8 }]}>
-                        <Dropdown
-                          onChange={(item) => setGoal(item.value)}
-                          data={numbers}
-                          labelField="label"
-                          valueField="value"
-                          placeholder="Select a number (reps/seconds)"
-                          placeholderStyle={[
-                            tw`text-xl text-center`,
-                            {
-                              fontSize: 15,
-                              color: Platform.OS === "ios" ? "gray" : "757575",
-                              fontFamily:
-                                Platform.OS === "ios"
-                                  ? "SF Pro Text"
-                                  : "Roboto",
-                            },
-                          ]}
-                          value={goal}
-                          style={[
-                            tw`${
-                              isDarkMode ? "bg-gray-800" : ""
-                            } self-center border border-[#294241] rounded-lg`,
-                            { width: width * 0.72, height: height * 0.04 },
-                          ]}
-                        />
-                      </View>
-                      <TouchableOpacity
-                        onPress={submitSkill}
-                        style={[
-                          tw`${
-                            isDarkMode ? "bg-orange-400" : "bg-black"
-                          } self-center justify-center items-center mt-8`,
-                          { width: width * 0.72, height: height * 0.045 },
-                        ]}
-                      >
-                        <Text
-                          style={[tw`text-white font-bold`, { fontSize: 15 }]}
-                        >
-                          Submit
-                        </Text>
                       </TouchableOpacity>
                     </View>
+                    <View>
+                      <View style={tw``}>
+                        <Text
+                          style={tw`${
+                            isDarkMode ? "text-white" : "text-black"
+                          } self-center font-bold text-2xl`}
+                        >
+                          Add new skill
+                        </Text>
+                        <Text
+                          style={[
+                            tw`${
+                              isDarkMode ? "text-white" : "text-black"
+                            } mt-5 ml-5 text-xl`,
+                            { fontSize: 18 },
+                          ]}
+                        >
+                          Skill
+                        </Text>
+                        <TextInput
+                          value={skill}
+                          onChangeText={(text) => setSkill(text)}
+                          placeholder="e.g. front lever"
+                          placeholderTextColor={"gray"}
+                          style={[
+                            tw`${
+                              isDarkMode ? "bg-gray-800" : ""
+                            } text-center self-center border border-[#294241] rounded-lg`,
+                            { width: width * 0.72, height: height * 0.04 },
+                          ]}
+                        ></TextInput>
+                        <Text
+                          style={[
+                            tw`${
+                              isDarkMode ? "text-white" : "text-black"
+                            } mt-5 ml-5 text-xl`,
+                            { fontSize: 18 },
+                          ]}
+                        >
+                          Progression
+                        </Text>
+                        <TextInput
+                          value={progression}
+                          onChangeText={(text) => setProgression(text)}
+                          placeholder="e.g. advanced tuck"
+                          placeholderTextColor={"gray"}
+                          style={[
+                            tw`${
+                              isDarkMode ? "bg-gray-800" : ""
+                            } text-center self-center border border-[#294241] rounded-lg`,
+                            { width: width * 0.72, height: height * 0.04 },
+                          ]}
+                        ></TextInput>
+                        <Text
+                          style={[
+                            tw`${
+                              isDarkMode ? "text-white" : "text-black"
+                            } mt-5 ml-5 text-xl`,
+                            { fontSize: 18 },
+                          ]}
+                        >
+                          Current
+                        </Text>
+                        <View style={[tw``, { width: width * 0.8 }]}>
+                          <Dropdown
+                            onChange={(item) => setCurrent(item.value)}
+                            data={numbers}
+                            labelField="label"
+                            valueField="value"
+                            placeholder="Select a number (reps/seconds)"
+                            placeholderStyle={[
+                              tw`text-xl text-center`,
+                              {
+                                fontSize: 15,
+                                color:
+                                  Platform.OS === "ios" ? "gray" : "757575",
+                                fontFamily:
+                                  Platform.OS === "ios"
+                                    ? "SF Pro Text"
+                                    : "Roboto",
+                              },
+                            ]}
+                            value={current}
+                            style={[
+                              tw`${
+                                isDarkMode ? "bg-gray-800" : ""
+                              } self-center border border-[#294241] rounded-lg`,
+                              { width: width * 0.72, height: height * 0.04 },
+                            ]}
+                          />
+                        </View>
+                        <Text
+                          style={[
+                            tw`${
+                              isDarkMode ? "text-white" : "text-black"
+                            } mt-5 ml-5 text-xl`,
+                            { fontSize: 18 },
+                          ]}
+                        >
+                          Goal
+                        </Text>
+                        <View style={[tw``, { width: width * 0.8 }]}>
+                          <Dropdown
+                            onChange={(item) => setGoal(item.value)}
+                            data={numbers}
+                            labelField="label"
+                            valueField="value"
+                            placeholder="Select a number (reps/seconds)"
+                            placeholderStyle={[
+                              tw`text-xl text-center`,
+                              {
+                                fontSize: 15,
+                                color:
+                                  Platform.OS === "ios" ? "gray" : "757575",
+                                fontFamily:
+                                  Platform.OS === "ios"
+                                    ? "SF Pro Text"
+                                    : "Roboto",
+                              },
+                            ]}
+                            value={goal}
+                            style={[
+                              tw`${
+                                isDarkMode ? "bg-gray-800" : ""
+                              } self-center border border-[#294241] rounded-lg`,
+                              { width: width * 0.72, height: height * 0.04 },
+                            ]}
+                          />
+                        </View>
+                        <TouchableOpacity
+                          onPress={submitSkill}
+                          style={[
+                            tw`${
+                              isDarkMode ? "bg-orange-400" : "bg-black"
+                            } self-center justify-center items-center mt-8`,
+                            { width: width * 0.72, height: height * 0.045 },
+                          ]}
+                        >
+                          <Text
+                            style={[tw`text-white font-bold`, { fontSize: 15 }]}
+                          >
+                            Submit
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   </View>
-                </View>
-              </TouchableWithoutFeedback>
-            </SafeAreaView>
-          </Modal>
+                </TouchableWithoutFeedback>
+              </SafeAreaView>
+            </Modal>
+          </View>
+        </ScrollView>
+        <View style={[tw`absolute w-full items-center`]}>
+          {selectedTab === "Tab1" && (
+            <TouchableOpacity
+              onPress={() => setModalVisible(true)}
+              style={[
+                tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 ${
+                  isDarkMode ? "bg-orange-600" : "bg-blue-400"
+                }`,
+                {
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  top: height * 0.8,
+                },
+              ]}
+            >
+              <Ionicons
+                name="add"
+                size={40}
+                color={isDarkMode ? "black" : "white"}
+              />
+            </TouchableOpacity>
+          )}
         </View>
-      </ScrollView>
-      <View style={[tw`absolute w-full items-center`]}>
-        {selectedTab === "Tab1" && (
-          <TouchableOpacity
-            onPress={() => setModalVisible(true)}
-            style={[
-              tw`z-10 absolute justify-center items-center rounded-full w-15 h-15 ${
-                isDarkMode ? "bg-orange-600" : "bg-blue-400"
-              }`,
-              {
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                top: height * 0.8,
-              },
-            ]}
-          >
-            <Ionicons
-              name="add"
-              size={40}
-              color={isDarkMode ? "black" : "white"}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 

@@ -6,17 +6,21 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 import { Home as HomeIcon, Dumbbell, User, History } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import SignIn from "./auth/signIn.jsx";
 import SignUp from "./auth/signUp.jsx";
 import Home from "./Home.jsx";
 import WorkoutSession from "./workoutSession.jsx";
+import WorkoutsMain from "./workoutsMain.jsx";
+import ProgressPage from "../components/progress.jsx";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
   return (
+
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
@@ -26,7 +30,7 @@ function TabNavigator() {
           paddingBottom: 8,
           paddingTop: 8,
           borderTopWidth: 1,
-          borderTopColor: "#FF7900",
+          borderTopColor: "black",
           shadowOffset: {
             width: 0,
             height: -2,
@@ -38,10 +42,20 @@ function TabNavigator() {
         },
         tabBarActiveTintColor: "#FF7900",
         tabBarInactiveTintColor: "#8E8E93",
+        
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "500",
         },
+        tabBarBackground: () => (
+          <View style={{ flex: 1 }}>
+            <LinearGradient
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              colors={["orange", "red"]}
+              style={{ height: 3 }}
+            />
+          </View> )
       }}
     >
       <Tab.Screen
@@ -60,7 +74,7 @@ function TabNavigator() {
       />
       <Tab.Screen
         name="Workouts"
-        component={Home} // Replace with your Workouts component when ready
+        component={WorkoutsMain} // Replace with your Workouts component when ready
         options={{
           tabBarLabel: "Workouts",
           tabBarIcon: ({ color, size, focused }) => (
@@ -70,7 +84,7 @@ function TabNavigator() {
       />
       <Tab.Screen
         name="History"
-        component={Home} // Replace with your History component when ready
+        component={ProgressPage} // Replace with your History component when ready
         options={{
           tabBarLabel: "History",
           tabBarIcon: ({ color, size, focused }) => (

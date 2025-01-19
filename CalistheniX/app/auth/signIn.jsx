@@ -22,7 +22,7 @@ const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
   android: "http://10.0.2.2:4005/signin",
-  ios: "http://10.0.0.122:4005/signin",
+  ios: "http://192.168.1.155:4005/signin",
 });
 
 const SignIn = () => {
