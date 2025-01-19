@@ -105,10 +105,10 @@ CREATE TABLE public.skills (
     id integer NOT NULL,
     skill text,
     progressions text[],
-    current integer[],
-    goal integer[],
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    user_id integer
+    user_id integer,
+    current jsonb,
+    goal jsonb
 );
 
 
@@ -181,7 +181,7 @@ CREATE TABLE public.workouts (
     user_id integer,
     title character varying(255),
     level character varying(255),
-    date character varying(255)
+    date timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -249,8 +249,8 @@ ALTER TABLE ONLY public.workouts ALTER COLUMN workout_id SET DEFAULT nextval('pu
 --
 
 COPY public.exercises (exercise_id, workout_id, name, user_id) FROM stdin;
-21	20	Tuck Hold	16
-22	20	Negative Tuck Pulls	16
+43	31	Tuck Hold	16
+44	31	Negative Tuck Pulls	16
 \.
 
 
@@ -259,12 +259,12 @@ COPY public.exercises (exercise_id, workout_id, name, user_id) FROM stdin;
 --
 
 COPY public.sets (set_id, exercise_id, reps, duration, notes, completed, workout_id, user_id) FROM stdin;
-51	21	\N	4		t	20	16
-52	21	\N	6		t	20	16
-53	21	\N	4		t	20	16
-54	22	4	\N		t	20	16
-55	22	5	\N		t	20	16
-56	22	\N	\N		f	20	16
+117	43	\N	5		t	31	16
+118	43	\N	\N		f	31	16
+119	43	\N	\N		f	31	16
+120	44	\N	\N		f	31	16
+121	44	\N	\N		f	31	16
+122	44	\N	\N		f	31	16
 \.
 
 
@@ -272,11 +272,9 @@ COPY public.sets (set_id, exercise_id, reps, duration, notes, completed, workout
 -- Data for Name: skills; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.skills (id, skill, progressions, current, goal, created_at, user_id) FROM stdin;
-21	L-sit	{"Full L-sit"}	{30}	{35}	2025-01-08 20:49:01.535874	16
-20	Muscle up	{"Full muscle up","Light band assisted"}	{1,6}	{10,15}	2025-01-08 12:54:13.972558	16
-18	Front lever	{"One leg","Advanced Tuck",Straddle}	{5,14,3}	{10,30,10}	2025-01-08 12:47:55.511735	16
-19	Handstand	{"Full Handstand","Wall handstand"}	{18,7}	{30,15}	2025-01-08 12:52:43.459383	16
+COPY public.skills (id, skill, progressions, created_at, user_id, current, goal) FROM stdin;
+41	Front Lever	{"Adv Tuck + One Leg","Advanced Tuck"}	2025-01-17 11:44:40.977335	16	[[5], [20]]	[[15, 20], [30]]
+42	Muscle Up	{"Full Muscle Up"}	2025-01-17 12:43:50.468571	16	[[5]]	[[10]]
 \.
 
 
@@ -300,7 +298,7 @@ COPY public.users (user_id, email, password_hash, username) FROM stdin;
 --
 
 COPY public.workouts (workout_id, user_id, title, level, date) FROM stdin;
-20	16	Front Lever	Intermediate	10/01/25 5:41 PM
+31	16	Front Lever	Beginner	2025-01-17 22:48:39.494818
 \.
 
 
@@ -308,21 +306,21 @@ COPY public.workouts (workout_id, user_id, title, level, date) FROM stdin;
 -- Name: exercises_exercise_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.exercises_exercise_id_seq', 22, true);
+SELECT pg_catalog.setval('public.exercises_exercise_id_seq', 44, true);
 
 
 --
 -- Name: sets_set_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.sets_set_id_seq', 56, true);
+SELECT pg_catalog.setval('public.sets_set_id_seq', 122, true);
 
 
 --
 -- Name: skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.skills_id_seq', 21, true);
+SELECT pg_catalog.setval('public.skills_id_seq', 42, true);
 
 
 --
@@ -336,7 +334,7 @@ SELECT pg_catalog.setval('public.users_user_id_seq', 16, true);
 -- Name: workouts_workout_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.workouts_workout_id_seq', 20, true);
+SELECT pg_catalog.setval('public.workouts_workout_id_seq', 31, true);
 
 
 --
