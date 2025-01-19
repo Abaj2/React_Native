@@ -26,7 +26,7 @@ import axios from "axios";
 const { width, height } = Dimensions.get("window");
 const GET_WORKOUTS_URL = Platform.select({
   android: "http://10.0.2.2:4005/getworkouts",
-  ios: "http://10.0.0.122:4005/getworkouts",
+  ios: "http://192.168.1.137:4005/getworkouts",
 });
 
 const HistoryCard = ({ isDarkMode }) => {

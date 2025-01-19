@@ -32,11 +32,11 @@ const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
   android: "http://10.0.2.2:4005/addprogression",
-  ios: "http://10.0.0.122:4005/addprogression",
+  ios: "http://192.168.1.137:4005/addprogression",
 });
 const EDIT_PROGRESSION_URL = Platform.select({
   android: "http://10.0.2.2:4005/editprogression",
-  ios: "http://10.0.0.122:4005/editprogression",
+  ios: "http://192.168.1.137:4005/editprogression",
 });
 
 const Skill = ({ skillData, loadUserData, isDarkMode }) => {

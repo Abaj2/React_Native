@@ -26,7 +26,7 @@ const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
   android: "http://10.0.2.2:4005/signup",
-  ios: "http://192.168.1.155:4005/signup",
+  ios: "http://192.168.1.137:4005/signup",
 });
 
 const SignUp = () => {

@@ -60,11 +60,11 @@ const Home = () => {
 
   const SERVER_URL = Platform.select({
     android: "http://10.0.2.2:4005/skills",
-    ios: "http://192.168.1.155:4005/skills",
+    ios: "http://192.168.1.137:4005/skills",
   });
   const SERVER_URL2 = Platform.select({
     android: "http://10.0.2.2:4005/fetchskills",
-    ios: "http://192.168.1.155:4005/fetchskills",
+    ios: "http://192.168.1.137:4005/fetchskills",
   });
 
   const [skillsData, setSkillsData] = useState([]);
@@ -117,7 +117,7 @@ const Home = () => {
   useEffect(() => {
     loadUserData();
     console.log(userData);
-    console.log(skillsData)
+    console.log(skillsData);
   }, []);
 
   const submitSkill = async () => {
@@ -240,7 +240,11 @@ const Home = () => {
               <StatusBar
                 barStyle={isDarkMode ? "light-content" : "dark-content"}
               />
-              <Progress isDarkMode={isDarkMode} userData={userData} skillsData={skillsData} />
+              <Progress
+                isDarkMode={isDarkMode}
+                userData={userData}
+                skillsData={skillsData}
+              />
             </View>
           </SafeAreaView>
         );
@@ -263,9 +267,9 @@ const Home = () => {
 
   return (
     <LinearGradient
-    colors={isDarkMode ? ["#000", "#1a1a1a"] : ["#f9f9f9", "#e3e3e3"]}
-    style={tw`flex-1`}
-  >
+      colors={isDarkMode ? ["#000", "#1a1a1a"] : ["#f9f9f9", "#e3e3e3"]}
+      style={tw`flex-1`}
+    >
       <SafeAreaView style={[tw`flex-1`, {}]}>
         <ScrollView
           contentContainerStyle={tw`pb-20`}
