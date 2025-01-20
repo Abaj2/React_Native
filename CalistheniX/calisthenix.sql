@@ -4,9 +4,6 @@
 
 -- Dumped from database version 17.2
 -- Dumped by pg_dump version 17.2
-DROP DATABASE IF EXISTS calisthenix;
-CREATE DATABASE calisthenix;
-\c calisthenix;
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -108,10 +105,11 @@ CREATE TABLE public.skills (
     id integer NOT NULL,
     skill text,
     progressions text[],
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     user_id integer,
     current jsonb,
-    goal jsonb
+    goal jsonb,
+    date jsonb,
+    date_formatted jsonb
 );
 
 
@@ -275,9 +273,9 @@ COPY public.sets (set_id, exercise_id, reps, duration, notes, completed, workout
 -- Data for Name: skills; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.skills (id, skill, progressions, created_at, user_id, current, goal) FROM stdin;
-41	Front Lever	{"Adv Tuck + One Leg","Advanced Tuck"}	2025-01-17 11:44:40.977335	16	[[5], [20]]	[[15, 20], [30]]
-42	Muscle Up	{"Full Muscle Up"}	2025-01-17 12:43:50.468571	16	[[5]]	[[10]]
+COPY public.skills (id, skill, progressions, user_id, current, goal, date, date_formatted) FROM stdin;
+47	Front Lever	{"Advanced Tuck",Tuck}	16	[[3, 4, 6, 13, 14, 16, 18, 19], [5]]	[[8, 20], [8]]	[[1737336604471, 1737336616895, 1737348015519, 1737348059825, 1737349728465, 1737349756343, 1737349763407, 1737349775370], [1737336610879]]	[["20/01/25 12:30", "20/01/25 12:30", "20/01/25 15:40", "20/01/25 15:40", "20/01/25 16:08", "20/01/25 16:09", "20/01/25 16:09", "20/01/25 16:09"], ["20/01/25 12:30"]]
+48	Muscle Up	{"Band Assisted"}	16	[[3, 4, 2]]	[[10]]	[[1737345751653, 1737345759507, 1737351573581]]	[["20/01/25 15:02", "20/01/25 15:02", "20/01/25 16:39"]]
 \.
 
 
@@ -323,7 +321,7 @@ SELECT pg_catalog.setval('public.sets_set_id_seq', 122, true);
 -- Name: skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.skills_id_seq', 42, true);
+SELECT pg_catalog.setval('public.skills_id_seq', 48, true);
 
 
 --
