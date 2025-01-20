@@ -33,11 +33,11 @@ const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
   android: "http://10.0.2.2:4005/addprogression",
-  ios: "http://192.168.1.137:4005/addprogression",
+  ios: "http://192.168.1.155:4005/addprogression",
 });
 const EDIT_PROGRESSION_URL = Platform.select({
   android: "http://10.0.2.2:4005/editprogression",
-  ios: "http://192.168.1.137:4005/editprogression",
+  ios: "http://192.168.1.155:4005/editprogression",
 });
 
 const Skill = ({ skillData, loadUserData, isDarkMode }) => {
@@ -294,6 +294,9 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
       </View>
     );
   };
+  useEffect(() => {
+    console.log(skillData)
+  }, skillData)
   return (
   
     <SafeAreaView style={[tw`flex-1`, {}]}>
@@ -380,9 +383,13 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
               {skillData.progressions.map((progression, index) => (
                 <View key={index} style={tw`flex-row items-center mt-4`}>
                   <View style={tw`flex-1`}>
+                    {/*<Text style={tw`mt-1 text-white`}>
+                      {skillData.date_formatted[index][0].slice(0, -6)}
+                    </Text>*/}
                     <Text style={{ color: isDarkMode ? "#9ca3af" : "#4b5563" }}>
                       Current Progression
                     </Text>
+                    <View style={tw`flex-column`}>
                     <Text
                       style={[
                         tw`font-medium mt-1`,
@@ -391,6 +398,8 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                     >
                       {progression}
                     </Text>
+                    
+                    </View>
                   </View>
                   <ProgressCircle
                     current={

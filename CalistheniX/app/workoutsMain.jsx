@@ -100,32 +100,6 @@ const WorkoutsMain = () => {
           contentContainerStyle={tw`p-4`}
           showsVerticalScrollIndicator={false}
         >
-          <View
-            style={[
-              tw`flex-row bg-zinc-900 rounded-3xl mb-5 border-l-4 border-orange-500`,
-              { width: width * 0.9, height: height * 0.08 },
-            ]}
-          >
-            <Text style={tw`text-white font-bold m-5 text-lg`}>
-              Custom Workout
-            </Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("custom-workout")}
-            >
-              <View
-                style={[
-                  tw`mb-5 rounded-lg mt-5 text-center justify-center items-center bg-orange-500`,
-                  {
-                    width: width * 0.35,
-                    height: height * 0.04,
-                    zIndex: 100,
-                  },
-                ]}
-              >
-                <Text style={tw`text-white font-bold`}>Start</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
           {renderContent()}
         </ScrollView>
       </SafeAreaView>

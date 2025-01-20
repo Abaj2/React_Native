@@ -20,7 +20,7 @@ const { width } = Dimensions.get("window");
 
 const SUBMIT_WORKOUT_URL = Platform.select({
   android: "http://10.0.2.2:4005/submitworkout",
-  ios: "http://192.168.1.137:4005/submitworkout",
+  ios: "http://192.168.1.155:4005/submitworkout",
 });
 
 const WorkoutSession = () => {

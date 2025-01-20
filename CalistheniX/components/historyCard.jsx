@@ -18,7 +18,7 @@ const { width } = Dimensions.get("window");
 const GET_WORKOUTS_URL = Platform.select({
   android: "http://10.0.2.2:4005/getworkouts",
 
-  ios: "http://192.168.1.137:4005/getworkouts",
+  ios: "http://192.168.1.155:4005/getworkouts",
 
 });
 

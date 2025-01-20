@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,6 @@ import { LineChart } from "react-native-chart-kit";
 
 const Progress = ({ isDarkMode, userData, skillsData }) => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  const [animatedPoints, setAnimatedPoints] = useState({});
 
   const formatDate = (dateStr) => {
     return dateStr.split(" ")[0];
@@ -26,42 +25,12 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
     goal,
     progressionId,
   }) => {
-    useEffect(() => {
-      if (openDropdownId === progressionId) {
-        // Reset animation
-        setAnimatedPoints((prev) => ({
-          ...prev,
-          [progressionId]: [values[0]],
-        }));
-
-        let currentIndex = 1;
-        const interval = setInterval(() => {
-          if (currentIndex <= values.length) {
-            setAnimatedPoints((prev) => ({
-              ...prev,
-              [progressionId]: values.slice(0, currentIndex),
-            }));
-            currentIndex++;
-          } else {
-            clearInterval(interval);
-          }
-        }, 100); // Add a new point every 100ms
-
-        return () => clearInterval(interval);
-      }
-    }, [openDropdownId, progressionId, values]);
-
-    // Get current animated points or show all points if animation is done
-    const currentPoints = animatedPoints[progressionId] || values;
-    const currentDates = dates.slice(0, currentPoints.length);
-
-    // Only show some labels if there are many points
-    const displayDates = currentDates.map((date, index) => {
-      if (currentDates.length > 4) {
+    const displayDates = dates.map((date, index) => {
+      if (dates.length > 4) {
         if (
           index === 0 ||
-          index === currentDates.length - 1 ||
-          index === Math.floor(currentDates.length / 2)
+          index === dates.length - 1 ||
+          index === Math.floor(dates.length / 2)
         ) {
           return formatDate(date);
         }
@@ -74,7 +43,7 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
       labels: displayDates,
       datasets: [
         {
-          data: [...currentPoints, goal], // Add goal to ensure proper scaling
+          data: [...values, goal],
           color: (opacity = 1) => `rgba(255, 126, 0, ${opacity})`,
           strokeWidth: 2,
         },
@@ -108,7 +77,7 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
             datasets: [
               {
                 ...chartData.datasets[0],
-                data: currentPoints, // Don't include goal in visible points
+                data: values,
               },
             ],
           }}
@@ -131,13 +100,7 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
   };
 
   const handleToggleDropdown = (id) => {
-    setOpenDropdownId((prevId) => {
-      if (prevId === id) {
-        setAnimatedPoints({}); // Reset animations when closing
-        return null;
-      }
-      return id;
-    });
+    setOpenDropdownId((prevId) => (prevId === id ? null : id));
   };
 
   return (
@@ -197,9 +160,22 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
                             <Text style={tw`text-white font-medium text-lg`}>
                               {progression}
                             </Text>
-                            <Text style={tw`text-gray-400`}>
-                              Goal: {currentGoal}
-                            </Text>
+                            <View style={tw`bg-orange-900 rounded-xl`}>
+                              <Text style={tw`ml-3 mt-1 mb-1 mr-3 text-orange-400`}>
+                                Progress:
+                                <Text style={tw`text-orange-400`}>
+                                  {" "}
+                                  {Math.round(
+                                    (item.current[index][
+                                      item.current[index].length - 1
+                                    ] /
+                                      currentGoal) *
+                                      100
+                                  )}
+                                  %
+                                </Text>
+                              </Text>
+                            </View>
                           </View>
 
                           <ChartComponent
@@ -211,41 +187,62 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
                           />
 
                           <View style={tw`mt-2 flex-row justify-between`}>
-                            <Text style={tw`text-gray-400`}>
-                              Current:{" "}
-                              {
-                                item.current[index][
-                                  item.current[index].length - 1
-                                ]
-                              }
-                            </Text>
                             <View style={tw`flex-row`}>
                               <Icon
-                                name="trending-up"
+                                name={
+                                  (item.current[index][item.current[index].length - 1]) -
+                                    item.current[index][0] >
+                                  0
+                                    ? "trending-up"
+                                    : (item.current[index][item.current[index].length - 1]) -
+                                      item.current[index][0] <
+                                      0
+                                    ? "trending-down"
+                                    : "minus"
+                                }
                                 size={16}
-                                color="orange"
+                                color={
+                                  (item.current[index][item.current[index].length - 1]) -
+                                    item.current[index][0] >
+                                  0
+                                    ? "lightgreen"
+                                    : (item.current[index][item.current[index].length - 1]) -
+                                      item.current[index][0] <
+                                      0
+                                    ? "red"
+                                    : "orange"
+                                }
                               />
-                              <Text style={tw`ml-3 text-gray-400`}>
-                                Progress:{" "}
-                                {Math.round(
-                                  (item.current[index][
-                                    item.current[index].length - 1
-                                  ] /
-                                    currentGoal) *
-                                    100
-                                )}
-                                %
+                              <Text style={tw`ml-2 text-white`}>
+                                {((item.current[index][item.current[index].length - 1]) -
+                                  item.current[index][0] > 0 ? '+' : "")}{(item.current[index][item.current[index].length - 1]) -
+                                  item.current[index][0]}{" "}
+                                Since Start
                               </Text>
                             </View>
+
+                            <View>
+                              <Text style={tw`ml-2 text-gray-400`}>
+                                Goal: {currentGoal}
+                              </Text>
+                            </View>
+                            
                           </View>
+                          <View style={tw`w-full h-0.5 mt-4 bg-gray-700`}></View>
+                          
                         </View>
+                        
                       );
                     })}
                 </View>
+                
               </View>
+              
             </TouchableOpacity>
+            
           );
         })}
+
       </ScrollView>
     </SafeAreaView>
   );
