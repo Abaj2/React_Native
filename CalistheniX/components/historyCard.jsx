@@ -1,207 +1,270 @@
 import React, { useEffect, useState } from "react";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import {
   View,
   Text,
   SafeAreaView,
-  TouchableOpacity,
-  StatusBar,
-  Modal,
-  Dimensions,
-  TextInput,
-  Platform,
-  Alert,
-  TouchableWithoutFeedback,
-  Keyboard,
   ScrollView,
+  Dimensions,
+  Platform,
+  TouchableOpacity,
+  Animated,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import tw from "twrnc";
-import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
-import Icon from "react-native-vector-icons/Feather";
-import RNPickerSelect from "react-native-picker-select";
-import { Dropdown } from "react-native-element-dropdown";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 const GET_WORKOUTS_URL = Platform.select({
   android: "http://10.0.2.2:4005/getworkouts",
+
   ios: "http://192.168.1.137:4005/getworkouts",
+
 });
 
 const HistoryCard = ({ isDarkMode }) => {
   const [workoutsData, setWorkoutsData] = useState([]);
   const [exercisesData, setExercisesData] = useState({});
   const [setsData, setSetsData] = useState({});
-  const navigation = useNavigation();
+  const [expandedWorkouts, setExpandedWorkouts] = useState([]);
+  const [animatedValues, setAnimatedValues] = useState({});
 
-  const getWorkouts = async () => {
-    const userData = JSON.parse(await AsyncStorage.getItem("userData"));
-    const jwtToken = await AsyncStorage.getItem("jwtToken");
-
-    const response = await axios.get(GET_WORKOUTS_URL, {
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-      },
-    });
-    if (response.status === 200) {
-      setWorkoutsData(response.data.workouts);
-      setExercisesData(response.data.exercises);
-      setSetsData(response.data.sets);
-    } else {
-      console.log("Failed to fetch user data from server");
-    }
-  };
   useEffect(() => {
-    getWorkouts();
+    const fetchWorkouts = async () => {
+      const jwtToken = await AsyncStorage.getItem("jwtToken");
+      const response = await axios.get(GET_WORKOUTS_URL, {
+        headers: { Authorization: `Bearer ${jwtToken}` },
+      });
+      if (response.status === 200) {
+        setWorkoutsData(response.data.workouts);
+        setExercisesData(response.data.exercises);
+        setSetsData(response.data.sets);
+
+        // Initialize animation values
+        const newAnimatedValues = {};
+        response.data.workouts.forEach(workout => {
+          newAnimatedValues[workout.workout_id] = new Animated.Value(0);
+        });
+        setAnimatedValues(newAnimatedValues);
+      }
+    };
+    fetchWorkouts();
   }, []);
 
-  useEffect(() => {
-    if (
-      workoutsData.length > 0 ||
-      Object.keys(exercisesData).length > 0 ||
-      Object.keys(setsData).length > 0
-    ) {
-      console.log(workoutsData);
-      console.log(exercisesData);
-      console.log(setsData);
+  const toggleExpandWorkout = (workoutId) => {
+    const isExpanding = !expandedWorkouts.includes(workoutId);
+
+    Animated.spring(animatedValues[workoutId], {
+      toValue: isExpanding ? 1 : 0,
+      useNativeDriver: true,
+    }).start();
+
+    setExpandedWorkouts((prevState) =>
+      prevState.includes(workoutId)
+        ? prevState.filter((id) => id !== workoutId)
+        : [...prevState, workoutId]
+    );
+  };
+
+  const getLevelColor = (level) => {
+    switch (level.toLowerCase()) {
+      case 'beginner': return 'green';
+      case 'intermediate': return 'yellow';
+      case 'advanced': return 'red';
+      default: return 'gray';
     }
-  }, [workoutsData, exercisesData, setsData]);
+  };
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    return date.toLocaleString('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, 
+    });
+  };
+
+  const getWorkoutStats = (workoutId) => {
+    const exercises = exercisesData.filter(ex => ex.workout_id === workoutId);
+    const sets = setsData.filter(set => set.workout_id === workoutId);
+    const totalExercises = exercises.length;
+    const totalSets = sets.length;
+    const totalReps = sets.reduce((acc, set) => acc + (set.reps || 0), 0);
+
+    return { totalExercises, totalSets, totalReps };
+  };
 
   return (
-    <SafeAreaView style={tw``}>
-      <View
-        style={[
-          tw`items-center flex-row justify-between self-center bg-gray-800 rounded-lg mb-3`,
-          { width: width * 0.9, height: height * 0.1 },
-        ]}
-      >
-        <View
-          style={tw`border-r border-white pr-22 flex-column items-center justify-center`}
-        >
-          <Text
-            style={[
-              tw`text-orange-500 ml-5 font-bold text-xl`,
-              { fontSize: 22 },
-            ]}
-          >{`${workoutsData.length}`}</Text>
-          <Text style={tw`text-white ml-5`}>Workouts</Text>
-        </View>
-        <View style={tw`flex-column items-center justify-center`}>
-          <Text
-            style={[
-              tw`text-orange-500 mr-5 font-bold text-xl`,
-              { fontSize: 22 },
-            ]}
-          >
-            1
-          </Text>
-          <Text style={tw`text-white mr-5`}>Daily Streak</Text>
-        </View>
-      </View>
-      <ScrollView>
-        <View>
-          {workoutsData.map((workout) => (
+    <SafeAreaView style={tw`flex-1 bg-${isDarkMode ? '' : ''}`}>
+      <ScrollView style={tw`px-4 py-6`}>
+        {workoutsData.map((workout) => {
+          const stats = getWorkoutStats(workout.workout_id);
+          const rotateAnimation = animatedValues[workout.workout_id]?.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', '180deg'],
+          });
+
+          return (
             <View
-              style={tw`border ${
-                isDarkMode ? "border-orange-500" : "border-gray-700"
-              } rounded-lg mb-5 p-4`}
+              key={workout.workout_id}
+              style={[
+                tw`rounded-3xl p-5 mb-5 shadow-xl border-l-4 border-l-orange-500`,
+                {
+                  backgroundColor: isDarkMode ? '#18181b' : '#ffffff',
+                  width: width * 0.9,
+                  alignSelf: 'center',
+                },
+              ]}
             >
-              <View style={tw`flex-row justify-between`}>
-                <Text
-                  style={[
-                    tw`font-bold ${isDarkMode ? "text-white" : "text-black"}`,
-                    { fontSize: 18 },
-                  ]}
-                >
-                  {workout.title}
-                </Text>
-                <Text
-                  style={[
-                    tw`mb-3 ${isDarkMode ? "text-gray-500" : "text-gray-700"}`,
-                  ]}
-                >
-                  {workout.date}
+              <View style={tw`flex-row justify-between items-center mb-4`}>
+                <View style={tw`flex-row items-center`}>
+                  <Icon name="calendar-outline" size={20} color="#f97316" style={tw`mr-2`} />
+                  <Text style={tw`text-${isDarkMode ? 'white' : 'gray-800'} font-bold text-lg`}>
+                    {workout.title}
+                  </Text>
+                </View>
+                <View style={tw`flex-row items-center`}>
+                  <Text style={tw`text-gray-400 text-sm mr-2`}>{formatDate(workout.date)}</Text>
+                  <Icon name="clock-outline" size={16} color="#9ca3af" />
+                </View>
+              </View>
+
+              {/* Skill Level */}
+              <View style={tw`flex-row items-center mb-4`}>
+                <Icon
+                  name="account-star-outline"
+                  size={16}
+                  color={getLevelColor(workout.level)}
+                  style={tw`mr-2`}
+                />
+                <Text style={tw`text-${getLevelColor(workout.level)}-500 text-sm font-medium`}>
+                  {workout.level}
                 </Text>
               </View>
-              <Text
-                style={tw`mb-5 ${
-                  isDarkMode ? "text-[#fb923c]" : "text-[#60a5fa]"
-                }`}
-              >
-                {workout.level}
-              </Text>
-              {exercisesData
-                .filter(
-                  (exercise) => exercise.workout_id === workout.workout_id
-                )
-                .map((exercise) => (
-                  <View style={tw`mb-3`}>
-                    <Text
-                      style={tw`self-center mb-2 ${
-                        isDarkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {exercise.name}
-                    </Text>
 
-                    {setsData
-                      .filter(
-                        (set) =>
-                          set.workout_id === workout.workout_id &&
-                          set.exercise_id === exercise.exercise_id
-                      )
-                      .map((set, index) => (
-                        <View
-                          style={[
-                            tw`border border-gray-500 flex-row justify-between items-center mb-3 ${
-                              isDarkMode ? "bg-[#18181b]" : "bg-[#f3f4f6]"
-                            } rounded-2xl`,
-                            { width: width * 0.8, height: height * 0.07 },
-                          ]}
-                        >
-                          <Text
-                            style={tw`m-5 ${
-                              isDarkMode ? "text-gray-500" : "text-gray-700"
-                            }`}
-                          >{`Set ${index + 1}`}</Text>
-                          <Text
-                            style={tw`${
-                              isDarkMode ? "text-gray-500" : "text-gray-700"
-                            }`}
-                          >
-                            {set.notes || ""}
-                          </Text>
-                          <View
-                            style={[
-                              tw`justify-center items-center mr-2 rounded-xl ${
-                                isDarkMode ? "bg-gray-800" : "bg-gray-400"
-                              }`,
-                              { width: width * 0.13, height: height * 0.05 },
-                            ]}
-                          >
-                            <Text
-                              style={[
-                                tw`${
-                                  isDarkMode ? "text-gray-400" : "text-gray-700"
-                                }`,
-                                {},
-                              ]}
-                            >
-                              {set.duration
-                                ? `${set.duration}s`
-                                : set.reps
-                                ? `${set.reps} reps`
-                                : "N/A"}
-                            </Text>
-                          </View>
-                        </View>
-                      ))}
-                  </View>
-                ))}
-            </View>
-          ))}
+              {/* Workout Stats */}
+              <View style={tw`flex-row justify-between items-center mb-4`}>
+                <View style={tw`flex-row items-center`}>
+                  <Icon name="dumbbell" size={16} color="#f97316" style={tw`mr-1`} />
+                  <Text style={tw`text-gray-400 text-sm`}>{stats.totalExercises} exercises</Text>
+                </View>
+                <View style={tw`flex-row items-center`}>
+                  <Icon name="target" size={16} color="#f97316" style={tw`mr-1`} />
+                  <Text style={tw`text-gray-400 text-sm`}>{stats.totalSets} sets</Text>
+                </View>
+                <View style={tw`flex-row items-center`}>
+                  <Icon name="fire" size={16} color="#f97316" style={tw`mr-1`} />
+                  <Text style={tw`text-gray-400 text-sm`}>{stats.totalReps} reps</Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => toggleExpandWorkout(workout.workout_id)}
+                style={tw`bg-orange-500 rounded-xl py-3 px-4`}
+              >
+                <View style={tw`flex-row justify-center items-center`}>
+                  <Text style={tw`text-white font-medium mr-2`}>
+                    {expandedWorkouts.includes(workout.workout_id) ? "Hide Details" : "Show Details"}
+                  </Text>
+                  <Animated.View style={{ transform: [{ rotate: rotateAnimation }] }}>
+                    <Icon name="chevron-down" size={20} color="white" />
+                  </Animated.View>
+                </View>
+              </TouchableOpacity>
+
+              {expandedWorkouts.includes(workout.workout_id) && (
+  <>
+    {exercisesData
+      .filter((exercise) => exercise.workout_id === workout.workout_id)
+      .map((exercise) => (
+        <View
+          key={exercise.exercise_id}
+          style={[
+            tw`rounded-xl p-4 mt-4`,
+            { backgroundColor: isDarkMode ? '#303030' : '#f8f8f8', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
+          ]}
+        >
+          {/* Exercise Header */}
+          <View style={tw`flex-row items-center mb-3`}>
+            <Icon name="run-fast" size={24} color="#f97316" style={tw`mr-3`} />
+            <Text style={tw`text-${isDarkMode ? 'white' : 'gray-800'} font-bold text-lg`}>
+              {exercise.name}
+            </Text>
+          </View>
+
+          {/* Exercise Sets */}
+          {setsData
+            .filter(
+              (set) =>
+                set.workout_id === workout.workout_id &&
+                set.exercise_id === exercise.exercise_id
+            )
+            .map((set, index) => (
+              <View
+                key={index}
+                style={[
+                  tw`flex-row items-center justify-between rounded-lg p-4 mb-2`,
+                  {
+                    backgroundColor: isDarkMode ? '#2a2a2a' : '#ffffff',
+                    shadowColor: '#000',
+                    shadowOpacity: 0.05,
+                    shadowRadius: 4,
+                    shadowOffset: { width: 0, height: 1 },
+                    elevation: 2,
+                  },
+                ]}
+              >
+                
+                <View>
+                  <Text
+                    style={tw`text-${isDarkMode ? 'gray-300' : 'gray-700'} font-medium text-sm`}
+                  >
+                    Set {index + 1}
+                  </Text>
+                  <Text
+                    style={tw`text-${isDarkMode ? 'gray-400' : 'gray-500'} italic text-xs mt-1`}
+                  >
+                    {set.notes || 'No notes'}
+                  </Text>
+                </View>
+
+                {/* Badge for Reps or Duration */}
+                <View
+                  style={[
+                    tw`px-3 py-1 rounded-full`,
+                    {
+                      backgroundColor: set.duration ? '#34d399' : '#f97316',
+                    },
+                  ]}
+                >
+                  <Text style={tw`text-white font-bold text-xs`}>
+                    {set.duration
+                      ? `${set.duration}s`
+                      : set.reps
+                      ? `${set.reps} reps`
+                      : 'N/A'}
+                  </Text>
+                </View>
+
+                {/* Icons for Set Type */}
+                <Icon
+                  name={set.duration ? 'timer-outline' : 'dumbbell'}
+                  size={20}
+                  color={set.duration ? '#34d399' : '#f97316'}
+                  style={tw`ml-3`}
+                />
+              </View>
+            ))}
         </View>
+      ))}
+  </>
+)}
+
+            </View>
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );

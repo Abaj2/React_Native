@@ -10,14 +10,16 @@ import {
   Dimensions,
 } from "react-native";
 import tw from "twrnc";
-import { FontAwesome5, Ionicons } from "@expo/vector-icons"; // Icons
-import { LinearGradient } from "expo-linear-gradient"; // Gradient Background
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import Workouts from "../components/workouts.jsx";
 import HistoryCard from "../components/historyCard.jsx";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 
 const WorkoutsMain = () => {
+  const navigation = useNavigation();
   const [selectedTab, setSelectedTab] = useState("Tab2");
   const [isDarkMode, setIsDarkMode] = useState(true);
 
@@ -42,7 +44,6 @@ const WorkoutsMain = () => {
       <SafeAreaView style={tw`flex-1`}>
         <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
-        {/* Header Section */}
         <View style={tw`px-5 pt-6 pb-4`}>
           <Text
             style={[
@@ -54,7 +55,6 @@ const WorkoutsMain = () => {
           </Text>
         </View>
 
-        {/* Tabs */}
         <View style={tw`flex-row justify-around py-4 bg-transparent`}>
           {["Tab2", "Tab3"].map((tab, index) => (
             <TouchableOpacity
@@ -95,32 +95,39 @@ const WorkoutsMain = () => {
             { backgroundColor: isDarkMode ? "#404040" : "#ccc" },
           ]}
         />
-       
 
-  <ScrollView
-    contentContainerStyle={tw`p-4`}
-    showsVerticalScrollIndicator={false}
-  >
-     <View style={[tw`flex-row bg-zinc-900 rounded-3xl mb-5 border-l-4 border-orange-500`, {width: width * 0.9, height: height * 0.08}]}>
-      <Text style={tw`text-white font-bold m-5 text-lg`}>Custom Workout</Text>
-     <TouchableOpacity>
-    <View
-      style={[
-        tw`mb-5 rounded-lg mt-5 text-center justify-center items-center bg-orange-500`,
-        { 
-          width: width * 0.35, 
-          height: height * 0.04, 
-          zIndex: 100,  
-        },
-      ]}
-    >
-      <Text style={tw`text-white font-bold`}>Start</Text>
-    </View>
-  </TouchableOpacity>
- 
-  </View>
-    {renderContent()}
-  </ScrollView>
+        <ScrollView
+          contentContainerStyle={tw`p-4`}
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={[
+              tw`flex-row bg-zinc-900 rounded-3xl mb-5 border-l-4 border-orange-500`,
+              { width: width * 0.9, height: height * 0.08 },
+            ]}
+          >
+            <Text style={tw`text-white font-bold m-5 text-lg`}>
+              Custom Workout
+            </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("custom-workout")}
+            >
+              <View
+                style={[
+                  tw`mb-5 rounded-lg mt-5 text-center justify-center items-center bg-orange-500`,
+                  {
+                    width: width * 0.35,
+                    height: height * 0.04,
+                    zIndex: 100,
+                  },
+                ]}
+              >
+                <Text style={tw`text-white font-bold`}>Start</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+          {renderContent()}
+        </ScrollView>
       </SafeAreaView>
     </LinearGradient>
   );

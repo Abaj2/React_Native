@@ -14,13 +14,13 @@ import Home from "./Home.jsx";
 import WorkoutSession from "./workoutSession.jsx";
 import WorkoutsMain from "./workoutsMain.jsx";
 import ProgressPage from "../components/progress.jsx";
+import CustomWorkout from "../components/customWorkout.jsx";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
   return (
-
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
@@ -42,7 +42,7 @@ function TabNavigator() {
         },
         tabBarActiveTintColor: "#FF7900",
         tabBarInactiveTintColor: "#8E8E93",
-        
+
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "500",
@@ -55,7 +55,8 @@ function TabNavigator() {
               colors={["orange", "red"]}
               style={{ height: 3 }}
             />
-          </View> )
+          </View>
+        ),
       }}
     >
       <Tab.Screen
@@ -158,6 +159,11 @@ export default function RootLayout() {
         name="Workout-Session"
         options={{ headerShown: false }}
         component={WorkoutSession}
+      />
+      <Stack.Screen
+        name="custom-workout"
+        options={{ headerShown: false }}
+        component={CustomWorkout}
       />
     </Stack.Navigator>
   );

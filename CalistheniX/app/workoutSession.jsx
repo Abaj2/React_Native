@@ -25,14 +25,13 @@ const SUBMIT_WORKOUT_URL = Platform.select({
 
 const WorkoutSession = () => {
   const navigation = useNavigation();
-  const [time, setTime] = useState(0); // Time in seconds
+  const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef(null);
 
   useEffect(() => {
-    startTimer(); // Automatically start the timer when the component mounts
+    startTimer();
 
-    // Cleanup timer when the component unmounts
     return () => {
       clearInterval(timerRef.current);
     };
@@ -262,9 +261,7 @@ const WorkoutSession = () => {
           ))}
         </ScrollView>
 
-        {/* Current Exercise */}
         <View style={tw`p-4`}>
-          {/* Target Info */}
           <View
             style={tw`mb-4 p-4 bg-[#18181b] rounded-xl border border-gray-800`}
           >

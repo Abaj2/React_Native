@@ -55,6 +55,18 @@ const generateJWT = (user) => {
     { expiresIn: "3d" }
   );
 };
+const formatDate = () => {
+  const now = new Date();
+
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const year = String(now.getFullYear()).slice(-2);
+
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
 
 app.post("/signup", async (req, res) => {
   const { email, username, password, confirmPassword } = req.body;
@@ -158,10 +170,15 @@ app.post("/signin", async (req, res) => {
 app.post("/skills", verifyToken, async (req, res) => {
   const { skill, progression, current, goal, user_id } = req.body;
 
+  const date = Date.now();
+  const dateFormatted = formatDate();
+
   try {
     const progressionsArray = [progression.trim()];
     const currentArray = JSON.stringify([[current]]);
     const goalArray = JSON.stringify([[goal]]);
+    const dateArray = JSON.stringify([[date]]);
+    const dateFormattedArray = JSON.stringify([[dateFormatted]]);
 
     if (req.user.user_id !== user_id) {
       return res
@@ -170,8 +187,16 @@ app.post("/skills", verifyToken, async (req, res) => {
     }
 
     const result = await pool.query(
-      "INSERT INTO skills (skill, progressions, current, goal, user_id) VALUES ($1, $2, $3::jsonb, $4::jsonb, $5) RETURNING skill, progressions, current, goal, user_id",
-      [skill.trim(), progressionsArray, currentArray, goalArray, user_id]
+      "INSERT INTO skills (skill, progressions, current, goal, date, date_formatted, user_id) VALUES ($1, $2, $3::jsonb, $4::jsonb, $5::jsonb, $6::jsonb, $7) RETURNING skill, progressions, current, goal, user_id",
+      [
+        skill.trim(),
+        progressionsArray,
+        currentArray,
+        goalArray,
+        dateArray,
+        dateFormattedArray,
+        user_id,
+      ]
     );
 
     res.status(200).json({ message: "Successfully inserted skills" });
@@ -204,6 +229,8 @@ app.post("/addprogression", verifyToken, async (req, res) => {
   try {
     const { skill, addProgressionTrimmed, addCurrent, addGoal, user_id } =
       req.body;
+    const date = Date.now();
+    const formattedDate = formatDate();
 
     if (req.user.user_id !== user_id) {
       return res
@@ -230,24 +257,31 @@ app.post("/addprogression", verifyToken, async (req, res) => {
       `SELECT current, goal FROM skills WHERE user_id = $1 AND skill = $2`,
       [user_id, skill]
     );
+    const getDates = await pool.query(
+      `SELECT date, date_formatted FROM skills WHERE user_id = $1 AND skill = $2`,
+      [user_id, skill]
+    );
 
     const currentAndGoals = getCurrentAndGoal.rows[0];
-    console.log("Current and goal:", currentAndGoals);
-    console.log("Current:", currentAndGoals.current);
-    console.log("Goal:", currentAndGoals.goal);
+    const dates = getDates.rows[0];
 
     currentAndGoals.current.push([addCurrent]);
     currentAndGoals.goal.push([addGoal]);
-
-    console.log("Current updated", currentAndGoals.current);
-    console.log("Goal updated:", currentAndGoals.goal);
+    dates.date.push([date]);
+    dates.date_formatted.push([formattedDate]);
 
     const currentJson = JSON.stringify(currentAndGoals.current);
     const goalJson = JSON.stringify(currentAndGoals.goal);
+    const dateJson = JSON.stringify(dates.date);
+    const dateFormattedJson = JSON.stringify(dates.date_formatted);
 
     const insertCurrentAndGoal = await pool.query(
       `UPDATE skills SET current = $1, goal = $2 WHERE user_id = $3 AND skill = $4`,
       [currentJson, goalJson, user_id, skill]
+    );
+    const insertDates = await pool.query(
+      `UPDATE skills SET date = $1, date_formatted = $2 WHERE user_id = $3 AND skill = $4`,
+      [dateJson, dateFormattedJson, user_id, skill]
     );
 
     if (insertProgression.rowCount === 0) {
@@ -280,27 +314,25 @@ app.post("/editprogression", verifyToken, async (req, res) => {
       user_id,
     } = req.body;
 
-    console.log(
-      "Received Data:",
-      skill,
-      editIndex,
-      editProgression,
-      editProgressionNameTrimmed,
-      user_id,
-      editCurrent,
-      oldCurrent,
-      oldGoal,
-      editGoal
-    );
+    const date = Date.now();
+    const formattedDate = formatDate();
+
     const getCurrentAndGoal = await pool.query(
       `SELECT current, goal FROM skills WHERE user_id = $1 AND skill = $2`,
       [user_id, skill]
     );
-    console.log("current and goal:", getCurrentAndGoal.rows[0]);
+    const getDates = await pool.query(
+      `SELECT date, date_formatted FROM skills WHERE user_id = $1 AND skill = $2`,
+      [user_id, skill]
+    );
+
+    const dates = getDates.rows[0];
     const currentAndGoals = getCurrentAndGoal.rows[0];
 
     if (oldCurrent !== editCurrent && editCurrent) {
       currentAndGoals.current[editIndex].push(editCurrent);
+      dates.date[editIndex].push(date);
+      dates.date_formatted[editIndex].push(formattedDate);
     }
     if (oldGoal !== editGoal && editGoal) {
       currentAndGoals.goal[editIndex].push(editGoal);
@@ -308,13 +340,12 @@ app.post("/editprogression", verifyToken, async (req, res) => {
 
     const currentJson = JSON.stringify(currentAndGoals.current);
     const goalJson = JSON.stringify(currentAndGoals.goal);
-
-    console.log("Current:", currentJson);
-    console.log("Goal:", goalJson);
+    const dateJson = JSON.stringify(dates.date);
+    const dateFormattedJson = JSON.stringify(dates.date_formatted);
 
     const insertEdit = await pool.query(
-      `UPDATE skills SET current = $1, goal = $2 WHERE user_id = $3 AND skill = $4`,
-      [currentJson, goalJson, user_id, skill]
+      `UPDATE skills SET current = $1, goal = $2, date = $3, date_formatted = $4 WHERE user_id = $5 AND skill = $6`,
+      [currentJson, goalJson, dateJson, dateFormattedJson, user_id, skill]
     );
 
     // Check if user is authorized
