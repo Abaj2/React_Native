@@ -238,7 +238,9 @@ const WorkoutSession = () => {
             <Text style={tw`text-orange-500 font-bold`}>Finish</Text>
           </TouchableOpacity>
         </View>
-        <Text style={tw`text-orange-500 text-center`}>{workout.level}</Text>
+        <Text style={tw`text-orange-500 text-center`}>
+          {workout.level || ""}
+        </Text>
       </View>
 
       <ScrollView style={tw`flex-1`}>
@@ -305,7 +307,6 @@ const WorkoutSession = () => {
             </Text>
           </View>
 
-          {/* Sets Input */}
           {exerciseData[currentExercise].sets.map((set, setIndex) => (
             <View
               key={setIndex}

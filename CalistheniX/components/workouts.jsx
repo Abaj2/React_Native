@@ -21,6 +21,7 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Dropdown } from "react-native-element-dropdown";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { Icon } from "react-native-vector-icons/Feather";
 
 const { width, height } = Dimensions.get("window");
 
@@ -313,6 +314,7 @@ const Workouts = ({ isDarkMode }) => {
   const [isLevelModalVisible, setIsLevelModalVisible] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
   const [selectedLevel, setSelectedLevel] = useState(null);
+  const [customWorkoutModal, setCustomWorkoutModal] = useState(null);
 
   const handleWorkoutPress = (workout) => {
     setSelectedWorkout(workout);
@@ -344,32 +346,30 @@ const Workouts = ({ isDarkMode }) => {
   return (
     <SafeAreaView>
       <View style={tw`flex-column items-center`}>
-          <View
-                    style={[
-                      tw`flex-row bg-zinc-900 rounded-3xl mb-5 border-l-4 border-orange-500`,
-                      { width: width * 0.9, height: height * 0.08 },
-                    ]}
-                  >
-                    <Text style={tw`text-white font-bold m-5 text-lg`}>
-                      Custom Workout
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate("custom-workout")}
-                    >
-                      <View
-                        style={[
-                          tw`mb-5 rounded-lg mt-5 text-center justify-center items-center bg-orange-500`,
-                          {
-                            width: width * 0.35,
-                            height: height * 0.04,
-                            zIndex: 100,
-                          },
-                        ]}
-                      >
-                        <Text style={tw`text-white font-bold`}>Start</Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
+        <View
+          style={[
+            tw`flex-row bg-zinc-900 rounded-3xl mb-5 border-l-4 border-orange-500`,
+            { width: width * 0.9, height: height * 0.08 },
+          ]}
+        >
+          <Text style={tw`text-white font-bold m-5 text-lg`}>
+            Custom Workout
+          </Text>
+          <TouchableOpacity onPress={() => setCustomWorkoutModal(true)}>
+            <View
+              style={[
+                tw`mb-5 rounded-lg mt-5 text-center justify-center items-center bg-orange-500`,
+                {
+                  width: width * 0.35,
+                  height: height * 0.04,
+                  zIndex: 100,
+                },
+              ]}
+            >
+              <Text style={tw`text-white font-bold`}>Start</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
         {workouts.map((workout) => (
           <TouchableOpacity
             key={workout.id}
@@ -534,7 +534,11 @@ const Workouts = ({ isDarkMode }) => {
               <View
                 style={[
                   tw`bg-black border border-orange-500 rounded-3xl mt-20 p-4`,
-                  { width: width * 0.9, minHeight: height * 0.3, top: height * 0.1 },
+                  {
+                    width: width * 0.9,
+                    minHeight: height * 0.3,
+                    top: height * 0.1,
+                  },
                 ]}
               >
                 <View
@@ -573,6 +577,37 @@ const Workouts = ({ isDarkMode }) => {
             </SafeAreaView>
           </View>
         </Modal>
+        <View>
+          <Modal
+            visible={customWorkoutModal}
+            transparent={true}
+            animationType="fade"
+          >
+            <View style={tw`flex-1 bg-black/90`}>
+              <SafeAreaView>
+                <View
+                  style={[
+                    tw`bg-gray-700 rounded-xl self-center mt-${width * 0.14}`,
+                    { width: width * 0.75, height: height * 0.45 },
+                  ]}
+                >
+                  <TouchableOpacity
+                    style={tw`absolute top-3 left-3`}
+                    onPress={() => setCustomWorkoutModal(false)}
+                  >
+                    <Ionicons name="close" size={30} color="gray" />
+                  </TouchableOpacity>
+
+                  <View style={tw`flex-1 mt-3 items-center`}>
+                    <Text style={tw`text-white font-bold text-xl`}>
+                      Custom Workout
+                    </Text>
+                  </View>
+                </View>
+              </SafeAreaView>
+            </View>
+          </Modal>
+        </View>
       </View>
     </SafeAreaView>
   );
