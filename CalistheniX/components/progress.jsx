@@ -10,9 +10,11 @@ import {
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/Feather";
 import { LineChart } from "react-native-chart-kit";
+const { width, height } = Dimensions.get("window");
 
 const Progress = ({ isDarkMode, userData, skillsData }) => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [selectedDataPoint, setSelectedDataPoint] = useState(null);
 
   const formatDate = (dateStr) => {
     return dateStr.split(" ")[0];
@@ -69,6 +71,41 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
       min: 0,
     };
 
+    const decorator = () => {
+      if (selectedDataPoint?.progressionId !== progressionId) return null;
+
+      const tooltipWidth = 80; // Approximate width of the tooltip
+      const tooltipHeight = 40; // Approximate height of the tooltip
+      const offset = 10; // Space between the tooltip and the data point
+
+      // Calculate tooltip position
+      const tooltipX = selectedDataPoint.x + offset;
+      const tooltipY = selectedDataPoint.y - tooltipHeight / 2;
+
+      return selectedDataPoint?.progressionId === progressionId ? (
+        <View
+          style={[
+            tw`items-center justify-center absolute bg-gray-800 rounded-lg border border-orange-500`,
+            {
+              width: width * 0.3,
+              height: height * 0.05,
+              left: tooltipX,
+              top: tooltipY,
+              width: tooltipWidth,
+            },
+          ]}
+          key="tooltip"
+        >
+          <Text style={tw`self-center text-white text-center`}>
+            Value: {selectedDataPoint.value}
+          </Text>
+          <Text style={tw`text-white text-center text-xs`}>
+            {formatDate(dates[selectedDataPoint.index])}
+          </Text>
+        </View>
+      ) : null;
+    };
+
     return (
       <View style={tw`mt-4 items-center`}>
         <LineChart
@@ -94,6 +131,16 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
           yAxisInterval={1}
           segments={4}
           fromZero={true}
+          decorator={decorator}
+          onDataPointClick={({ value, dataset, getColor, x, y, index }) => {
+            setSelectedDataPoint({
+              value,
+              x,
+              y,
+              index,
+              progressionId,
+            });
+          }}
         />
       </View>
     );
@@ -101,6 +148,27 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
 
   const handleToggleDropdown = (id) => {
     setOpenDropdownId((prevId) => (prevId === id ? null : id));
+    setSelectedDataPoint(null);
+  };
+
+  const getProgressColour = (progress) => {
+    if (progress > 0 && progress < 30) {
+      return "red";
+    } else if (progress > 30 && progress < 65) {
+      return "yellow";
+    } else {
+      return "green";
+    }
+  };
+
+  const getTrendingArrowColour = (progress) => {
+    if (progress < 0) {
+      return "red";
+    } else if (progress === 0) {
+      return "orange";
+    } else {
+      return "lightgreen";
+    }
   };
 
   return (
@@ -160,10 +228,40 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
                             <Text style={tw`text-white font-medium text-lg`}>
                               {progression}
                             </Text>
-                            <View style={tw`bg-orange-900 rounded-xl`}>
-                              <Text style={tw`ml-3 mt-1 mb-1 mr-3 text-orange-400`}>
+                            <View
+                              style={tw`bg-${getProgressColour(
+                                Math.round(
+                                  (item.current[index][
+                                    item.current[index].length - 1
+                                  ] /
+                                    currentGoal) *
+                                    100
+                                )
+                              )}-900 rounded-xl`}
+                            >
+                              <Text
+                                style={tw`ml-3 mt-1 mb-1 mr-3 text-${getProgressColour(
+                                  Math.round(
+                                    (item.current[index][
+                                      item.current[index].length - 1
+                                    ] /
+                                      currentGoal) *
+                                      100
+                                  )
+                                )}-500`}
+                              >
                                 Progress:
-                                <Text style={tw`text-orange-400`}>
+                                <Text
+                                  style={tw`text-${getProgressColour(
+                                    Math.round(
+                                      (item.current[index][
+                                        item.current[index].length - 1
+                                      ] /
+                                        currentGoal) *
+                                        100
+                                    )
+                                  )}-500`}
+                                >
                                   {" "}
                                   {Math.round(
                                     (item.current[index][
@@ -190,33 +288,38 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
                             <View style={tw`flex-row`}>
                               <Icon
                                 name={
-                                  (item.current[index][item.current[index].length - 1]) -
+                                  item.current[index][
+                                    item.current[index].length - 1
+                                  ] -
                                     item.current[index][0] >
                                   0
                                     ? "trending-up"
-                                    : (item.current[index][item.current[index].length - 1]) -
-                                      item.current[index][0] <
+                                    : item.current[index][
+                                        item.current[index].length - 1
+                                      ] -
+                                        item.current[index][0] <
                                       0
                                     ? "trending-down"
                                     : "minus"
                                 }
                                 size={16}
-                                color={
-                                  (item.current[index][item.current[index].length - 1]) -
-                                    item.current[index][0] >
-                                  0
-                                    ? "lightgreen"
-                                    : (item.current[index][item.current[index].length - 1]) -
-                                      item.current[index][0] <
-                                      0
-                                    ? "red"
-                                    : "orange"
-                                }
+                                color={getTrendingArrowColour(
+                                  item.current[index][
+                                    item.current[index].length - 1
+                                  ] - item.current[index][0]
+                                )}
                               />
                               <Text style={tw`ml-2 text-white`}>
-                                {((item.current[index][item.current[index].length - 1]) -
-                                  item.current[index][0] > 0 ? '+' : "")}{(item.current[index][item.current[index].length - 1]) -
-                                  item.current[index][0]}{" "}
+                                {item.current[index][
+                                  item.current[index].length - 1
+                                ] -
+                                  item.current[index][0] >
+                                0
+                                  ? "+"
+                                  : ""}
+                                {item.current[index][
+                                  item.current[index].length - 1
+                                ] - item.current[index][0]}{" "}
                                 Since Start
                               </Text>
                             </View>
@@ -226,23 +329,18 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
                                 Goal: {currentGoal}
                               </Text>
                             </View>
-                            
                           </View>
-                          <View style={tw`w-full h-0.5 mt-4 bg-gray-700`}></View>
-                          
+                          <View
+                            style={tw`w-full h-0.5 mt-4 bg-gray-700`}
+                          ></View>
                         </View>
-                        
                       );
                     })}
                 </View>
-                
               </View>
-              
             </TouchableOpacity>
-            
           );
         })}
-
       </ScrollView>
     </SafeAreaView>
   );

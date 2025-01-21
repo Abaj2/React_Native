@@ -18,8 +18,7 @@ const { width } = Dimensions.get("window");
 const GET_WORKOUTS_URL = Platform.select({
   android: "http://10.0.2.2:4005/getworkouts",
 
-  ios: "http://192.168.1.155:4005/getworkouts",
-
+  ios: "http://192.168.1.137:4005/getworkouts",
 });
 
 const HistoryCard = ({ isDarkMode }) => {
@@ -42,7 +41,7 @@ const HistoryCard = ({ isDarkMode }) => {
 
         // Initialize animation values
         const newAnimatedValues = {};
-        response.data.workouts.forEach(workout => {
+        response.data.workouts.forEach((workout) => {
           newAnimatedValues[workout.workout_id] = new Animated.Value(0);
         });
         setAnimatedValues(newAnimatedValues);
@@ -68,27 +67,31 @@ const HistoryCard = ({ isDarkMode }) => {
 
   const getLevelColor = (level) => {
     switch (level.toLowerCase()) {
-      case 'beginner': return 'green';
-      case 'intermediate': return 'yellow';
-      case 'advanced': return 'red';
-      default: return 'gray';
+      case "beginner":
+        return "green";
+      case "intermediate":
+        return "yellow";
+      case "advanced":
+        return "red";
+      default:
+        return "gray";
     }
   };
   const formatDate = (isoString) => {
     const date = new Date(isoString);
-    return date.toLocaleString('en-GB', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false, 
+    return date.toLocaleString("en-GB", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
     });
   };
 
   const getWorkoutStats = (workoutId) => {
-    const exercises = exercisesData.filter(ex => ex.workout_id === workoutId);
-    const sets = setsData.filter(set => set.workout_id === workoutId);
+    const exercises = exercisesData.filter((ex) => ex.workout_id === workoutId);
+    const sets = setsData.filter((set) => set.workout_id === workoutId);
     const totalExercises = exercises.length;
     const totalSets = sets.length;
     const totalReps = sets.reduce((acc, set) => acc + (set.reps || 0), 0);
@@ -97,13 +100,15 @@ const HistoryCard = ({ isDarkMode }) => {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-${isDarkMode ? '' : ''}`}>
+    <SafeAreaView style={tw`flex-1 bg-${isDarkMode ? "" : ""}`}>
       <ScrollView style={tw`px-4 py-6`}>
         {workoutsData.map((workout) => {
           const stats = getWorkoutStats(workout.workout_id);
-          const rotateAnimation = animatedValues[workout.workout_id]?.interpolate({
+          const rotateAnimation = animatedValues[
+            workout.workout_id
+          ]?.interpolate({
             inputRange: [0, 1],
-            outputRange: ['0deg', '180deg'],
+            outputRange: ["0deg", "180deg"],
           });
 
           return (
@@ -112,21 +117,32 @@ const HistoryCard = ({ isDarkMode }) => {
               style={[
                 tw`rounded-3xl p-5 mb-5 shadow-xl border-l-4 border-l-orange-500`,
                 {
-                  backgroundColor: isDarkMode ? '#18181b' : '#ffffff',
+                  backgroundColor: isDarkMode ? "#18181b" : "#ffffff",
                   width: width * 0.9,
-                  alignSelf: 'center',
+                  alignSelf: "center",
                 },
               ]}
             >
               <View style={tw`flex-row justify-between items-center mb-4`}>
                 <View style={tw`flex-row items-center`}>
-                  <Icon name="calendar-outline" size={20} color="#f97316" style={tw`mr-2`} />
-                  <Text style={tw`text-${isDarkMode ? 'white' : 'gray-800'} font-bold text-lg`}>
+                  <Icon
+                    name="calendar-outline"
+                    size={20}
+                    color="#f97316"
+                    style={tw`mr-2`}
+                  />
+                  <Text
+                    style={tw`text-${
+                      isDarkMode ? "white" : "gray-800"
+                    } font-bold text-lg`}
+                  >
                     {workout.title}
                   </Text>
                 </View>
                 <View style={tw`flex-row items-center`}>
-                  <Text style={tw`text-gray-400 text-sm mr-2`}>{formatDate(workout.date)}</Text>
+                  <Text style={tw`text-gray-400 text-sm mr-2`}>
+                    {formatDate(workout.date)}
+                  </Text>
                   <Icon name="clock-outline" size={16} color="#9ca3af" />
                 </View>
               </View>
@@ -139,7 +155,11 @@ const HistoryCard = ({ isDarkMode }) => {
                   color={getLevelColor(workout.level)}
                   style={tw`mr-2`}
                 />
-                <Text style={tw`text-${getLevelColor(workout.level)}-500 text-sm font-medium`}>
+                <Text
+                  style={tw`text-${getLevelColor(
+                    workout.level
+                  )}-500 text-sm font-medium`}
+                >
                   {workout.level}
                 </Text>
               </View>
@@ -147,16 +167,37 @@ const HistoryCard = ({ isDarkMode }) => {
               {/* Workout Stats */}
               <View style={tw`flex-row justify-between items-center mb-4`}>
                 <View style={tw`flex-row items-center`}>
-                  <Icon name="dumbbell" size={16} color="#f97316" style={tw`mr-1`} />
-                  <Text style={tw`text-gray-400 text-sm`}>{stats.totalExercises} exercises</Text>
+                  <Icon
+                    name="dumbbell"
+                    size={16}
+                    color="#f97316"
+                    style={tw`mr-1`}
+                  />
+                  <Text style={tw`text-gray-400 text-sm`}>
+                    {stats.totalExercises} exercises
+                  </Text>
                 </View>
                 <View style={tw`flex-row items-center`}>
-                  <Icon name="target" size={16} color="#f97316" style={tw`mr-1`} />
-                  <Text style={tw`text-gray-400 text-sm`}>{stats.totalSets} sets</Text>
+                  <Icon
+                    name="target"
+                    size={16}
+                    color="#f97316"
+                    style={tw`mr-1`}
+                  />
+                  <Text style={tw`text-gray-400 text-sm`}>
+                    {stats.totalSets} sets
+                  </Text>
                 </View>
                 <View style={tw`flex-row items-center`}>
-                  <Icon name="fire" size={16} color="#f97316" style={tw`mr-1`} />
-                  <Text style={tw`text-gray-400 text-sm`}>{stats.totalReps} reps</Text>
+                  <Icon
+                    name="fire"
+                    size={16}
+                    color="#f97316"
+                    style={tw`mr-1`}
+                  />
+                  <Text style={tw`text-gray-400 text-sm`}>
+                    {stats.totalReps} reps
+                  </Text>
                 </View>
               </View>
 
@@ -166,102 +207,132 @@ const HistoryCard = ({ isDarkMode }) => {
               >
                 <View style={tw`flex-row justify-center items-center`}>
                   <Text style={tw`text-white font-medium mr-2`}>
-                    {expandedWorkouts.includes(workout.workout_id) ? "Hide Details" : "Show Details"}
+                    {expandedWorkouts.includes(workout.workout_id)
+                      ? "Hide Details"
+                      : "Show Details"}
                   </Text>
-                  <Animated.View style={{ transform: [{ rotate: rotateAnimation }] }}>
+                  <Animated.View
+                    style={{ transform: [{ rotate: rotateAnimation }] }}
+                  >
                     <Icon name="chevron-down" size={20} color="white" />
                   </Animated.View>
                 </View>
               </TouchableOpacity>
 
               {expandedWorkouts.includes(workout.workout_id) && (
-  <>
-    {exercisesData
-      .filter((exercise) => exercise.workout_id === workout.workout_id)
-      .map((exercise) => (
-        <View
-          key={exercise.exercise_id}
-          style={[
-            tw`rounded-xl p-4 mt-4`,
-            { backgroundColor: isDarkMode ? '#303030' : '#f8f8f8', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
-          ]}
-        >
-          {/* Exercise Header */}
-          <View style={tw`flex-row items-center mb-3`}>
-            <Icon name="run-fast" size={24} color="#f97316" style={tw`mr-3`} />
-            <Text style={tw`text-${isDarkMode ? 'white' : 'gray-800'} font-bold text-lg`}>
-              {exercise.name}
-            </Text>
-          </View>
+                <>
+                  {exercisesData
+                    .filter(
+                      (exercise) => exercise.workout_id === workout.workout_id
+                    )
+                    .map((exercise) => (
+                      <View
+                        key={exercise.exercise_id}
+                        style={[
+                          tw`rounded-xl p-4 mt-4`,
+                          {
+                            backgroundColor: isDarkMode ? "#303030" : "#f8f8f8",
+                            shadowColor: "#000",
+                            shadowOpacity: 0.1,
+                            shadowRadius: 5,
+                            shadowOffset: { width: 0, height: 2 },
+                            elevation: 3,
+                          },
+                        ]}
+                      >
+                        {/* Exercise Header */}
+                        <View style={tw`flex-row items-center mb-3`}>
+                          <Icon
+                            name="run-fast"
+                            size={24}
+                            color="#f97316"
+                            style={tw`mr-3`}
+                          />
+                          <Text
+                            style={tw`text-${
+                              isDarkMode ? "white" : "gray-800"
+                            } font-bold text-lg`}
+                          >
+                            {exercise.name}
+                          </Text>
+                        </View>
 
-          {/* Exercise Sets */}
-          {setsData
-            .filter(
-              (set) =>
-                set.workout_id === workout.workout_id &&
-                set.exercise_id === exercise.exercise_id
-            )
-            .map((set, index) => (
-              <View
-                key={index}
-                style={[
-                  tw`flex-row items-center justify-between rounded-lg p-4 mb-2`,
-                  {
-                    backgroundColor: isDarkMode ? '#2a2a2a' : '#ffffff',
-                    shadowColor: '#000',
-                    shadowOpacity: 0.05,
-                    shadowRadius: 4,
-                    shadowOffset: { width: 0, height: 1 },
-                    elevation: 2,
-                  },
-                ]}
-              >
-                
-                <View>
-                  <Text
-                    style={tw`text-${isDarkMode ? 'gray-300' : 'gray-700'} font-medium text-sm`}
-                  >
-                    Set {index + 1}
-                  </Text>
-                  <Text
-                    style={tw`text-${isDarkMode ? 'gray-400' : 'gray-500'} italic text-xs mt-1`}
-                  >
-                    {set.notes || 'No notes'}
-                  </Text>
-                </View>
+                        {/* Exercise Sets */}
+                        {setsData
+                          .filter(
+                            (set) =>
+                              set.workout_id === workout.workout_id &&
+                              set.exercise_id === exercise.exercise_id
+                          )
+                          .map((set, index) => (
+                            <View
+                              key={index}
+                              style={[
+                                tw`flex-row items-center justify-between rounded-lg p-4 mb-2`,
+                                {
+                                  backgroundColor: isDarkMode
+                                    ? "#2a2a2a"
+                                    : "#ffffff",
+                                  shadowColor: "#000",
+                                  shadowOpacity: 0.05,
+                                  shadowRadius: 4,
+                                  shadowOffset: { width: 0, height: 1 },
+                                  elevation: 2,
+                                },
+                              ]}
+                            >
+                              <View>
+                                <Text
+                                  style={tw`text-${
+                                    isDarkMode ? "gray-300" : "gray-700"
+                                  } font-medium text-sm`}
+                                >
+                                  Set {index + 1}
+                                </Text>
+                                <Text
+                                  style={tw`text-${
+                                    isDarkMode ? "gray-400" : "gray-500"
+                                  } italic text-xs mt-1`}
+                                >
+                                  {set.notes || "No notes"}
+                                </Text>
+                              </View>
 
-                {/* Badge for Reps or Duration */}
-                <View
-                  style={[
-                    tw`px-3 py-1 rounded-full`,
-                    {
-                      backgroundColor: set.duration ? '#34d399' : '#f97316',
-                    },
-                  ]}
-                >
-                  <Text style={tw`text-white font-bold text-xs`}>
-                    {set.duration
-                      ? `${set.duration}s`
-                      : set.reps
-                      ? `${set.reps} reps`
-                      : 'N/A'}
-                  </Text>
-                </View>
+                              {/* Badge for Reps or Duration */}
+                              <View
+                                style={[
+                                  tw`px-3 py-1 rounded-full`,
+                                  {
+                                    backgroundColor: set.duration
+                                      ? "#34d399"
+                                      : "#f97316",
+                                  },
+                                ]}
+                              >
+                                <Text style={tw`text-white font-bold text-xs`}>
+                                  {set.duration
+                                    ? `${set.duration}s`
+                                    : set.reps
+                                    ? `${set.reps} reps`
+                                    : "N/A"}
+                                </Text>
+                              </View>
 
-                {/* Icons for Set Type */}
-                <Icon
-                  name={set.duration ? 'timer-outline' : 'dumbbell'}
-                  size={20}
-                  color={set.duration ? '#34d399' : '#f97316'}
-                  style={tw`ml-3`}
-                />
-              </View>
-            ))}
-        </View>
-      ))}
-  </>
-)}
-
+                              {/* Icons for Set Type */}
+                              <Icon
+                                name={
+                                  set.duration ? "timer-outline" : "dumbbell"
+                                }
+                                size={20}
+                                color={set.duration ? "#34d399" : "#f97316"}
+                                style={tw`ml-3`}
+                              />
+                            </View>
+                          ))}
+                      </View>
+                    ))}
+                </>
+              )}
             </View>
           );
         })}

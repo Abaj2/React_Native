@@ -60,11 +60,11 @@ const Home = () => {
 
   const SERVER_URL = Platform.select({
     android: "http://10.0.2.2:4005/skills",
-    ios: "http://192.168.1.155:4005/skills",
+    ios: "http://192.168.1.137:4005/skills",
   });
   const SERVER_URL2 = Platform.select({
     android: "http://10.0.2.2:4005/fetchskills",
-    ios: "http://192.168.1.155:4005/fetchskills",
+    ios: "http://192.168.1.137:4005/fetchskills",
   });
 
   const [skillsData, setSkillsData] = useState([]);

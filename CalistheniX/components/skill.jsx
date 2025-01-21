@@ -33,11 +33,11 @@ const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
   android: "http://10.0.2.2:4005/addprogression",
-  ios: "http://192.168.1.155:4005/addprogression",
+  ios: "http://192.168.1.137:4005/addprogression",
 });
 const EDIT_PROGRESSION_URL = Platform.select({
   android: "http://10.0.2.2:4005/editprogression",
-  ios: "http://192.168.1.155:4005/editprogression",
+  ios: "http://192.168.1.137:4005/editprogression",
 });
 
 const Skill = ({ skillData, loadUserData, isDarkMode }) => {
@@ -205,7 +205,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
 
   const SKILL_DELETE_URL = Platform.select({
     android: "http://10.0.2.2:4005/deleteskill",
-    ios: "http://192.168.1.155:4005/deleteskill",
+    ios: "http://192.168.1.137:4005/deleteskill",
   });
 
   const handleSkillDelete = async (item) => {
@@ -295,10 +295,9 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
     );
   };
   useEffect(() => {
-    console.log(skillData)
-  }, skillData)
+    console.log(skillData);
+  }, skillData);
   return (
-  
     <SafeAreaView style={[tw`flex-1`, {}]}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
       <View style={tw`flex-1 w-full`}>
@@ -307,7 +306,6 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[tw` items-center w-full px-2`, {}]}
         >
-        
           <View
             style={[
               tw`mb-4 rounded-xl shadow-md border-2 border-orange-500`,
@@ -390,15 +388,14 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                       Current Progression
                     </Text>
                     <View style={tw`flex-column`}>
-                    <Text
-                      style={[
-                        tw`font-medium mt-1`,
-                        { color: isDarkMode ? "white" : "black" },
-                      ]}
-                    >
-                      {progression}
-                    </Text>
-                    
+                      <Text
+                        style={[
+                          tw`font-medium mt-1`,
+                          { color: isDarkMode ? "white" : "black" },
+                        ]}
+                      >
+                        {progression}
+                      </Text>
                     </View>
                   </View>
                   <ProgressCircle
