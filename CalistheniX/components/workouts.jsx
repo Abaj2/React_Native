@@ -355,7 +355,9 @@ const Workouts = ({ isDarkMode }) => {
           <Text style={tw`text-white font-bold m-5 text-lg`}>
             Custom Workout
           </Text>
-          <TouchableOpacity onPress={() => setCustomWorkoutModal(true)}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("custom-workout")}
+          >
             <View
               style={[
                 tw`mb-5 rounded-lg mt-5 text-center justify-center items-center bg-orange-500`,
