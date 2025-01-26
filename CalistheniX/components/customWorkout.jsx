@@ -7,68 +7,124 @@ import {
   TextInput,
   SafeAreaView,
   Dimensions,
+  Alert,
+  Platform,
 } from "react-native";
 import tw from "twrnc";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const { width } = Dimensions.get("window");
+
+const SERVER_URL = Platform.select({
+  android: "http://10.0.2.2:4005/postcustomworkout",
+  ios: "http://192.168.1.155:4005/postcustomworkout",
+});
 
 const CustomWorkout = () => {
   const navigation = useNavigation();
   const [title, setTitle] = useState("");
-  const [exercises, setExercises] = useState([]);
+  const [workoutSummary, setWorkoutSummary] = useState([]);
   const [currentExercise, setCurrentExercise] = useState(0);
-  const [newExerciseName, setNewExerciseName] = useState("");
+  const [newWorkoutSummary, setNewWorkoutSummary] = useState("");
 
   const addExercise = () => {
-    if (newExerciseName.trim()) {
-      setExercises([
-        ...exercises,
+    if (newWorkoutSummary.trim()) {
+      setWorkoutSummary([
+        ...workoutSummary,
         {
-          name: newExerciseName,
+          name: newWorkoutSummary,
           sets: [
             {
               reps: "",
               duration: "",
               notes: "",
+              type: "reps",
             },
           ],
         },
       ]);
-      setNewExerciseName("");
+      setNewWorkoutSummary("");
     }
   };
 
-  const addSet = (exerciseIndex) => {
-    const updatedExercises = [...exercises];
-    updatedExercises[exerciseIndex].sets.push({
+  const addSet = (workoutIndex) => {
+    const updatedWorkoutSummary = [...workoutSummary];
+    updatedWorkoutSummary[workoutIndex].sets.push({
       reps: "",
       duration: "",
       notes: "",
+      type: "reps",
     });
-    setExercises(updatedExercises);
+    setWorkoutSummary(updatedWorkoutSummary);
   };
 
-  const removeSet = (exerciseIndex) => {
-    if (exercises[exerciseIndex].sets.length > 1) {
-      const updatedExercises = [...exercises];
-      updatedExercises[exerciseIndex].sets.pop();
-      setExercises(updatedExercises);
+  const removeSet = (workoutIndex) => {
+    if (workoutSummary[workoutIndex].sets.length > 1) {
+      const updatedWorkoutSummary = [...workoutSummary];
+      updatedWorkoutSummary[workoutIndex].sets.pop();
+      setWorkoutSummary(updatedWorkoutSummary);
     }
   };
 
-  const updateSet = (exerciseIndex, setIndex, field, value) => {
-    const updatedExercises = [...exercises];
-    updatedExercises[exerciseIndex].sets[setIndex][field] = value;
-    setExercises(updatedExercises);
+  const updateSet = (workoutIndex, setIndex, field, value) => {
+    const updatedWorkoutSummary = [...workoutSummary];
+    const currentSet = updatedWorkoutSummary[workoutIndex].sets[setIndex];
+
+    if (field === "type") {
+      if (value === "reps") {
+        currentSet.duration = "";
+      } else {
+        currentSet.reps = "";
+      }
+      currentSet.type = value;
+    } else {
+      currentSet[field] = value;
+    }
+
+    setWorkoutSummary(updatedWorkoutSummary);
   };
 
   const cancelWorkout = () => {
     navigation.goBack();
   };
 
-  const finishWorkout = () => {
-    console.log(JSON.stringify(exercises));
+  const finishWorkout = async () => {
+    try {
+      const token = await AsyncStorage.getItem("jwtToken");
+      const storedUserData = await AsyncStorage.getItem("userData");
+      const parsedUserData = JSON.parse(storedUserData);
+      const user_id = parsedUserData.user_id;
+      if (!title) {
+        Alert.alert("Enter a title");
+        return;
+      }
+
+      const response = await axios.post(
+        SERVER_URL,
+        {
+          workoutSummary,
+          title,
+          user_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        console.log("Sent data to backend");
+      }
+      navigation.navigate("Home");
+
+      setTimeout(() => {
+     Alert.alert("Successfully completed workout")
+    }, 750);
+    } catch (err) {
+      console.error("Error:", err);
+    }
   };
 
   return (
@@ -91,15 +147,14 @@ const CustomWorkout = () => {
         </View>
       </View>
 
-      {/* Add Exercise Section */}
       <View style={tw`p-4 border-b border-gray-800`}>
         <View style={tw`flex-row gap-2`}>
           <TextInput
             style={tw`flex-1 bg-zinc-900 text-white p-2 rounded-lg`}
             placeholder="Enter exercise name"
             placeholderTextColor="#6b7280"
-            value={newExerciseName}
-            onChangeText={setNewExerciseName}
+            value={newWorkoutSummary}
+            onChangeText={setNewWorkoutSummary}
             onSubmitEditing={addExercise}
           />
           <TouchableOpacity
@@ -111,11 +166,10 @@ const CustomWorkout = () => {
         </View>
       </View>
 
-      {/* Exercise tabs - Fixed height */}
-      {exercises.length > 0 && (
+      {workoutSummary.length > 0 && (
         <View style={tw`h-14 border-b border-gray-800`}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {exercises.map((exercise, index) => (
+            {workoutSummary.map((exercise, index) => (
               <TouchableOpacity
                 key={index}
                 style={tw`px-4 h-14 justify-center ${
@@ -132,14 +186,14 @@ const CustomWorkout = () => {
         </View>
       )}
 
-      {exercises.length > 0 && (
+      {workoutSummary.length > 0 && (
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={tw`flex-1`}
           contentContainerStyle={tw`p-4 pb-8`}
         >
           <View style={tw`space-y-4 mb-4`}>
-            {exercises[currentExercise].sets.map((set, setIndex) => (
+            {workoutSummary[currentExercise].sets.map((set, setIndex) => (
               <View
                 key={setIndex}
                 style={tw`p-4 mb-4 bg-zinc-900 rounded-xl border border-gray-800`}
@@ -147,32 +201,65 @@ const CustomWorkout = () => {
                 <Text style={tw`text-white font-bold mb-3`}>
                   Set {setIndex + 1}
                 </Text>
+
+ 
+                <View style={tw`flex-row mb-3`}>
+                  <TouchableOpacity
+                    style={tw`flex-1 p-2 ${
+                      set.type === "reps" ? "bg-orange-500" : "bg-gray-800"
+                    } rounded-l-lg`}
+                    onPress={() =>
+                      updateSet(currentExercise, setIndex, "type", "reps")
+                    }
+                  >
+                    <Text style={tw`text-white text-center`}>Reps</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={tw`flex-1 p-2 ${
+                      set.type === "duration" ? "bg-orange-500" : "bg-gray-800"
+                    } rounded-r-lg`}
+                    onPress={() =>
+                      updateSet(currentExercise, setIndex, "type", "duration")
+                    }
+                  >
+                    <Text style={tw`text-white text-center`}>Duration</Text>
+                  </TouchableOpacity>
+                </View>
+
                 <View style={tw`flex-row gap-4`}>
-                  <View style={tw`flex-1`}>
-                    <Text style={tw`text-gray-400 text-sm`}>Reps</Text>
-                    <TextInput
-                      style={tw`bg-gray-800 text-white p-2 rounded-lg mt-1`}
-                      placeholder="e.g., 12"
-                      placeholderTextColor="#6b7280"
-                      value={set.reps}
-                      onChangeText={(value) =>
-                        updateSet(currentExercise, setIndex, "reps", value)
-                      }
-                      keyboardType="number-pad"
-                    />
-                  </View>
-                  <View style={tw`flex-1`}>
-                    <Text style={tw`text-gray-400 text-sm`}>Duration</Text>
-                    <TextInput
-                      style={tw`bg-gray-800 text-white p-2 rounded-lg mt-1`}
-                      placeholder="e.g., 30s"
-                      placeholderTextColor="#6b7280"
-                      value={set.duration}
-                      onChangeText={(value) =>
-                        updateSet(currentExercise, setIndex, "duration", value)
-                      }
-                    />
-                  </View>
+                  {set.type === "reps" ? (
+                    <View style={tw`flex-1`}>
+                      <Text style={tw`text-gray-400 text-sm`}>Reps</Text>
+                      <TextInput
+                        style={tw`bg-gray-800 text-white p-2 rounded-lg mt-1`}
+                        placeholder="e.g., 12"
+                        placeholderTextColor="#6b7280"
+                        value={set.reps}
+                        onChangeText={(value) =>
+                          updateSet(currentExercise, setIndex, "reps", value)
+                        }
+                        keyboardType="number-pad"
+                      />
+                    </View>
+                  ) : (
+                    <View style={tw`flex-1`}>
+                      <Text style={tw`text-gray-400 text-sm`}>Duration</Text>
+                      <TextInput
+                        style={tw`bg-gray-800 text-white p-2 rounded-lg mt-1`}
+                        placeholder="e.g., 30s"
+                        placeholderTextColor="#6b7280"
+                        value={set.duration}
+                        onChangeText={(value) =>
+                          updateSet(
+                            currentExercise,
+                            setIndex,
+                            "duration",
+                            value
+                          )
+                        }
+                      />
+                    </View>
+                  )}
                 </View>
                 <View style={tw`mt-3`}>
                   <Text style={tw`text-gray-400 text-sm`}>Notes</Text>

@@ -16,11 +16,11 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 const SUBMIT_WORKOUT_URL = Platform.select({
   android: "http://10.0.2.2:4005/submitworkout",
-  ios: "http://192.168.1.137:4005/submitworkout",
+  ios: "http://192.168.1.155:4005/submitworkout",
 });
 
 const WorkoutSession = () => {
@@ -28,6 +28,7 @@ const WorkoutSession = () => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef(null);
+  const [isTargetModalVisible, setTargetModalVisible] = useState(false);
 
   useEffect(() => {
     startTimer();
@@ -38,7 +39,7 @@ const WorkoutSession = () => {
   }, []);
 
   const startTimer = () => {
-    if (isRunning) return; // Prevent multiple intervals
+    if (isRunning) return; 
     setIsRunning(true);
 
     timerRef.current = setInterval(() => {
@@ -49,6 +50,7 @@ const WorkoutSession = () => {
   const stopTimer = () => {
     clearInterval(timerRef.current);
     setIsRunning(false);
+    console.log(time);
   };
 
   const formatTime = (seconds) => {
@@ -154,6 +156,7 @@ const WorkoutSession = () => {
       .padStart(2, "0")}/${year} ${hours}:${minutes} ${ampm}`;
 
     const workoutSummary = {
+      duration: formattedTime,
       title: workout.title.trim(),
       level: workout.level.trim(),
       date: formattedDate.trim(),
@@ -195,6 +198,7 @@ const WorkoutSession = () => {
   };
 
   const finishWorkout = () => {
+
     Alert.alert(
       "Finish Workout?",
       "Save your progress?",
@@ -217,6 +221,7 @@ const WorkoutSession = () => {
   };
 
   const cancelWorkout = () => {
+    stopTimer();
     Alert.alert("Exit Workout?", "Your progress will be lost.", [
       {
         text: "OK",
@@ -225,9 +230,11 @@ const WorkoutSession = () => {
       },
     ]);
   };
+  useEffect(() => {
+    console.log(exercises2)
+  }, [exercises2])
   return (
     <SafeAreaView style={tw`flex-1 bg-black`}>
-      {/* Header */}
       <View style={tw`px-4 py-2 border-b border-gray-800`}>
         <View style={tw`flex-row justify-between items-center`}>
           <TouchableOpacity style={tw`p-2`} onPress={cancelWorkout}>
@@ -261,6 +268,20 @@ const WorkoutSession = () => {
               <Text style={tw`text-white font-bold`}>{exercise.name}</Text>
             </TouchableOpacity>
           ))}
+          <View
+            style={[
+              tw`bg-orange-500 items-center self-center justify-center`,
+              {
+                width: width * 0.08,
+                height: height * 0.036,
+                borderRadius: (width * 0.1) / 2,
+              },
+            ]}
+          >
+            <TouchableOpacity>
+              <Ionicons name="add" color="white" size={25} />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
 
         <View style={tw`p-4`}>

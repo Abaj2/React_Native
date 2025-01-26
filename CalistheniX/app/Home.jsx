@@ -60,11 +60,11 @@ const Home = () => {
 
   const SERVER_URL = Platform.select({
     android: "http://10.0.2.2:4005/skills",
-    ios: "http://192.168.1.137:4005/skills",
+    ios: "http://192.168.1.155:4005/skills",
   });
   const SERVER_URL2 = Platform.select({
     android: "http://10.0.2.2:4005/fetchskills",
-    ios: "http://192.168.1.137:4005/fetchskills",
+    ios: "http://192.168.1.155:4005/fetchskills",
   });
 
   const [skillsData, setSkillsData] = useState([]);
@@ -74,15 +74,19 @@ const Home = () => {
       const token = await AsyncStorage.getItem("jwtToken");
       const storedUserData = await AsyncStorage.getItem("userData");
 
+      const colourThemeAsyncStorage = await AsyncStorage.getItem('colourTheme')
+      const colourTheme = colourThemeAsyncStorage || 'Minimalistic';
+
+
       if (!token) {
         console.log("No JWT token found");
-        navigation.navigate("Sign-in"); // Redirect to sign-in if no token
+        navigation.navigate("Sign-in"); 
         return;
       }
       if (storedUserData) {
         const parsedUserData = JSON.parse(storedUserData);
-        setUserData(parsedUserData); // Set the user data from storage
-        console.log("Loaded user data from storage:", parsedUserData);
+        setUserData(parsedUserData); 
+        console.log(parsedUserData)
       }
 
       const response = await axios.get(SERVER_URL2, {
@@ -93,7 +97,6 @@ const Home = () => {
 
       if (response.status === 200) {
         setSkillsData(response.data.skills);
-        console.log(JSON.stringify(response.data.skills, null, 2));
       } else {
         console.log("Failed to fetch user data from server");
       }
@@ -116,8 +119,6 @@ const Home = () => {
 
   useEffect(() => {
     loadUserData();
-    console.log(userData);
-    console.log(skillsData);
   }, []);
 
   const submitSkill = async () => {
@@ -172,19 +173,11 @@ const Home = () => {
     setGoal("");
   };
 
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem("jwtToken");
-      await AsyncStorage.removeItem("userData"); // Clear user data as well
-      navigation.replace("Sign-in");
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
 
-  // Check if loading or if there's no user data
+
+
   if (isLoading) {
-    return <Text>Loading...</Text>; // Display loading text or a spinner
+    return <Text>Loading...</Text>; 
   }
 
   if (!userData) {
@@ -198,9 +191,6 @@ const Home = () => {
           <Text>
             Hello {username}, your email is {email}
           </Text>
-          <TouchableOpacity onPress={handleLogout}>
-            <Text>Logout</Text>
-          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -283,7 +273,7 @@ const Home = () => {
           <View
             style={[tw`mt-4 flex-row justify-between`, { backgroundColor: "" }]}
           >
-            <TouchableOpacity onPress={handleLogout}>
+            <TouchableOpacity>
               <Text
                 style={[
                   tw`text-3xl ${
@@ -304,7 +294,7 @@ const Home = () => {
                   color={isDarkMode ? "#f97316" : "lightskyblue"}
                 />
               </TouchableOpacity>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate("Settings-Main")}>
                 <Icon
                   style={tw`m-5`}
                   name="settings"

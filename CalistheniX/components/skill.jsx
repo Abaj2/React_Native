@@ -33,14 +33,23 @@ const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
   android: "http://10.0.2.2:4005/addprogression",
-  ios: "http://192.168.1.137:4005/addprogression",
+  ios: "http://192.168.1.155:4005/addprogression",
 });
 const EDIT_PROGRESSION_URL = Platform.select({
   android: "http://10.0.2.2:4005/editprogression",
-  ios: "http://192.168.1.137:4005/editprogression",
+  ios: "http://192.168.1.155:4005/editprogression",
 });
 
-const Skill = ({ skillData, loadUserData, isDarkMode }) => {
+const Skill = ({ skillData, loadUserData, isDarkMode, colourTheme }) => {
+  const [themeColors, setThemeColors] = useState({
+    text: "black",
+    secondaryText: "#4b5563",
+    background: "#f3f4f6",
+    border: "#e5e7eb",
+    progressTrack: "#e5e7eb",
+    progressFill: "#60a5fa",
+  });
+
   const [addProgression, setAddProgression] = useState("");
   const [addCurrent, setAddCurrent] = useState();
   const [addGoal, setAddGoal] = useState();
@@ -205,7 +214,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
 
   const SKILL_DELETE_URL = Platform.select({
     android: "http://10.0.2.2:4005/deleteskill",
-    ios: "http://192.168.1.137:4005/deleteskill",
+    ios: "http://192.168.1.155:4005/deleteskill",
   });
 
   const handleSkillDelete = async (item) => {
@@ -247,6 +256,103 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
     setEditProgressionName(item.value);
   };
 
+  useEffect(() => {
+    const getThemeColours = (theme) => {
+      switch (theme) {
+        case "Minimalistic":
+          return {
+            text: "#000000",
+            secondaryText: "#4b5563",
+            background: "#f3f4f6",
+            border: "#60a5fa",
+            progressTrack: "#e5e7eb",
+            progressFill: "#60a5fa",
+            placeholder: "#9ca3af",
+            buttonBackground: "#3b82f6",
+            buttonText: "#ffffff",
+            inputBorder: "#d1d5db",
+          };
+        case "Halloween":
+          return {
+            text: "#ffffff",
+            secondaryText: "#ffb347",
+            background: "#1A1A1A",
+            border: "#FB8C00",
+            progressTrack: "#4a4a4a",
+            progressFill: "#FB8C00",
+            placeholder: "#757575",
+            buttonBackground: "#FB8C00",
+            buttonText: "#000000",
+            inputBorder: "#ffb347",
+          };
+        case "Nature":
+          return {
+            text: "green",
+            secondaryText: "#4b5320",
+            background: "#e8f5e9",
+            border: "#66bb6a",
+            progressTrack: "#c5e1a5",
+            progressFill: "#66bb6a",
+            placeholder: "#a5d6a7",
+            buttonBackground: "#4caf50",
+            buttonText: "#ffffff",
+            inputBorder: "#a5d6a7",
+          };
+        case "Ocean":
+          return {
+            text: "#0077be",
+            secondaryText: "#004c8c",
+            background: "#e0f7fa",
+            border: "#0288d1",
+            progressTrack: "#b3e5fc",
+            progressFill: "#0288d1",
+            placeholder: "#81d4fa",
+            buttonBackground: "#0288d1",
+            buttonText: "#ffffff",
+            inputBorder: "#81d4fa",
+          };
+        case "Warm":
+          return {
+            text: "#5d4037",
+            secondaryText: "#3e2723",
+            background: "#fbe9e7",
+            border: "#8d6e63",
+            progressTrack: "#d7ccc8",
+            progressFill: "#8d6e63",
+            placeholder: "#bcaaa4",
+            buttonBackground: "#6d4c41",
+            buttonText: "#ffffff",
+            inputBorder: "#bcaaa4",
+          };
+        default:
+          return {
+            text: "#000000",
+            secondaryText: "#4b5563",
+            background: "#f3f4f6",
+            border: "#60a5fa",
+            progressTrack: "#e5e7eb",
+            progressFill: "#60a5fa",
+            placeholder: "#9ca3af",
+            buttonBackground: "#3b82f6",
+            buttonText: "#ffffff",
+            inputBorder: "#d1d5db",
+          };
+      }
+    };
+
+    const fetchThemeColors = async () => {
+      try {
+        const storedTheme = await AsyncStorage.getItem("colourTheme");
+        const colors = getThemeColours(storedTheme);
+        setThemeColors(colors);
+      } catch (error) {
+        console.error("Error fetching theme colors:", error);
+      }
+    };
+
+    fetchThemeColors();
+  }, [colourTheme]);
+
   const ProgressCircle = ({ current, goal }) => {
     const size = 64;
     const strokeWidth = 3;
@@ -256,7 +362,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
 
     return (
       <View style={tw`flex-row items-center`}>
-        <Text style={[tw`mr-2 ${isDarkMode ? "text-white" : "text-black"}`]}>
+        <Text style={[tw`mr-2 text-[${themeColors.text}]`, {}]}>
           {`${current} / ${goal}`}
         </Text>
         <View style={tw`w-16 h-16 justify-center items-center`}>
@@ -265,7 +371,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke={isDarkMode ? "#27272a" : "#e5e7eb"}
+              stroke={themeColors.progressTrack}
               strokeWidth={strokeWidth}
               fill="none"
             />
@@ -274,7 +380,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke={isDarkMode ? "#fb923c" : "#60a5fa"}
+              stroke={themeColors.progressFill}
               strokeWidth={strokeWidth}
               fill="none"
               strokeDasharray={circumference}
@@ -294,9 +400,6 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
       </View>
     );
   };
-  useEffect(() => {
-    console.log(skillData);
-  }, skillData);
   return (
     <SafeAreaView style={[tw`flex-1`, {}]}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
@@ -308,23 +411,18 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
         >
           <View
             style={[
-              tw`mb-4 rounded-xl shadow-md border-2 border-orange-500`,
+              tw`mb-4 bg-[${themeColors.background}] rounded-xl shadow-md border-2 border-[${themeColors.border}]`,
               {
-                backgroundColor: isDarkMode ? "#18181b" : "#f3f4f6",
                 width: width * 0.88,
               },
             ]}
           >
-            {/* Main Skill Header */}
             <View style={[tw`p-4`, {}]}>
               <View style={tw`flex-row justify-between items-center mb-2`}>
                 <View style={tw`flex-1`}>
                   <View style={tw`flex-row justify-between items-center`}>
                     <Text
-                      style={[
-                        tw`font-bold text-lg`,
-                        { color: isDarkMode ? "white" : "black" },
-                      ]}
+                      style={[tw`font-bold text-lg text-[${themeColors.text}]`]}
                     >
                       {skillData.skill}
                     </Text>
@@ -333,26 +431,21 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                     <Icon
                       name="award"
                       size={16}
-                      color={isDarkMode ? "#fb923c" : "#60a5fa"}
+                      color={themeColors.border}
                       style={tw`mr-1`}
                     />
-                    <Text style={{ color: isDarkMode ? "#9ca3af" : "#4b5563" }}>
+                    <Text style={tw`text-[${themeColors.secondaryText}]`}>
                       5 day streak
                     </Text>
                   </View>
                 </View>
 
-                {/* Action Buttons */}
                 <View style={tw`flex-row`}>
                   <TouchableOpacity
                     style={tw`mr-2 p-2 rounded-lg`}
                     onPress={() => setEditModalVisible(true)}
                   >
-                    <Icon
-                      name="edit-2"
-                      size={20}
-                      color={isDarkMode ? "white" : "black"}
-                    />
+                    <Icon name="edit-2" size={20} color={themeColors.text} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={tw`mr-2 p-2 rounded-lg`}
@@ -361,37 +454,32 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                     <Icon
                       name="plus-circle"
                       size={20}
-                      color={isDarkMode ? "white" : "black"}
+                      color={themeColors.text}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={tw`mr-2 p-2 rounded-lg`}
                     onPress={handleSkillDelete}
                   >
-                    <Icon
-                      name="trash"
-                      size={20}
-                      color={isDarkMode ? "white" : "black"}
-                    />
+                    <Icon name="trash" size={20} color={themeColors.text} />
                   </TouchableOpacity>
                 </View>
               </View>
 
-              {/* Active Progression */}
               {skillData.progressions.map((progression, index) => (
                 <View key={index} style={tw`flex-row items-center mt-4`}>
                   <View style={tw`flex-1`}>
                     {/*<Text style={tw`mt-1 text-white`}>
                       {skillData.date_formatted[index][0].slice(0, -6)}
                     </Text>*/}
-                    <Text style={{ color: isDarkMode ? "#9ca3af" : "#4b5563" }}>
+                    <Text style={tw`text-[${themeColors.secondaryText}]`}>
                       Current Progression
                     </Text>
                     <View style={tw`flex-column`}>
                       <Text
                         style={[
-                          tw`font-medium mt-1`,
-                          { color: isDarkMode ? "white" : "black" },
+                          tw`font-medium mt-1 text-[${themeColors.text}]`,
+                          {},
                         ]}
                       >
                         {progression}
@@ -412,38 +500,29 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
               ))}
             </View>
 
-            {/* Expanded Progressions */}
             {expandedSkill === skillData.skill &&
               skillData.progressions.length > 1 && (
-                <View
-                  style={[
-                    tw`border-t`,
-                    { borderColor: isDarkMode ? "#27272a" : "#e5e7eb" },
-                  ]}
-                >
+                <View style={[tw`border-[${themeColors.border}] border-t`, {}]}>
                   {skillData.progressions.slice(1).map((progression, index) => (
                     <View
                       key={index}
                       style={[
-                        tw`p-4 flex-row items-center`,
-                        index > 0 && tw`border-t`,
-                        { borderColor: isDarkMode ? "#27272a" : "#e5e7eb" },
+                        tw`pflex-row items-center`,
+                        index > 0 &&
+                          tw`border-t border-[${themeColors.border}]`,
+                        {},
                       ]}
                     >
                       <View style={tw`flex-1`}>
                         <Text
                           style={[
-                            tw`font-medium`,
-                            { color: isDarkMode ? "white" : "black" },
+                            tw`text-[${themeColors.text}] font-medium`,
+                            {},
                           ]}
                         >
                           {progression}
                         </Text>
-                        <Text
-                          style={{
-                            color: isDarkMode ? "#9ca3af" : "#4b5563",
-                          }}
-                        >
+                        <Text style={tw`text-[${themeColors.secondaryText}]`}>
                           {
                             skillData.current[index][
                               skillData.current[index].length - 1
@@ -474,40 +553,41 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                 </View>
               )}
           </View>
-
-          {/* Add Progression Modal */}
           <Modal
             transparent={true}
             visible={progressionModalVisible}
             animationType="fade"
           >
             <SafeAreaView
-              style={tw`flex-1 justify-center items-center bg-black/70`}
+              style={tw`flex-1 justify-center items-center bg-black/60`}
             >
               <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                 <View
                   style={[
-                    tw`bg-white rounded-2xl`,
+                    tw`border border-[${themeColors.border}] bg-[${themeColors.background}] rounded-2xl`,
                     { width: 0.8 * width, height: 0.5 * height },
                   ]}
                 >
                   <View
                     style={[
-                      tw``,
-                      { width: width * 0.1, height: height * 0.05 },
+                      tw`bg-[${themeColors.background}]`,
+                      { width: width * 0.15, height: height * 0.07 },
                     ]}
                   >
                     <TouchableOpacity onPress={handleProgressionModalClose}>
                       <Ionicons
+                        style={tw`m-2`}
                         name="close-circle-outline"
                         size={40}
-                        color="black"
+                        color={themeColors.border}
                       />
                     </TouchableOpacity>
                   </View>
                   <View>
                     <View style={tw``}>
-                      <Text style={tw`self-center font-bold text-2xl`}>
+                      <Text
+                        style={tw`text-[${themeColors.text}] self-center font-bold text-2xl`}
+                      >
                         {skillData.skill}
                       </Text>
                       <Text style={[tw`ml-5 mt-5 text-xl`, { fontSize: 18 }]}>
@@ -517,9 +597,9 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                         value={addProgression}
                         onChangeText={(text) => setAddProgression(text)}
                         placeholder="e.g. advanced tuck"
-                        placeholderTextColor={"gray"}
+                        placeholderTextColor={`${themeColors.placeholder}`}
                         style={[
-                          tw`self-center text-center border border-[#294241] rounded-lg`,
+                          tw`self-center text-center border border-[${themeColors.inputBorder}] rounded-lg`,
                           { width: width * 0.72, height: height * 0.04 },
                         ]}
                       ></TextInput>
@@ -537,7 +617,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                             tw`text-xl text-center`,
                             {
                               fontSize: 15,
-                              color: Platform.OS === "ios" ? "gray" : "757575",
+                              color: themeColors.placeholder,
                               fontFamily:
                                 Platform.OS === "ios"
                                   ? "SF Pro Text"
@@ -546,7 +626,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                           ]}
                           value={addCurrent}
                           style={[
-                            tw`self-center border border-[#294241] rounded-lg`,
+                            tw`self-center border border-[${themeColors.inputBorder}] rounded-lg`,
                             { width: width * 0.72, height: height * 0.04 },
                           ]}
                         />
@@ -565,7 +645,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                             tw`text-xl text-center`,
                             {
                               fontSize: 15,
-                              color: Platform.OS === "ios" ? "gray" : "757575",
+                              color: themeColors.placeholder,
                               fontFamily:
                                 Platform.OS === "ios"
                                   ? "SF Pro Text"
@@ -574,7 +654,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                           ]}
                           value={addGoal}
                           style={[
-                            tw`self-center border border-[#294241] rounded-lg`,
+                            tw`self-center border border-[${themeColors.inputBorder}] rounded-lg`,
                             { width: width * 0.72, height: height * 0.04 },
                           ]}
                         />
@@ -582,12 +662,15 @@ const Skill = ({ skillData, loadUserData, isDarkMode }) => {
                       <TouchableOpacity
                         onPress={submitProgression}
                         style={[
-                          tw`bg-black self-center justify-center items-center mt-8`,
+                          tw`bg-[${themeColors.buttonBackground}] rounded-lg self-center justify-center items-center mt-8`,
                           { width: width * 0.72, height: height * 0.045 },
                         ]}
                       >
                         <Text
-                          style={[tw`text-white font-bold`, { fontSize: 15 }]}
+                          style={[
+                            tw`text-[${themeColors.buttonText}] font-bold`,
+                            { fontSize: 15 },
+                          ]}
                         >
                           Submit
                         </Text>

@@ -2,16 +2,18 @@ const express = require("express");
 const { OAuth2Client } = require("google-auth-library");
 const { Pool } = require("pg");
 const cors = require("cors");
+const multer = require('multer');
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 const app = express();
+const upload = multer({ storage: multer.memoryStorage() });
 const port = process.env.PORT || 4005;
 const postgresPassword = process.env.PASSWORD;
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(cors());
 
 const pool = new Pool({
@@ -348,14 +350,12 @@ app.post("/editprogression", verifyToken, async (req, res) => {
       [currentJson, goalJson, dateJson, dateFormattedJson, user_id, skill]
     );
 
-    // Check if user is authorized
     if (req.user.user_id !== user_id) {
       return res
         .status(403)
         .json({ error: "Unauthorized to modify this data" });
     }
 
-    // Update progression name
     if (editProgression !== editProgressionNameTrimmed) {
       try {
         const updateName = await pool.query(
@@ -373,9 +373,6 @@ app.post("/editprogression", verifyToken, async (req, res) => {
       }
     }
 
-    // Update current
-
-    // Update goal
     if (editGoal !== oldGoal) {
       try {
         const updateGoal = await pool.query(``, [
@@ -408,10 +405,11 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
     console.log(workoutSummary.title);
     console.log(workoutSummary.level);
     console.log(workoutSummary.date);
+    console.log(workoutSummary.duration)
 
     const addWorkout = await pool.query(
-      `INSERT INTO workouts(user_id, title, level) VALUES($1, $2, $3) RETURNING workout_id`,
-      [user_id, workoutSummary.title, workoutSummary.level]
+      `INSERT INTO workouts(user_id, title, level, duration) VALUES($1, $2, $3, $4) RETURNING workout_id`,
+      [user_id, workoutSummary.title, workoutSummary.level, workoutSummary.duration]
     );
     console.log(`Number of rows affected: ${addWorkout.rowCount}`);
     const workout_id = addWorkout.rows[0].workout_id;
@@ -426,16 +424,8 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
 
       for (const set of exercise.sets) {
         await pool.query(
-          `INSERT INTO sets(exercise_id, reps, duration, notes, completed, user_id, workout_id) VALUES($1, $2, $3, $4, $5, $6, $7)`,
-          [
-            exercise_id,
-            set.reps,
-            set.duration,
-            set.notes,
-            set.completed,
-            user_id,
-            workout_id,
-          ]
+          `INSERT INTO sets(exercise_id, reps, duration, notes, user_id, workout_id) VALUES($1, $2, $3, $4, $5, $6)`,
+          [exercise_id, set.reps, set.duration, set.notes, user_id, workout_id]
         );
       }
     }
@@ -483,6 +473,108 @@ app.post("/deleteskill", verifyToken, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+app.post("/postcustomworkout", verifyToken, async (req, res) => {
+  const { workoutSummary, title, user_id } = req.body;
+  console.log(JSON.stringify(workoutSummary), title, user_id);
+  const level = "Custom";
+
+  try {
+    const addWorkout = await pool.query(
+      `INSERT INTO workouts(user_id, title, custom, level) values($1, $2, $3, $4) RETURNING workout_id`,
+      [user_id, title.trim(), true, level]
+    );
+    console.log(`Number of rows affected: ${addWorkout.rowCount}`);
+    const workout_id = addWorkout.rows[0].workout_id;
+
+    for (const exercise of workoutSummary) {
+      const addExercise = await pool.query(
+        `INSERT INTO exercises(workout_id, name, user_id) values($1, $2, $3) RETURNING exercise_id`,
+        [workout_id, exercise.name, user_id]
+      );
+      const exercise_id = addExercise.rows[0].exercise_id;
+      console.log(`Number of rows affected: ${addExercise.rowCount}`);
+
+      for (const set of exercise.sets) {
+        const integerReps = isNaN(parseInt(set.reps))
+          ? null
+          : parseInt(set.reps);
+        const integerDuration = isNaN(parseInt(set.duration))
+          ? null
+          : parseInt(set.duration);
+        await pool.query(
+          `INSERT INTO sets(exercise_id, reps, duration, notes, user_id, workout_id) VALUES($1, $2, $3, $4, $5, $6)`,
+          [
+            exercise_id,
+            integerReps,
+            integerDuration,
+            set.notes,
+            user_id,
+            workout_id,
+          ]
+        );
+      }
+    }
+    res.status(200).json({ success: "Inserted into the database" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.post(
+  "/profilepicture",
+  async (req, res) => {
+
+    const { profile_pic, username } = req.body;
+
+    if (!profile_pic) {
+      return res.status(400).send({ message: 'No file uploaded.' });
+    }
+
+    const imageBuffer = Buffer.from(profile_pic, 'base64');
+
+    try {
+      const query = `UPDATE users SET profile_pic = $1 WHERE username = $2`;
+      const values = [imageBuffer, username];
+
+      await pool.query(query, values);
+      res.send({ message: 'Profile picture uploaded successfully' });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      res.status(500).send({ message: 'Failed to upload profile picture. '});
+    }
+  }
+);
+
+app.get("/getstats", verifyToken, async (req, res) => {
+  const { user_id } = req.query
+  
+  if (!user_id) {
+    return res.status(400).json({ message: "Missing user_id parameter." });
+  }
+
+  try {
+    const totalWorkouts = await pool.query(`SELECT workout_id FROM workouts WHERE user_id = $1`,
+      [user_id]
+    )
+    const totalSkills = await pool.query(`SELECT id FROM skills WHERE user_id = $1`,
+      [user_id]
+    )
+    
+    const stats = {
+      totalWorkouts: totalWorkouts.rows.length,
+      totalSkills: totalSkills.rows.length
+    };
+
+    res.status(200).json({ stats })
+    
+
+  } catch (error) {
+    console.error('Error getting stats:', error);
+    res.status(500).send({ message: 'Failed to get data' })
+  }
+})
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

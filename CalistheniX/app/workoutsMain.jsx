@@ -23,7 +23,7 @@ const WorkoutsMain = () => {
   const [selectedTab, setSelectedTab] = useState("Tab2");
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-  const renderContent = () => {
+/*  const renderContent = () => {
     switch (selectedTab) {
       case "Tab2":
         return <Workouts isDarkMode={isDarkMode} />;
@@ -34,7 +34,7 @@ const WorkoutsMain = () => {
           <Text style={tw`text-gray-500 text-center mt-10`}>Select a tab</Text>
         );
     }
-  };
+  }; */
 
   return (
     <LinearGradient
@@ -56,7 +56,7 @@ const WorkoutsMain = () => {
         </View>
 
         <View style={tw`flex-row justify-around py-4 bg-transparent`}>
-          {["Tab2", "Tab3"].map((tab, index) => (
+         {/* {["Tab2", "Tab3"].map((tab, index) => (
             <TouchableOpacity
               key={index}
               style={[
@@ -86,7 +86,7 @@ const WorkoutsMain = () => {
                 {tab === "Tab2" ? "Workouts" : "History"}
               </Text>
             </TouchableOpacity>
-          ))}
+          ))} */}
         </View>
 
         <View
@@ -100,7 +100,7 @@ const WorkoutsMain = () => {
           contentContainerStyle={tw`p-4`}
           showsVerticalScrollIndicator={false}
         >
-          {renderContent()}
+          <Workouts isDarkMode={isDarkMode} />
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>

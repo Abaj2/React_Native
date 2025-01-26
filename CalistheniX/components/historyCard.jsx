@@ -18,33 +18,41 @@ const { width } = Dimensions.get("window");
 const GET_WORKOUTS_URL = Platform.select({
   android: "http://10.0.2.2:4005/getworkouts",
 
-  ios: "http://192.168.1.137:4005/getworkouts",
+  ios: "http://192.168.1.155:4005/getworkouts",
 });
 
-const HistoryCard = ({ isDarkMode }) => {
+const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) => {
   const [workoutsData, setWorkoutsData] = useState([]);
   const [exercisesData, setExercisesData] = useState({});
   const [setsData, setSetsData] = useState({});
+
   const [expandedWorkouts, setExpandedWorkouts] = useState([]);
   const [animatedValues, setAnimatedValues] = useState({});
 
   useEffect(() => {
     const fetchWorkouts = async () => {
-      const jwtToken = await AsyncStorage.getItem("jwtToken");
-      const response = await axios.get(GET_WORKOUTS_URL, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
-      if (response.status === 200) {
-        setWorkoutsData(response.data.workouts);
-        setExercisesData(response.data.exercises);
-        setSetsData(response.data.sets);
-
-        // Initialize animation values
-        const newAnimatedValues = {};
-        response.data.workouts.forEach((workout) => {
-          newAnimatedValues[workout.workout_id] = new Animated.Value(0);
+      try {
+        const jwtToken = await AsyncStorage.getItem("jwtToken");
+        const response = await axios.get(GET_WORKOUTS_URL, {
+          headers: { Authorization: `Bearer ${jwtToken}` },
         });
-        setAnimatedValues(newAnimatedValues);
+        if (response.status === 200) {
+          setWorkoutsData(response.data.workouts);
+          setExercisesData(response.data.exercises);
+          setSetsData(response.data.sets);
+
+          const newAnimatedValues = {};
+          response.data.workouts.forEach((workout) => {
+            newAnimatedValues[workout.workout_id] = new Animated.Value(0);
+          });
+          setAnimatedValues(newAnimatedValues);
+
+          if (onDataChange) {
+            onDataChange(response.data.workouts);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching workouts:", error);
       }
     };
     fetchWorkouts();
@@ -73,6 +81,8 @@ const HistoryCard = ({ isDarkMode }) => {
         return "yellow";
       case "advanced":
         return "red";
+      case "custom":
+        return "green"
       default:
         return "gray";
     }
@@ -99,10 +109,13 @@ const HistoryCard = ({ isDarkMode }) => {
     return { totalExercises, totalSets, totalReps };
   };
 
+  const displayedWorkouts = (filteredWorkouts || workoutsData).filter(workout => isCustom ? workout.custom : !workout.custom);
+  console.log("Displaying workouts:", displayedWorkouts);
+
   return (
     <SafeAreaView style={tw`flex-1 bg-${isDarkMode ? "" : ""}`}>
       <ScrollView style={tw`px-4 py-6`}>
-        {workoutsData.map((workout) => {
+        {displayedWorkouts.map((workout) => {
           const stats = getWorkoutStats(workout.workout_id);
           const rotateAnimation = animatedValues[
             workout.workout_id

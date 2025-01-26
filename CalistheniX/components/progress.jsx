@@ -252,7 +252,7 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
                               >
                                 Progress:
                                 <Text
-                                  style={tw`text-${getProgressColour(
+                                  style={tw`font-bold text-${getProgressColour(
                                     Math.round(
                                       (item.current[index][
                                         item.current[index].length - 1
@@ -271,7 +271,9 @@ const Progress = ({ isDarkMode, userData, skillsData }) => {
                                       100
                                   )}
                                   %
+                                  
                                 </Text>
+                                <Text> to goal</Text>
                               </Text>
                             </View>
                           </View>
