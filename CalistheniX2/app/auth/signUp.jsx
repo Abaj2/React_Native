@@ -25,8 +25,8 @@ import tw from "twrnc";
 const { width, height } = Dimensions.get("window");
 
 const SERVER_URL = Platform.select({
-  android: "http://10.0.2.2:4005/signup",
-  ios: "http://192.168.1.155:4005/signup",
+  android: "http://10.0.2.2:4003/signup",
+  ios: "http://192.168.1.155:4003/signup",
 });
 
 const SignUp = () => {
@@ -40,11 +40,11 @@ const SignUp = () => {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const usernameRegex = /^[a-zA-Z0-9._]{3,15}$/;
-
+  
   const isTokenExpired = (token) => {
     const decoded = jwt_decode(token);
-    const currentTime = Date.now() / 1000; 
-    return decoded.exp < currentTime; 
+    const currentTime = Date.now() / 1000; // Get the current time in seconds
+    return decoded.exp < currentTime; // Check if token is expired
   };
 
   const handleSignUp = async (e) => {
@@ -83,17 +83,14 @@ const SignUp = () => {
       if (response.status === 201) {
         console.log("User signed up:", response.data);
         await AsyncStorage.setItem("jwtToken", response.data.token);
-        await AsyncStorage.setItem(
-          "userData",
-          JSON.stringify({
-            username: response.data.user.username,
-            email: response.data.user.email,
-            userId: response.data.user.user_id,
-          })
-        );
-        const username = response.data.user.username;
-        const email = response.data.user.email;
-        const user_id = response.data.user.user_id;
+        await AsyncStorage.setItem("userData", JSON.stringify({
+          username: response.data.user.username,
+          email: response.data.user.email,
+          userId: response.data.user.user_id
+        }))
+        const username = response.data.user.username
+        const email = response.data.user.email
+        const user_id = response.data.user.user_id
         navigation.navigate("Home", { email, username, user_id });
       }
     } catch (err) {

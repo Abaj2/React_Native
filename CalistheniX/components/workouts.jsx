@@ -30,283 +30,487 @@ const workouts = [
     id: 1,
     title: "Front Lever",
     description: "Master the front lever through progressive training.",
-    totalsets: "7-8",
-    totalexercises: "2",
-    totallevels: "3",
-    totaltime: "25",
+    totalsets: 8,
+    totalexercises: 2,
+    totallevels: 3,
+    totaltime: 25,
     levels: [
       {
         level: "Beginner",
         exercises: [
           {
             name: "Tuck Hold",
-            sets: "3-4",
+            sets: 4,
             duration: "10-20s",
             rest: "90s",
-            notes: "Keep arms straight, maintain hollow body",
+            notes: "Keep arms straight, maintain hollow body."
           },
           {
             name: "Negative Tuck Pulls",
-            sets: "3",
+            sets: 3,
             reps: "5-8",
             rest: "120s",
-            notes: "Control descent, focus on scapular retraction",
-          },
-        ],
+            notes: "Control descent, focus on scapular retraction."
+          }
+        ]
       },
       {
         level: "Intermediate",
         exercises: [
           {
             name: "Advanced Tuck Hold",
-            sets: "4",
+            sets: 4,
             duration: "10-15s",
             rest: "120s",
-            notes: "Extend legs slightly from tuck position.",
+            notes: "Extend legs slightly from tuck position."
           },
           {
             name: "Single Leg Extensions",
-            sets: "3",
+            sets: 3,
             reps: "5 each leg",
             rest: "120s",
-            notes: "Alternate legs, maintain stable position.",
-          },
-        ],
+            notes: "Alternate legs, maintain stable position."
+          }
+        ]
       },
       {
         level: "Advanced",
         exercises: [
           {
             name: "Straddle Front Lever Hold",
-            sets: "4-5",
+            sets: 5,
             duration: "3-7s",
             rest: "180s",
-            notes: "Maintain straight body, squeeze lats.",
+            notes: "Maintain straight body, squeeze lats."
           },
           {
             name: "One Leg Front Lever Pulls",
-            sets: "3",
+            sets: 3,
             reps: "3-5",
             rest: "180s",
-            notes: "Keep one leg in advanced tuck, and extend the other",
-          },
-        ],
-      },
-    ],
+            notes: "Keep one leg in advanced tuck, extend the other."
+          }
+        ]
+      }
+    ]
   },
   {
     id: 2,
     title: "Muscle Up",
-    description: "Progress from pull-ups to clean muscle ups",
-    totalsets: "6-7",
-    totalexercises: "2-3",
-    totallevels: "3",
-    totaltime: "22",
+    description: "Progress from pull-ups to clean muscle-ups.",
+    totalsets: 7,
+    totalexercises: 3,
+    totallevels: 3,
+    totaltime: 22,
     levels: [
       {
         level: "Beginner",
         exercises: [
           {
             name: "High Pull-Ups",
-            sets: "4",
+            sets: 4,
             reps: "6-8",
             rest: "90s",
-            notes: "Pull to upper chest, focus on exploding upward.",
+            notes: "Pull to upper chest, focus on exploding upward."
           },
           {
             name: "Straight Bar Dips",
-            sets: "3",
+            sets: 3,
             reps: "8-10",
             rest: "90s",
-            notes: "Full range of motion, use weight if too easy.",
-          },
-        ],
+            notes: "Full range of motion, use weight if too easy."
+          }
+        ]
       },
       {
         level: "Intermediate",
         exercises: [
           {
             name: "Explosive Pull-Ups",
-            sets: "4",
+            sets: 4,
             reps: "5-7",
             rest: "120s",
-            notes: "Pull bar to waist, lean forward slightly",
+            notes: "Pull bar to waist, lean forward slightly."
           },
           {
             name: "Russian Dips",
-            sets: "3",
+            sets: 3,
             reps: "6-8",
             rest: "120s",
-            notes: "Focus on transition",
-          },
-        ],
+            notes: "Focus on transition."
+          }
+        ]
       },
       {
         level: "Advanced",
         exercises: [
           {
-            name: "Weighted Pullups",
-            sets: "3",
+            name: "Weighted Pull-Ups",
+            sets: 3,
             reps: "8-10",
             rest: "180s",
-            notes: "Clean form, try to be explosive",
+            notes: "Clean form, try to be explosive."
           },
           {
-            name: "Band Assisted Muscle Ups",
-            sets: "3",
+            name: "Band-Assisted Muscle-Ups",
+            sets: 3,
             reps: "3-5",
             rest: "180s",
-            notes: "Control descent and instantly go into the next muscle up",
+            notes: "Control descent, transition smoothly."
           },
           {
-            name: "Negative Muscle Ups",
-            sets: "3",
+            name: "Negative Muscle-Ups",
+            sets: 3,
             reps: "3-5",
             rest: "180s",
-            notes: "Be as slow as possible",
-          },
-        ],
-      },
-    ],
+            notes: "Slow controlled descent."
+          }
+        ]
+      }
+    ]
   },
   {
     id: 3,
     title: "Planche",
     description: "Achieve the planche through focused progressions.",
-    totalsets: "6-8",
-    totalexercises: "3",
-    totallevels: "3",
-    totaltime: "30",
+    totalsets: 8,
+    totalexercises: 3,
+    totallevels: 3,
+    totaltime: 30,
     levels: [
       {
         level: "Beginner",
         exercises: [
           {
             name: "Planche Leans",
-            sets: "3-4",
+            sets: 4,
             duration: "15-20s",
             rest: "90s",
-            notes:
-              "Lean forward as far as possible while keeping arms straight.",
+            notes: "Lean forward while keeping arms straight."
           },
           {
             name: "Tuck Planche",
-            sets: "3",
+            sets: 3,
             duration: "10-15s",
             rest: "120s",
-            notes: "Focus on maintaining shoulder protraction.",
-          },
-        ],
+            notes: "Focus on maintaining shoulder protraction."
+          }
+        ]
       },
       {
         level: "Intermediate",
         exercises: [
           {
             name: "Advanced Tuck Planche",
-            sets: "3-4",
+            sets: 4,
             duration: "10-12s",
             rest: "120s",
-            notes: "Slightly extend legs out from tuck position.",
+            notes: "Slightly extend legs out from tuck position."
           },
           {
             name: "Pseudo Planche Push-Ups",
-            sets: "3",
+            sets: 3,
             reps: "6-8",
             rest: "120s",
-            notes: "Lean forward as you push up, keep core tight.",
-          },
-        ],
+            notes: "Lean forward as you push up, keep core tight."
+          }
+        ]
       },
       {
         level: "Advanced",
         exercises: [
           {
             name: "Straddle Planche Hold",
-            sets: "4",
+            sets: 4,
             duration: "5-7s",
             rest: "180s",
-            notes: "Open legs to straddle position to reduce difficulty.",
+            notes: "Open legs to straddle position to reduce difficulty."
           },
           {
             name: "Planche Push-Ups",
-            sets: "3",
+            sets: 3,
             reps: "4-6",
             rest: "180s",
-            notes: "Push through scapular protraction, maintain straight arms.",
-          },
-        ],
-      },
-    ],
+            notes: "Push through scapular protraction, keep arms straight."
+          }
+        ]
+      }
+    ]
   },
   {
     id: 4,
     title: "Handstand",
     description: "Master balance and strength for a freestanding handstand.",
-    totalsets: "5-7",
-    totalexercises: "3",
-    totallevels: "3",
-    totaltime: "20",
+    totalsets: 7,
+    totalexercises: 3,
+    totallevels: 3,
+    totaltime: 20,
     levels: [
       {
         level: "Beginner",
         exercises: [
           {
             name: "Wall-Assisted Handstand (Back to Wall)",
-            sets: "3-4",
+            sets: 4,
             duration: "20-30s",
             rest: "90s",
-            notes: "Focus on alignment and straight arms.",
+            notes: "Focus on alignment and straight arms."
           },
           {
             name: "Wall Walks",
-            sets: "3",
+            sets: 3,
             reps: "4-5",
             rest: "90s",
-            notes: "Walk up the wall slowly and return under control.",
-          },
-        ],
+            notes: "Walk up the wall slowly and return under control."
+          }
+        ]
       },
       {
         level: "Intermediate",
         exercises: [
           {
             name: "Wall-Assisted Handstand (Face to Wall)",
-            sets: "4",
+            sets: 4,
             duration: "15-25s",
             rest: "120s",
-            notes: "Get as close to the wall as possible.",
+            notes: "Get as close to the wall as possible."
           },
           {
             name: "Freestanding Handstand Attempts",
-            sets: "3",
+            sets: 3,
             duration: "10-15s",
             rest: "120s",
-            notes: "Kick up and hold balance without support.",
-          },
-        ],
+            notes: "Kick up and hold balance without support."
+          }
+        ]
       },
       {
         level: "Advanced",
         exercises: [
           {
             name: "Handstand Hold",
-            sets: "4-5",
+            sets: 5,
             duration: "20-30s",
             rest: "180s",
-            notes: "Maintain perfect alignment and core tension.",
+            notes: "Maintain perfect alignment and core tension."
           },
           {
             name: "Handstand Push-Ups",
-            sets: "3",
+            sets: 3,
             reps: "4-6",
             rest: "180s",
-            notes: "Lower under control, keep a straight body line.",
-          },
-        ],
-      },
-    ],
+            notes: "Lower under control, keep a straight body line."
+          }
+        ]
+      }
+    ]
   },
+  {
+    id: 5,
+    title: "Back Lever",
+    description: "Develop strength and flexibility for the back lever.",
+    totalsets: 7,
+    totalexercises: 2,
+    totallevels: 3,
+    totaltime: 25,
+    levels: [
+      {
+        level: "Beginner",
+        exercises: [
+          {
+            name: "Tuck Back Lever",
+            sets: 4,
+            duration: "10-15s",
+            rest: "90s",
+            notes: "Tuck legs and maintain a straight line from shoulders to hips."
+          },
+          {
+            name: "Skin the Cat",
+            sets: 3,
+            reps: "3-5",
+            rest: "120s",
+            notes: "Control the rotation, avoid swinging."
+          }
+        ]
+      },
+      {
+        level: "Intermediate",
+        exercises: [
+          {
+            name: "Advanced Tuck Back Lever",
+            sets: 4,
+            duration: "8-12s",
+            rest: "120s",
+            notes: "Slightly extend legs from the tuck position."
+          },
+          {
+            name: "German Hang",
+            sets: 3,
+            duration: "10-20s",
+            rest: "90s",
+            notes: "Stretch shoulders and focus on scapular retraction."
+          }
+        ]
+      },
+      {
+        level: "Advanced",
+        exercises: [
+          {
+            name: "Straddle Back Lever",
+            sets: 4,
+            duration: "5-10s",
+            rest: "180s",
+            notes: "Open legs to straddle for balance."
+          },
+          {
+            name: "Full Back Lever",
+            sets: 3,
+            duration: "5-8s",
+            rest: "180s",
+            notes: "Hold a straight line from shoulders to toes."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: "Human Flag",
+    description: "Learn to hold the human flag through strength and technique.",
+    totalsets: 8,
+    totalexercises: 2,
+    totallevels: 3,
+    totaltime: 30,
+    levels: [
+      {
+        level: "Beginner",
+        exercises: [
+          {
+            name: "Vertical Flag Holds",
+            sets: 3,
+            duration: "10-20s",
+            rest: "90s",
+            notes: "Focus on alignment and grip strength."
+          },
+          {
+            name: "Side Plank",
+            sets: 3,
+            duration: "20-30s",
+            rest: "60s",
+            notes: "Strengthen obliques for better stability."
+          }
+        ]
+      },
+      {
+        level: "Intermediate",
+        exercises: [
+          {
+            name: "Tuck Flag Holds",
+            sets: 4,
+            duration: "8-12s",
+            rest: "120s",
+            notes: "Bring knees toward chest to reduce difficulty."
+          },
+          {
+            name: "Dynamic Side Raises",
+            sets: 3,
+            reps: "4-6",
+            rest: "90s",
+            notes: "Raise legs to the side while gripping the bar."
+          }
+        ]
+      },
+      {
+        level: "Advanced",
+        exercises: [
+          {
+            name: "Straddle Flag",
+            sets: 4,
+            duration: "5-10s",
+            rest: "180s",
+            notes: "Open legs to straddle for balance."
+          },
+          {
+            name: "Full Human Flag",
+            sets: 3,
+            duration: "5-8s",
+            rest: "180s",
+            notes: "Hold a straight line from head to toe."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: "L-Sit",
+    description: "Develop core and hip flexor strength for the L-Sit.",
+    totalsets: 6,
+    totalexercises: 2,
+    totallevels: 3,
+    totaltime: 20,
+    levels: [
+      {
+        level: "Beginner",
+        exercises: [
+          {
+            name: "Tuck L-Sit",
+            sets: 4,
+            duration: "10-20s",
+            rest: "60s",
+            notes: "Tuck knees to chest and keep arms locked."
+          },
+          {
+            name: "Hanging Knee Raises",
+            sets: 3,
+            reps: "8-10",
+            rest: "60s",
+            notes: "Control movement, avoid swinging."
+          }
+        ]
+      },
+      {
+        level: "Intermediate",
+        exercises: [
+          {
+            name: "Parallel Bar L-Sit",
+            sets: 4,
+            duration: "10-15s",
+            rest: "90s",
+            notes: "Keep legs straight and parallel to the ground."
+          },
+          {
+            name: "Hanging Leg Raises",
+            sets: 3,
+            reps: "8-10",
+            rest: "90s",
+            notes: "Engage core and avoid arching back."
+          }
+        ]
+      },
+      {
+        level: "Advanced",
+        exercises: [
+          {
+            name: "Ring L-Sit",
+            sets: 4,
+            duration: "10-15s",
+            rest: "120s",
+            notes: "Stabilize rings while maintaining L-Sit position."
+          },
+          {
+            name: "V-Sit",
+            sets: 3,
+            duration: "5-10s",
+            rest: "120s",
+            notes: "Lift legs higher than L-Sit, keeping straight form."
+          }
+        ]
+      }
+    ]
+  }
 ];
+
 
 const Workouts = ({ isDarkMode }) => {
   const navigation = useNavigation();

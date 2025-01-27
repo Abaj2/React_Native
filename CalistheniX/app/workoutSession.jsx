@@ -251,7 +251,7 @@ const WorkoutSession = () => {
       </View>
 
       <ScrollView style={tw`flex-1`}>
-        {/* Exercise Tabs */}
+      
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -268,20 +268,7 @@ const WorkoutSession = () => {
               <Text style={tw`text-white font-bold`}>{exercise.name}</Text>
             </TouchableOpacity>
           ))}
-          <View
-            style={[
-              tw`bg-orange-500 items-center self-center justify-center`,
-              {
-                width: width * 0.08,
-                height: height * 0.036,
-                borderRadius: (width * 0.1) / 2,
-              },
-            ]}
-          >
-            <TouchableOpacity>
-              <Ionicons name="add" color="white" size={25} />
-            </TouchableOpacity>
-          </View>
+         
         </ScrollView>
 
         <View style={tw`p-4`}>
@@ -375,7 +362,7 @@ const WorkoutSession = () => {
                 <TouchableOpacity
                   style={tw`p-2 rounded-lg bg-orange-500 ml-2`}
                   onPress={() => {
-                    // Start rest timer
+                   
                     Alert.alert("Rest Timer", "Start 90s rest timer?");
                   }}
                 >
@@ -394,7 +381,7 @@ const WorkoutSession = () => {
             </View>
           ))}
 
-          {/* Set Controls */}
+     
           <View style={tw`flex-row justify-between mb-4`}>
             <TouchableOpacity
               style={tw`bg-gray-800 p-4 rounded-lg flex-1 mr-2`}

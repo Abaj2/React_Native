@@ -68,6 +68,9 @@ const SettingsMain = () => {
   return (
     <SafeAreaView style={tw`flex-1 bg-black`}>
       <View style={tw`mt-5 bg-black flex-1`}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons style={tw`ml-5 mb-5`} name="arrow-back" size={28} color="white" />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => setIsAppearanceModalVisible(true)}>
           <SettingsCard
             iconName={"color-palette-outline"}

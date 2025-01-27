@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -28,6 +28,28 @@ const CustomWorkout = () => {
   const [workoutSummary, setWorkoutSummary] = useState([]);
   const [currentExercise, setCurrentExercise] = useState(0);
   const [newWorkoutSummary, setNewWorkoutSummary] = useState("");
+  const [timer, setTimer] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(true);
+
+  useEffect(() => {
+    let intervalId;
+    if (timerRunning) {
+      intervalId = setInterval(() => {
+        setTimer((prevTimer) => prevTimer + 1);
+      }, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [timerRunning]);
+
+
+  const formatTimer = (totalSeconds) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   const addExercise = () => {
     if (newWorkoutSummary.trim()) {
@@ -96,10 +118,14 @@ const CustomWorkout = () => {
       const storedUserData = await AsyncStorage.getItem("userData");
       const parsedUserData = JSON.parse(storedUserData);
       const user_id = parsedUserData.user_id;
+
       if (!title) {
         Alert.alert("Enter a title");
         return;
       }
+
+    
+      setTimerRunning(false);
 
       const response = await axios.post(
         SERVER_URL,
@@ -107,6 +133,7 @@ const CustomWorkout = () => {
           workoutSummary,
           title,
           user_id,
+          duration: formatTimer(timer),
         },
         {
           headers: {
@@ -114,14 +141,15 @@ const CustomWorkout = () => {
           },
         }
       );
+
       if (response.status === 200) {
         console.log("Sent data to backend");
       }
       navigation.navigate("Home");
 
       setTimeout(() => {
-     Alert.alert("Successfully completed workout")
-    }, 750);
+        Alert.alert("Successfully completed workout");
+      }, 750);
     } catch (err) {
       console.error("Error:", err);
     }
@@ -132,7 +160,7 @@ const CustomWorkout = () => {
       <View style={tw`px-4 py-2 border-b border-gray-800`}>
         <View style={tw`flex-row justify-between items-center`}>
           <TouchableOpacity style={tw`p-2`} onPress={cancelWorkout}>
-            <Text style={tw`text-white text-xl`}>×</Text>
+            <Text style={tw`text-white text-xl`}></Text>
           </TouchableOpacity>
           <TextInput
             style={tw`text-white font-bold text-lg text-center flex-1 mx-4`}
@@ -202,7 +230,6 @@ const CustomWorkout = () => {
                   Set {setIndex + 1}
                 </Text>
 
- 
                 <View style={tw`flex-row mb-3`}>
                   <TouchableOpacity
                     style={tw`flex-1 p-2 ${

@@ -475,14 +475,14 @@ app.post("/deleteskill", verifyToken, async (req, res) => {
 });
 
 app.post("/postcustomworkout", verifyToken, async (req, res) => {
-  const { workoutSummary, title, user_id } = req.body;
+  const { workoutSummary, title, user_id, duration } = req.body;
   console.log(JSON.stringify(workoutSummary), title, user_id);
   const level = "Custom";
 
   try {
     const addWorkout = await pool.query(
-      `INSERT INTO workouts(user_id, title, custom, level) values($1, $2, $3, $4) RETURNING workout_id`,
-      [user_id, title.trim(), true, level]
+      `INSERT INTO workouts(user_id, title, custom, level, duration) values($1, $2, $3, $4, $5) RETURNING workout_id`,
+      [user_id, title.trim(), true, level, duration]
     );
     console.log(`Number of rows affected: ${addWorkout.rowCount}`);
     const workout_id = addWorkout.rows[0].workout_id;
@@ -561,10 +561,16 @@ app.get("/getstats", verifyToken, async (req, res) => {
     const totalSkills = await pool.query(`SELECT id FROM skills WHERE user_id = $1`,
       [user_id]
     )
+
+    const totalDuration = await pool.query(`SELECT duration FROM workouts WHERE user_id = $1`,
+      [user_id]
+    )
+    console.log(totalDuration)
     
     const stats = {
       totalWorkouts: totalWorkouts.rows.length,
-      totalSkills: totalSkills.rows.length
+      totalSkills: totalSkills.rows.length,
+      totalDuration: totalDuration.rows,
     };
 
     res.status(200).json({ stats })

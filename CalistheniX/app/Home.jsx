@@ -181,7 +181,6 @@ const Home = () => {
   }
 
   if (!userData) {
-    // If user data is not available, display fallback info
     const email = routeEmail || "No email";
     const username = routeUsername || "Unknown";
     const user_id = routeUser_id || "Unknown";
@@ -244,7 +243,7 @@ const Home = () => {
   };
   const handleScroll = (event) => {
     const offsetY = event.nativeEvent.contentOffset.y;
-    const maxOffset = 100; // Adjust based on how quickly you want the blur to disappear
+    const maxOffset = 100
     const newOpacity = Math.max(0, 1 - offsetY / maxOffset);
     setBlurOpacity(newOpacity);
   };

@@ -37,7 +37,7 @@ const ProfileScreen = () => {
   const [profilePic, setProfilePic] = useState(null);
   const [stats, setStats] = useState({
     totalWorkouts: 0,
-    totalSkills: 0
+    totalSkills: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -74,8 +74,10 @@ const ProfileScreen = () => {
       if (response.status === 200 && response.data.stats) {
         setStats({
           totalWorkouts: response.data.stats.totalWorkouts || 0,
-          totalSkills: response.data.stats.totalSkills || 0
+          totalSkills: response.data.stats.totalSkills || 0,
+          totalDuration: response.data.stats.totalDuration || 0,
         });
+        console.log(response.data.stats.totalDuration)
       }
     } catch (error) {
       console.error("Error getting stats:", error);
@@ -181,6 +183,35 @@ const ProfileScreen = () => {
     }
   };
 
+  const calculateTotalDuration = (durations) => {
+    if (!durations || !Array.isArray(durations)) {
+      return "00:00:00"
+    }
+  
+    const durationToSeconds = (duration) => {
+      if (!duration) return 0;
+      const [hours, minutes, seconds] = duration.split(":").map(Number);
+      return hours * 3600 + minutes * 60 + seconds;
+    };
+  
+    const totalSeconds = durations
+      .map((item) => durationToSeconds(item.duration))
+      .reduce((acc, curr) => acc + curr, 0);
+  
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+  
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}:${String(seconds).padStart(2, "0")}`;
+  };
+
+  const totalDuration = calculateTotalDuration(stats.totalDuration);
+  console.log(totalDuration);
+  
+
   return (
     <View style={tw`flex-1 bg-black`}>
       <View
@@ -216,15 +247,19 @@ const ProfileScreen = () => {
 
       <View style={tw`flex-row justify-around p-7`}>
         <View style={tw`items-center`}>
-          <Text style={tw`text-white text-2xl font-bold`}>{stats?.totalWorkouts ? `${stats.totalWorkouts}` : "None"}</Text>
+          <Text style={tw`text-white text-2xl font-bold`}>
+            {stats?.totalWorkouts ? `${stats.totalWorkouts}` : "None"}
+          </Text>
           <Text style={tw`text-gray-400`}>Total Workouts</Text>
         </View>
         <View style={tw`items-center`}>
-          <Text style={tw`text-white text-2xl font-bold`}>124 hrs</Text>
+          <Text style={tw`text-white text-2xl font-bold`}>{totalDuration}</Text>
           <Text style={tw`text-gray-400`}>Training Time</Text>
         </View>
         <View style={tw`items-center`}>
-          <Text style={tw`text-white text-2xl font-bold`}>{stats?.totalSkills ? `${stats.totalSkills}` : "None"}</Text>
+          <Text style={tw`text-white text-2xl font-bold`}>
+            {stats?.totalSkills ? `${stats.totalSkills}` : "None"}
+          </Text>
           <Text style={tw`text-gray-400`}>Total Skills</Text>
         </View>
       </View>

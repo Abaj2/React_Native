@@ -390,8 +390,8 @@ const Skill = ({ skillData, loadUserData, isDarkMode, colourTheme }) => {
           </Svg>
           <Text
             style={[
-              tw`absolute text-sm font-bold`,
-              { color: isDarkMode ? "white" : "black" },
+              tw`text-[${themeColors.text}] absolute text-sm font-bold`,
+              {},
             ]}
           >
             {Math.round((current / goal) * 100)}%
@@ -683,7 +683,7 @@ const Skill = ({ skillData, loadUserData, isDarkMode, colourTheme }) => {
             </SafeAreaView>
           </Modal>
 
-          {/* Edit Modal */}
+      
           <Modal
             transparent={true}
             visible={editModalVisible}

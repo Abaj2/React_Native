@@ -160,7 +160,7 @@ const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) =
                 </View>
               </View>
 
-              {/* Skill Level */}
+  
               <View style={tw`flex-row items-center mb-4`}>
                 <Icon
                   name="account-star-outline"
@@ -177,7 +177,7 @@ const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) =
                 </Text>
               </View>
 
-              {/* Workout Stats */}
+     
               <View style={tw`flex-row justify-between items-center mb-4`}>
                 <View style={tw`flex-row items-center`}>
                   <Icon
@@ -253,7 +253,7 @@ const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) =
                           },
                         ]}
                       >
-                        {/* Exercise Header */}
+                   
                         <View style={tw`flex-row items-center mb-3`}>
                           <Icon
                             name="run-fast"
@@ -270,7 +270,6 @@ const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) =
                           </Text>
                         </View>
 
-                        {/* Exercise Sets */}
                         {setsData
                           .filter(
                             (set) =>
@@ -311,7 +310,7 @@ const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) =
                                 </Text>
                               </View>
 
-                              {/* Badge for Reps or Duration */}
+                      
                               <View
                                 style={[
                                   tw`px-3 py-1 rounded-full`,
@@ -331,7 +330,7 @@ const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) =
                                 </Text>
                               </View>
 
-                              {/* Icons for Set Type */}
+                    
                               <Icon
                                 name={
                                   set.duration ? "timer-outline" : "dumbbell"
