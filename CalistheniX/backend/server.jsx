@@ -2,7 +2,7 @@ const express = require("express");
 const { OAuth2Client } = require("google-auth-library");
 const { Pool } = require("pg");
 const cors = require("cors");
-const multer = require('multer');
+const multer = require("multer");
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
@@ -13,7 +13,7 @@ const postgresPassword = process.env.PASSWORD;
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
 app.use(cors());
 
 const pool = new Pool({
@@ -405,11 +405,16 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
     console.log(workoutSummary.title);
     console.log(workoutSummary.level);
     console.log(workoutSummary.date);
-    console.log(workoutSummary.duration)
+    console.log(workoutSummary.duration);
 
     const addWorkout = await pool.query(
       `INSERT INTO workouts(user_id, title, level, duration) VALUES($1, $2, $3, $4) RETURNING workout_id`,
-      [user_id, workoutSummary.title, workoutSummary.level, workoutSummary.duration]
+      [
+        user_id,
+        workoutSummary.title,
+        workoutSummary.level,
+        workoutSummary.duration,
+      ]
     );
     console.log(`Number of rows affected: ${addWorkout.rowCount}`);
     const workout_id = addWorkout.rows[0].workout_id;
@@ -522,65 +527,105 @@ app.post("/postcustomworkout", verifyToken, async (req, res) => {
   }
 });
 
-app.post(
-  "/profilepicture",
-  async (req, res) => {
+app.post("/profilepicture", async (req, res) => {
+  const { profile_pic, username } = req.body;
 
-    const { profile_pic, username } = req.body;
-
-    if (!profile_pic) {
-      return res.status(400).send({ message: 'No file uploaded.' });
-    }
-
-    const imageBuffer = Buffer.from(profile_pic, 'base64');
-
-    try {
-      const query = `UPDATE users SET profile_pic = $1 WHERE username = $2`;
-      const values = [imageBuffer, username];
-
-      await pool.query(query, values);
-      res.send({ message: 'Profile picture uploaded successfully' });
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      res.status(500).send({ message: 'Failed to upload profile picture. '});
-    }
+  if (!profile_pic) {
+    return res.status(400).send({ message: "No file uploaded." });
   }
-);
+
+  const imageBuffer = Buffer.from(profile_pic, "base64");
+
+  try {
+    const query = `UPDATE users SET profile_pic = $1 WHERE username = $2`;
+    const values = [imageBuffer, username];
+
+    await pool.query(query, values);
+    res.send({ message: "Profile picture uploaded successfully" });
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    res.status(500).send({ message: "Failed to upload profile picture. " });
+  }
+});
 
 app.get("/getstats", verifyToken, async (req, res) => {
-  const { user_id } = req.query
-  
+  const { user_id } = req.query;
+
   if (!user_id) {
     return res.status(400).json({ message: "Missing user_id parameter." });
   }
 
   try {
-    const totalWorkouts = await pool.query(`SELECT workout_id FROM workouts WHERE user_id = $1`,
+    const totalWorkouts = await pool.query(
+      `SELECT workout_id FROM workouts WHERE user_id = $1`,
       [user_id]
-    )
-    const totalSkills = await pool.query(`SELECT id FROM skills WHERE user_id = $1`,
+    );
+    const totalSkills = await pool.query(
+      `SELECT id FROM skills WHERE user_id = $1`,
       [user_id]
-    )
+    );
 
-    const totalDuration = await pool.query(`SELECT duration FROM workouts WHERE user_id = $1`,
+    const totalDuration = await pool.query(
+      `SELECT duration FROM workouts WHERE user_id = $1`,
       [user_id]
-    )
-    console.log(totalDuration)
-    
+    );
+    console.log(totalDuration);
+
     const stats = {
       totalWorkouts: totalWorkouts.rows.length,
       totalSkills: totalSkills.rows.length,
       totalDuration: totalDuration.rows,
     };
 
-    res.status(200).json({ stats })
-    
-
+    res.status(200).json({ stats });
   } catch (error) {
-    console.error('Error getting stats:', error);
-    res.status(500).send({ message: 'Failed to get data' })
+    console.error("Error getting stats:", error);
+    res.status(500).send({ message: "Failed to get data" });
   }
-})
+});
+
+app.get("/getduration", verifyToken, async (req, res) => {
+  const { user_id } = req.query;
+
+  if (!user_id) {
+    return res.status(400).json({ message: "Missing user_id parameter." });
+  }
+
+  try {
+    const thisWeekDuration = await pool.query(
+      `SELECT EXTRACT(EPOCH FROM SUM(duration::interval)) AS total_duration_seconds
+FROM workouts
+WHERE date >= date_trunc('week', NOW()) AND date < date_trunc('week', NOW()) + INTERVAL '7 days' AND user_id = $1;
+`,
+      [user_id]
+    );
+
+    const lastWeekDuration = await pool.query(
+      `SELECT EXTRACT(EPOCH FROM SUM(duration::interval)) AS total_duration_seconds
+       FROM workouts
+       WHERE date >= date_trunc('week', NOW()) - INTERVAL '7 days'
+       AND date < date_trunc('week', NOW()) 
+       AND user_id = $1`,
+      [user_id]
+    );
+
+    const getCustomWorkouts = await pool.query(
+      `SELECT title FROM workouts WHERE custom = true AND user_id = $1`,
+      [user_id]
+    )
+    const getCustomWorkoutsLength = getCustomWorkouts.rows.length;
+
+
+    res.status(200).json({
+      thisWeekDuration: thisWeekDuration.rows[0],
+      lastWeekDuration: lastWeekDuration.rows[0],
+      routineLength: getCustomWorkoutsLength,
+    });
+  } catch (error) {
+    console.error("Error getting this week's duration:", error);
+    res.status(500).send({ message: "Failed to get data" });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

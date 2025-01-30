@@ -87,18 +87,27 @@ const WorkoutSession = () => {
   };
 
   const [exerciseData, setExerciseData] = useState(
-    exercises2.map((exercise) => ({
-      sets: Array(parseInt(exercise.sets[0]))
-        .fill(null)
-        .map(() => ({
+    exercises2.map((exercise) => {
+
+      const setsCount = typeof exercise.sets === 'string' 
+        ? parseInt(exercise.sets.replace(/\D/g, ''), 10) 
+        : exercise.sets;
+  
+  
+      const validSetsCount = Number.isInteger(setsCount) && setsCount > 0 
+        ? setsCount 
+        : 1;
+  
+      return {
+        sets: Array(validSetsCount).fill(null).map(() => ({
           completed: false,
           reps: "",
           duration: "",
           notes: "",
-        })),
-    }))
+        }))
+      };
+    })
   );
-
   const [currentExercise, setCurrentExercise] = useState(0);
   const [timer, setTimer] = useState(null);
 
