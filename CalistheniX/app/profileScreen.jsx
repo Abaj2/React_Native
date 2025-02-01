@@ -17,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import axios from "axios";
 import blackDefaultProfilePic from "../assets/images/blackDefaultProfilePic.png";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width, height } = Dimensions.get("window");
 
@@ -77,7 +78,7 @@ const ProfileScreen = () => {
           totalSkills: response.data.stats.totalSkills || 0,
           totalDuration: response.data.stats.totalDuration || 0,
         });
-        console.log(response.data.stats.totalDuration)
+        console.log(response.data.stats.totalDuration);
       }
     } catch (error) {
       console.error("Error getting stats:", error);
@@ -185,23 +186,23 @@ const ProfileScreen = () => {
 
   const calculateTotalDuration = (durations) => {
     if (!durations || !Array.isArray(durations)) {
-      return "00:00:00"
+      return "00:00:00";
     }
-  
+
     const durationToSeconds = (duration) => {
       if (!duration) return 0;
       const [hours, minutes, seconds] = duration.split(":").map(Number);
       return hours * 3600 + minutes * 60 + seconds;
     };
-  
+
     const totalSeconds = durations
       .map((item) => durationToSeconds(item.duration))
       .reduce((acc, curr) => acc + curr, 0);
-  
+
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-  
+
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
       2,
       "0"
@@ -210,84 +211,98 @@ const ProfileScreen = () => {
 
   const totalDuration = calculateTotalDuration(stats.totalDuration);
   console.log(totalDuration);
-  
 
   return (
-    <View style={tw`flex-1 bg-black`}>
-      <View
-        style={tw`bg-zinc-900 border-2 border-b-orange-500 border-r-orange-500 border-l-orange-500 rounded-b-3xl pt-20 pb-5`}
-      >
-        <View style={tw`flex-row items-center px-5`}>
-          <TouchableOpacity onPress={handleChangeProfilePicture}>
-            <View style={tw`relative`}>
-              <Image
-                source={
-                  profilePic ? { uri: profilePic } : blackDefaultProfilePic
-                }
-                style={tw`w-24 h-24 rounded-full`}
-              />
-              <View
-                style={tw`absolute bottom-0 right-0 bg-white p-2 rounded-full`}
-              >
-                <Text style={tw`text-orange-500 text-xs font-bold`}>Edit</Text>
+    <LinearGradient
+      colors={["#000", "#1a1a1a"]}
+      style={tw`flex-1`}
+    >
+      <View style={tw`flex-1`}>
+       
+        <LinearGradient
+          colors={["#1f2937", "#111827"]}
+          style={tw`rounded-b-3xl pb-6 shadow-lg`}
+        >
+          <View style={tw`pt-20 px-5`}>
+            <View style={tw`flex-row items-center`}>
+              <TouchableOpacity onPress={handleChangeProfilePicture}>
+                <View style={tw`relative`}>
+                  <Image
+                    source={
+                      profilePic ? { uri: profilePic } : blackDefaultProfilePic
+                    }
+                    style={tw`w-24 h-24 rounded-full border-4 border-orange-500`}
+                  />
+                  <View
+                    style={tw`absolute bottom-0 right-0 bg-orange-500 p-2 rounded-full shadow-lg`}
+                  >
+                    <Icon name="edit" size={16} color="white" />
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              <View style={tw`ml-4`}>
+                <Text style={tw`text-white text-2xl font-bold`}>
+                  {userData ? userData.username : "Loading..."}
+                </Text>
+                <Text style={tw`text-gray-300`}>
+                  {userData ? userData.email : "Loading..."}
+                </Text>
               </View>
             </View>
+          </View>
+        </LinearGradient>
+
+
+        <View
+          style={tw`flex-row justify-around p-7 bg-zinc-900 mx-5 my-6 rounded-xl shadow-lg`}
+        >
+          <View style={tw`items-center`}>
+            <Text style={tw`text-white text-2xl font-bold`}>
+              {stats?.totalWorkouts ? `${stats.totalWorkouts}` : "None"}
+            </Text>
+            <Text style={tw`text-gray-400 text-sm`}>Total Workouts</Text>
+          </View>
+          <View style={tw`items-center`}>
+            <Text style={tw`text-white text-2xl font-bold`}>
+              {totalDuration}
+            </Text>
+            <Text style={tw`text-gray-400 text-sm`}>Training Time</Text>
+          </View>
+          <View style={tw`items-center`}>
+            <Text style={tw`text-white text-2xl font-bold`}>
+              {stats?.totalSkills ? `${stats.totalSkills}` : "None"}
+            </Text>
+            <Text style={tw`text-gray-400 text-sm`}>Total Skills</Text>
+          </View>
+        </View>
+
+   
+        <View style={tw`px-5 mt-2`}>
+          <TouchableOpacity
+            style={tw`flex-row items-center justify-between bg-zinc-900 p-4 rounded-lg mb-4 shadow-lg`}
+            onPress={() => navigation.navigate("Settings-Main")}
+          >
+            <View style={tw`flex-row items-center`}>
+              <Icon name="settings" size={24} color="orange" />
+              <Text style={tw`text-white ml-4 text-base`}>App Settings</Text>
+            </View>
+            <Ionicons name="chevron-forward" color="orange" size={24} />
           </TouchableOpacity>
 
-          <View style={tw`ml-4`}>
-            <Text style={tw`text-white text-2xl font-bold`}>
-              {userData ? userData.username : "Loading..."}
-            </Text>
-            <Text style={tw`text-gray-200`}>
-              {userData ? userData.email : "Loading..."}
-            </Text>
-          </View>
+          <TouchableOpacity
+            style={tw`flex-row items-center justify-between bg-zinc-900 p-4 rounded-lg shadow-lg`}
+            onPress={handleLogout}
+          >
+            <View style={tw`flex-row items-center`}>
+              <Ionicons name="exit-outline" size={24} color="orange" />
+              <Text style={tw`text-white ml-4 text-base`}>Logout</Text>
+            </View>
+            <Ionicons name="chevron-forward" color="orange" size={24} />
+          </TouchableOpacity>
         </View>
       </View>
-
-      <View style={tw`flex-row justify-around p-7`}>
-        <View style={tw`items-center`}>
-          <Text style={tw`text-white text-2xl font-bold`}>
-            {stats?.totalWorkouts ? `${stats.totalWorkouts}` : "None"}
-          </Text>
-          <Text style={tw`text-gray-400`}>Total Workouts</Text>
-        </View>
-        <View style={tw`items-center`}>
-          <Text style={tw`text-white text-2xl font-bold`}>{totalDuration}</Text>
-          <Text style={tw`text-gray-400`}>Training Time</Text>
-        </View>
-        <View style={tw`items-center`}>
-          <Text style={tw`text-white text-2xl font-bold`}>
-            {stats?.totalSkills ? `${stats.totalSkills}` : "None"}
-          </Text>
-          <Text style={tw`text-gray-400`}>Total Skills</Text>
-        </View>
-      </View>
-
-      <View style={tw`px-5 mt-2`}>
-        <TouchableOpacity
-          style={tw`flex-row items-center justify-between bg-zinc-900 p-4 rounded-lg mb-4`}
-          onPress={() => navigation.navigate("Settings-Main")}
-        >
-          <View style={tw`flex-row items-center`}>
-            <Icon name="settings" size={24} color="orange" />
-            <Text style={tw`text-white ml-4 text-base`}>App Settings</Text>
-          </View>
-          <Ionicons name="chevron-forward" color="orange" size={24} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={tw`flex-row items-center justify-between bg-zinc-900 p-4 rounded-lg`}
-          onPress={handleLogout}
-        >
-          <View style={tw`flex-row items-center`}>
-            <Ionicons name="exit-outline" size={24} color="orange" />
-            <Text style={tw`text-white ml-4 text-base`}>Logout</Text>
-          </View>
-          <Ionicons name="chevron-forward" color="orange" size={24} />
-        </TouchableOpacity>
-      </View>
-    </View>
+    </LinearGradient>
   );
 };
 

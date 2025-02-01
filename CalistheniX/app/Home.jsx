@@ -301,7 +301,7 @@ const Home = () => {
           </View>
 
           {/* Enhanced Tab Navigation */}
-          <View style={tw`mx-5 my-6 bg-transparent`}>
+          <View style={tw`mx-5 mt-6 bg-transparent`}>
             <View style={tw`flex-row justify-between bg-transparent rounded-xl p-1 ${isDarkMode ? 'bg-gray-800/30' : 'bg-gray-200/50'}`}>
               {["Tab1", "Tab4"].map((tab) => (
                 <TouchableOpacity
@@ -432,10 +432,11 @@ const Home = () => {
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
             style={[
-              tw`absolute right-5 bottom-8 w-14 h-14 rounded-full items-center justify-center`,
+              tw`absolute self-center w-14 h-14 rounded-full items-center justify-center`,
               isDarkMode ? tw`bg-orange-500` : tw`bg-blue-500`,
               {
-                shadowColor: "#000",
+                top: height - 180,
+                shadowColor: "white",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
                 shadowRadius: 6,

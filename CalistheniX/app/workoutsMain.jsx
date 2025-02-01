@@ -144,8 +144,8 @@ const WorkoutsMain = () => {
                   style={tw`mt-2`}
                 />
               </LinearGradient>
-
-              <View style={tw`bg-zinc-900 p-4 rounded-2xl w-[48%]`}>
+              <LinearGradient colors={["#1a1a1a", "#000000"]} style={tw`p-4 rounded-2xl w-[48%]`}>
+              <View style={tw``}>
                 <Text style={tw`text-orange-500 text-xs font-bold mb-1`}>
                   This Week
                 </Text>
@@ -175,6 +175,7 @@ const WorkoutsMain = () => {
                   )}
                 </View>
               </View>
+              </LinearGradient>
             </View>
           </View>
      
@@ -190,9 +191,9 @@ const WorkoutsMain = () => {
               </TouchableOpacity>
             </View>
 
-          
+            <LinearGradient colors={["#1a1a1a", "#000000"]} style={tw`rounded-3xl p-6`}>
             <TouchableOpacity
-              style={tw`bg-zinc-900 rounded-3xl p-4`}
+              style={tw``}
               activeOpacity={0.9}
             >
               <View style={tw`flex-row justify-between items-start mb-4`}>
@@ -219,6 +220,7 @@ const WorkoutsMain = () => {
                 </Text>
               </TouchableOpacity>
             </TouchableOpacity>
+            </LinearGradient>
           </View>
 
           <View style={tw`px-5`}>

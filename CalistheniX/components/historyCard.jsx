@@ -13,6 +13,7 @@ import {
 import tw from "twrnc";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 const GET_WORKOUTS_URL = Platform.select({
@@ -21,7 +22,12 @@ const GET_WORKOUTS_URL = Platform.select({
   ios: "http://192.168.1.155:4005/getworkouts",
 });
 
-const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) => {
+const HistoryCard = ({
+  isDarkMode,
+  onDataChange,
+  filteredWorkouts,
+  isCustom,
+}) => {
   const [workoutsData, setWorkoutsData] = useState([]);
   const [exercisesData, setExercisesData] = useState({});
   const [setsData, setSetsData] = useState({});
@@ -82,7 +88,7 @@ const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) =
       case "advanced":
         return "red";
       case "custom":
-        return "green"
+        return "green";
       default:
         return "gray";
     }
@@ -109,8 +115,9 @@ const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) =
     return { totalExercises, totalSets, totalReps };
   };
 
-  const displayedWorkouts = (filteredWorkouts || workoutsData).filter(workout => isCustom ? workout.custom : !workout.custom);
-  console.log("Displaying workouts:", displayedWorkouts);
+  const displayedWorkouts = (filteredWorkouts || workoutsData).filter(
+    (workout) => (isCustom ? workout.custom : !workout.custom)
+  );
 
   return (
     <SafeAreaView style={tw`flex-1 bg-${isDarkMode ? "" : ""}`}>
@@ -125,227 +132,228 @@ const HistoryCard = ({ isDarkMode, onDataChange, filteredWorkouts, isCustom }) =
           });
 
           return (
-            <View
+            <LinearGradient
+              colors={["#1a1a1a", "#000000"]}
               key={workout.workout_id}
               style={[
-                tw`rounded-3xl p-5 mb-5 shadow-xl border-l-4 border-l-orange-500`,
+                tw`rounded-3xl  p-5 mb-5 shadow-xl border-l-4 border-l-orange-500`,
                 {
-                  backgroundColor: isDarkMode ? "#18181b" : "#ffffff",
                   width: width * 0.9,
                   alignSelf: "center",
                 },
               ]}
             >
-              <View style={tw`flex-row justify-between items-center mb-4`}>
-                <View style={tw`flex-row items-center`}>
+              <View>
+                <View style={tw`flex-row justify-between items-center mb-4`}>
+                  <View style={tw`flex-row items-center`}>
+                    <Icon
+                      name="calendar-outline"
+                      size={20}
+                      color="#f97316"
+                      style={tw`mr-2`}
+                    />
+                    <Text
+                      style={tw`text-${
+                        isDarkMode ? "white" : "gray-800"
+                      } font-bold text-lg`}
+                    >
+                      {workout.title}
+                    </Text>
+                  </View>
+                  <View style={tw`flex-row items-center`}>
+                    <Text style={tw`text-gray-400 text-sm mr-2`}>
+                      {formatDate(workout.date)}
+                    </Text>
+                    <Icon name="clock-outline" size={16} color="#9ca3af" />
+                  </View>
+                </View>
+
+                <View style={tw`flex-row items-center mb-4`}>
                   <Icon
-                    name="calendar-outline"
-                    size={20}
-                    color="#f97316"
+                    name="account-star-outline"
+                    size={16}
+                    color={getLevelColor(workout.level)}
                     style={tw`mr-2`}
                   />
                   <Text
-                    style={tw`text-${
-                      isDarkMode ? "white" : "gray-800"
-                    } font-bold text-lg`}
+                    style={tw`text-${getLevelColor(
+                      workout.level
+                    )}-500 text-sm font-medium`}
                   >
-                    {workout.title}
+                    {workout.level}
                   </Text>
                 </View>
-                <View style={tw`flex-row items-center`}>
-                  <Text style={tw`text-gray-400 text-sm mr-2`}>
-                    {formatDate(workout.date)}
-                  </Text>
-                  <Icon name="clock-outline" size={16} color="#9ca3af" />
-                </View>
-              </View>
 
-  
-              <View style={tw`flex-row items-center mb-4`}>
-                <Icon
-                  name="account-star-outline"
-                  size={16}
-                  color={getLevelColor(workout.level)}
-                  style={tw`mr-2`}
-                />
-                <Text
-                  style={tw`text-${getLevelColor(
-                    workout.level
-                  )}-500 text-sm font-medium`}
+                <View style={tw`flex-row justify-between items-center mb-4`}>
+                  <View style={tw`flex-row items-center`}>
+                    <Icon
+                      name="dumbbell"
+                      size={16}
+                      color="#f97316"
+                      style={tw`mr-1`}
+                    />
+                    <Text style={tw`text-gray-400 text-sm`}>
+                      {stats.totalExercises} exercises
+                    </Text>
+                  </View>
+                  <View style={tw`flex-row items-center`}>
+                    <Icon
+                      name="target"
+                      size={16}
+                      color="#f97316"
+                      style={tw`mr-1`}
+                    />
+                    <Text style={tw`text-gray-400 text-sm`}>
+                      {stats.totalSets} sets
+                    </Text>
+                  </View>
+                  <View style={tw`flex-row items-center`}>
+                    <Icon
+                      name="fire"
+                      size={16}
+                      color="#f97316"
+                      style={tw`mr-1`}
+                    />
+                    <Text style={tw`text-gray-400 text-sm`}>
+                      {stats.totalReps} reps
+                    </Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => toggleExpandWorkout(workout.workout_id)}
+                  style={tw`bg-orange-500 rounded-xl py-3 px-4`}
                 >
-                  {workout.level}
-                </Text>
-              </View>
+                  <View style={tw`flex-row justify-center items-center`}>
+                    <Text style={tw`text-white font-medium mr-2`}>
+                      {expandedWorkouts.includes(workout.workout_id)
+                        ? "Hide Details"
+                        : "Show Details"}
+                    </Text>
+                    <Animated.View
+                      style={{ transform: [{ rotate: rotateAnimation }] }}
+                    >
+                      <Icon name="chevron-down" size={20} color="white" />
+                    </Animated.View>
+                  </View>
+                </TouchableOpacity>
 
-     
-              <View style={tw`flex-row justify-between items-center mb-4`}>
-                <View style={tw`flex-row items-center`}>
-                  <Icon
-                    name="dumbbell"
-                    size={16}
-                    color="#f97316"
-                    style={tw`mr-1`}
-                  />
-                  <Text style={tw`text-gray-400 text-sm`}>
-                    {stats.totalExercises} exercises
-                  </Text>
-                </View>
-                <View style={tw`flex-row items-center`}>
-                  <Icon
-                    name="target"
-                    size={16}
-                    color="#f97316"
-                    style={tw`mr-1`}
-                  />
-                  <Text style={tw`text-gray-400 text-sm`}>
-                    {stats.totalSets} sets
-                  </Text>
-                </View>
-                <View style={tw`flex-row items-center`}>
-                  <Icon
-                    name="fire"
-                    size={16}
-                    color="#f97316"
-                    style={tw`mr-1`}
-                  />
-                  <Text style={tw`text-gray-400 text-sm`}>
-                    {stats.totalReps} reps
-                  </Text>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => toggleExpandWorkout(workout.workout_id)}
-                style={tw`bg-orange-500 rounded-xl py-3 px-4`}
-              >
-                <View style={tw`flex-row justify-center items-center`}>
-                  <Text style={tw`text-white font-medium mr-2`}>
-                    {expandedWorkouts.includes(workout.workout_id)
-                      ? "Hide Details"
-                      : "Show Details"}
-                  </Text>
-                  <Animated.View
-                    style={{ transform: [{ rotate: rotateAnimation }] }}
-                  >
-                    <Icon name="chevron-down" size={20} color="white" />
-                  </Animated.View>
-                </View>
-              </TouchableOpacity>
-
-              {expandedWorkouts.includes(workout.workout_id) && (
-                <>
-                  {exercisesData
-                    .filter(
-                      (exercise) => exercise.workout_id === workout.workout_id
-                    )
-                    .map((exercise) => (
-                      <View
-                        key={exercise.exercise_id}
-                        style={[
-                          tw`rounded-xl p-4 mt-4`,
-                          {
-                            backgroundColor: isDarkMode ? "#303030" : "#f8f8f8",
-                            shadowColor: "#000",
-                            shadowOpacity: 0.1,
-                            shadowRadius: 5,
-                            shadowOffset: { width: 0, height: 2 },
-                            elevation: 3,
-                          },
-                        ]}
-                      >
-                   
-                        <View style={tw`flex-row items-center mb-3`}>
-                          <Icon
-                            name="run-fast"
-                            size={24}
-                            color="#f97316"
-                            style={tw`mr-3`}
-                          />
-                          <Text
-                            style={tw`text-${
-                              isDarkMode ? "white" : "gray-800"
-                            } font-bold text-lg`}
-                          >
-                            {exercise.name}
-                          </Text>
-                        </View>
-
-                        {setsData
-                          .filter(
-                            (set) =>
-                              set.workout_id === workout.workout_id &&
-                              set.exercise_id === exercise.exercise_id
-                          )
-                          .map((set, index) => (
-                            <View
-                              key={index}
-                              style={[
-                                tw`flex-row items-center justify-between rounded-lg p-4 mb-2`,
-                                {
-                                  backgroundColor: isDarkMode
-                                    ? "#2a2a2a"
-                                    : "#ffffff",
-                                  shadowColor: "#000",
-                                  shadowOpacity: 0.05,
-                                  shadowRadius: 4,
-                                  shadowOffset: { width: 0, height: 1 },
-                                  elevation: 2,
-                                },
-                              ]}
+                {expandedWorkouts.includes(workout.workout_id) && (
+                  <>
+                    {exercisesData
+                      .filter(
+                        (exercise) => exercise.workout_id === workout.workout_id
+                      )
+                      .map((exercise) => (
+                        <View
+                          key={exercise.exercise_id}
+                          style={[
+                            tw`rounded-xl p-4 mt-4`,
+                            {
+                              backgroundColor: isDarkMode
+                                ? "#303030"
+                                : "#f8f8f8",
+                              shadowColor: "#000",
+                              shadowOpacity: 0.1,
+                              shadowRadius: 5,
+                              shadowOffset: { width: 0, height: 2 },
+                              elevation: 3,
+                            },
+                          ]}
+                        >
+                          <View style={tw`flex-row items-center mb-3`}>
+                            <Icon
+                              name="run-fast"
+                              size={24}
+                              color="#f97316"
+                              style={tw`mr-3`}
+                            />
+                            <Text
+                              style={tw`text-${
+                                isDarkMode ? "white" : "gray-800"
+                              } font-bold text-lg`}
                             >
-                              <View>
-                                <Text
-                                  style={tw`text-${
-                                    isDarkMode ? "gray-300" : "gray-700"
-                                  } font-medium text-sm`}
-                                >
-                                  Set {index + 1}
-                                </Text>
-                                <Text
-                                  style={tw`text-${
-                                    isDarkMode ? "gray-400" : "gray-500"
-                                  } italic text-xs mt-1`}
-                                >
-                                  {set.notes || "No notes"}
-                                </Text>
-                              </View>
+                              {exercise.name}
+                            </Text>
+                          </View>
 
-                      
+                          {setsData
+                            .filter(
+                              (set) =>
+                                set.workout_id === workout.workout_id &&
+                                set.exercise_id === exercise.exercise_id
+                            )
+                            .map((set, index) => (
                               <View
+                                key={index}
                                 style={[
-                                  tw`px-3 py-1 rounded-full`,
+                                  tw`flex-row items-center justify-between rounded-lg p-4 mb-2`,
                                   {
-                                    backgroundColor: set.duration
-                                      ? "#34d399"
-                                      : "#f97316",
+                                    backgroundColor: isDarkMode
+                                      ? "#2a2a2a"
+                                      : "#ffffff",
+                                    shadowColor: "#000",
+                                    shadowOpacity: 0.05,
+                                    shadowRadius: 4,
+                                    shadowOffset: { width: 0, height: 1 },
+                                    elevation: 2,
                                   },
                                 ]}
                               >
-                                <Text style={tw`text-white font-bold text-xs`}>
-                                  {set.duration
-                                    ? `${set.duration}s`
-                                    : set.reps
-                                    ? `${set.reps} reps`
-                                    : "N/A"}
-                                </Text>
-                              </View>
+                                <View>
+                                  <Text
+                                    style={tw`text-${
+                                      isDarkMode ? "gray-300" : "gray-700"
+                                    } font-medium text-sm`}
+                                  >
+                                    Set {index + 1}
+                                  </Text>
+                                  <Text
+                                    style={tw`text-${
+                                      isDarkMode ? "gray-400" : "gray-500"
+                                    } italic text-xs mt-1`}
+                                  >
+                                    {set.notes || "No notes"}
+                                  </Text>
+                                </View>
 
-                    
-                              <Icon
-                                name={
-                                  set.duration ? "timer-outline" : "dumbbell"
-                                }
-                                size={20}
-                                color={set.duration ? "#34d399" : "#f97316"}
-                                style={tw`ml-3`}
-                              />
-                            </View>
-                          ))}
-                      </View>
-                    ))}
-                </>
-              )}
-            </View>
+                                <View
+                                  style={[
+                                    tw`px-3 py-1 rounded-full`,
+                                    {
+                                      backgroundColor: set.duration
+                                        ? "#34d399"
+                                        : "#f97316",
+                                    },
+                                  ]}
+                                >
+                                  <Text
+                                    style={tw`text-white font-bold text-xs`}
+                                  >
+                                    {set.duration
+                                      ? `${set.duration}s`
+                                      : set.reps
+                                      ? `${set.reps} reps`
+                                      : "N/A"}
+                                  </Text>
+                                </View>
+
+                                <Icon
+                                  name={
+                                    set.duration ? "timer-outline" : "dumbbell"
+                                  }
+                                  size={20}
+                                  color={set.duration ? "#34d399" : "#f97316"}
+                                  style={tw`ml-3`}
+                                />
+                              </View>
+                            ))}
+                        </View>
+                      ))}
+                  </>
+                )}
+              </View>
+            </LinearGradient>
           );
         })}
       </ScrollView>

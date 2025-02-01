@@ -644,7 +644,7 @@ const Workouts = ({ isDarkMode }) => {
     <SafeAreaView style={tw`flex-1`}>
       <ScrollView contentContainerStyle={tw`pb-20`}>
         <View style={tw`px-4 pt-4`}>
-          {/* Custom Workout Card */}
+     
           <TouchableOpacity
             onPress={() => navigation.navigate("custom-workout")}
             style={tw`mb-6 rounded-3xl overflow-hidden`}
@@ -689,7 +689,7 @@ const Workouts = ({ isDarkMode }) => {
         />
         
         <View style={tw`relative z-10 h-full justify-between`}>
-          {/* Title Section */}
+      
           <View>
             <Text 
               style={tw`text-[15px] font-extrabold text-white mb-1 pr-4`}
@@ -708,7 +708,6 @@ const Workouts = ({ isDarkMode }) => {
             </View>
           </View>
 
-          {/* Description */}
           <Text 
             style={tw`text-zinc-400 text-xs leading-[14px] mb-5`}
             numberOfLines={3}
@@ -717,7 +716,6 @@ const Workouts = ({ isDarkMode }) => {
             {workout.description}
           </Text>
 
-          {/* Stats Row */}
           <View style={tw`flex-row justify-between items-center`}>
             <View style={tw`flex-row items-center`}>
               <Ionicons name="time" size={14} color="#f97316" />
@@ -741,7 +739,6 @@ const Workouts = ({ isDarkMode }) => {
         </View>
       </ScrollView>
 
-      {/* Workout Detail Modal */}
       <Modal visible={isModalVisible} transparent animationType="slide">
         <SafeAreaView style={tw`flex-1 bg-black/90`}>
           <View
@@ -782,7 +779,6 @@ const Workouts = ({ isDarkMode }) => {
         </SafeAreaView>
       </Modal>
 
-      {/* Level Selection Modal */}
       <Modal visible={isLevelModalVisible} transparent animationType="slide">
         <View style={tw`flex-1 bg-black/90 items-center justify-center`}>
           <SafeAreaView style={tw`flex-1 items-center`}>

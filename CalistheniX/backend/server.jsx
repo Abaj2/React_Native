@@ -440,7 +440,7 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
   }
 });
 app.get("/getworkouts", verifyToken, async (req, res) => {
-  console.log("Received Request");
+
   const userId = req.user.user_id;
 
   const userWorkouts = await pool.query(
