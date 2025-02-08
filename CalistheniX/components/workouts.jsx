@@ -551,20 +551,21 @@ const Workouts = ({ isDarkMode }) => {
   const selectLevel = (level) => {
     setIsLevelModalVisible(false);
     
-    // Get the selected workout's data from the original array
+
     const selectedWorkoutData = workouts.find(
       (workout) => workout.title === selectedWorkout.title
     );
   
-    // Find the matching level in the workout data
+
     const selectedLevelData = selectedWorkoutData?.levels.find(
       (l) => l.level === level.level
     );
-  
-    // Ensure we have valid exercises array
+ 
     const exercises = selectedLevelData?.exercises || [];
+    console.log(exercises)
   
     navigation.navigate("Workout-Session", {
+      
       title: selectedWorkout.title,
       level: level.level,
       exercises2: exercises,
@@ -643,7 +644,7 @@ const Workouts = ({ isDarkMode }) => {
   return (
     <SafeAreaView style={tw`flex-1`}>
       <ScrollView contentContainerStyle={tw`pb-20`}>
-        <View style={tw`px-4 pt-4`}>
+        <View style={tw`pt-4`}>
      
           <TouchableOpacity
             onPress={() => navigation.navigate("custom-workout")}
@@ -654,7 +655,7 @@ const Workouts = ({ isDarkMode }) => {
                 Custom Routine
               </Text>
               <Text style={tw`text-orange-100 text-sm mb-4`}>
-                Build your personalized workout
+                Build your personalised workout
               </Text>
               <View style={tw`flex-row items-center`}>
                 <View style={tw`bg-white/10 p-2 rounded-full`}>
@@ -667,14 +668,15 @@ const Workouts = ({ isDarkMode }) => {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Workouts Grid */}
-<View style={tw`flex-row flex-wrap justify-between`}>
+  
+<View style={tw`flex-row gap-3`}>
+  <ScrollView style={[tw`w-[90%]`, {}]} horizontal showsHorizontalScrollIndicator={false}>
   {workouts.map((workout) => (
     <TouchableOpacity
       key={workout.id}
       onPress={() => handleWorkoutPress(workout)}
       activeOpacity={0.9}
-      style={tw`w-[48%] mb-4`}
+      style={tw`w-[8%] mr-3 mb-4`}
     >
       <Animated.View style={[
         tw`rounded-3xl p-3 overflow-hidden`,
@@ -735,6 +737,7 @@ const Workouts = ({ isDarkMode }) => {
       </Animated.View>
     </TouchableOpacity>
   ))}
+  </ScrollView>
 </View>
         </View>
       </ScrollView>

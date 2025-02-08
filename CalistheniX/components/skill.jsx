@@ -26,15 +26,14 @@ import { LinearGradient } from "expo-linear-gradient";
 
 const COLORS = {
   background: "#1A1A1A",
-  primary: "#F57C00", 
+  primary: "#F57C00",
   text: "#FFFFFF",
   secondaryText: "#A0A0A0",
   border: "#333333",
   inputBackground: "#222222",
-  progressFill: "#F57C00", 
+  progressFill: "#F57C00",
   progressTrack: "#333333",
 };
-
 
 const numbers = Array.from({ length: 90 }, (_, i) => ({
   label: `${i + 1}`,
@@ -52,7 +51,15 @@ const EDIT_PROGRESSION_URL = Platform.select({
   ios: "http://192.168.1.155:4005/editprogression",
 });
 
-const Skill = ({ skillData, loadUserData, isDarkMode, colourTheme }) => {
+const Skill = ({
+  skillData,
+  loadUserData,
+  isDarkMode,
+  colourTheme,
+  selectedTab,
+  setSelectedTab,
+  onSendProgress,
+}) => {
   const [themeColors, setThemeColors] = useState({
     text: "black",
     secondaryText: "#4b5563",
@@ -268,15 +275,12 @@ const Skill = ({ skillData, loadUserData, isDarkMode, colourTheme }) => {
     setEditIndex(index);
     setEditProgression(item.value);
     setEditProgressionName(item.value);
-    
-  
+
     if (index !== -1) {
       setEditCurrent(
         skillData.current[index][skillData.current[index].length - 1]
       );
-      setEditGoal(
-        skillData.goal[index][skillData.goal[index].length - 1]
-      );
+      setEditGoal(skillData.goal[index][skillData.goal[index].length - 1]);
     }
   };
 
@@ -411,7 +415,9 @@ const Skill = ({ skillData, loadUserData, isDarkMode, colourTheme }) => {
               transform={`rotate(-90 ${size / 2} ${size / 2})`}
             />
           </Svg>
-          <Text style={[tw`absolute text-sm font-bold`, { color: COLORS.text }]}>
+          <Text
+            style={[tw`absolute text-sm font-bold`, { color: COLORS.text }]}
+          >
             {Math.round((current / goal) * 100)}%
           </Text>
         </View>
@@ -419,419 +425,404 @@ const Skill = ({ skillData, loadUserData, isDarkMode, colourTheme }) => {
     );
   };
 
+  const sendProgress = () => {
+    console.log('skilldata:', skillData)
+
+    if (skillData.current.every(subArray => subArray.length < 2)) {
+      Alert.alert(
+        'Make some progress first!'
+      )
+      return
+    }
+
+    const progressId = skillData.id;
+
+    onSendProgress(progressId);
+  };
+
   return (
-    
-    <SafeAreaView style={[tw`mt-5 flex-1`, {}]}>
+    <SafeAreaView style={tw`flex-1`}>
       <StatusBar barStyle="light-content" />
-      <View style={tw`flex-1 w-full`}>
-        <ScrollView
-          style={tw`flex-1 w-full`}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={tw`items-center w-full px-2`}
-        >
-          <LinearGradient colors={["#1a1a1a", "#000000"]} style={tw`border border-zinc-800 rounded-3xl w-full`}>
-          <View style={[
-            tw`mb-4 rounded-2xl w-[100%] overflow-hidden`,
-            {
-            }
-          ]}>
-            <View style={[
-              tw`p-4 border-b`,
-              { 
-                borderColor: '#FFA500', 
-              }
-            ]}>
-              <View style={tw`flex-row justify-between items-center`}>
-                <Text style={[tw`text-xl font-bold`, { color: '#FFFFFF' }]}>
+      {/*<ScrollView
+        contentContainerStyle={tw`pb-5`}
+        showsVerticalScrollIndicator={false}
+      >*/}
+        <View style={[tw`mt-10 mx-2 self-center`, {width: width * 0.95}]}>
+       
+          <LinearGradient
+            colors={["#1a1a1a", "#000000"]}
+            style={tw`rounded-3xl border-2 border-orange-600`}
+          >
+            <View style={tw`p-5 border-b border-orange-600/50`}>
+              <View style={tw`flex-row justify-between items-center mb-2`}>
+                <Text style={tw`text-2xl ml-5 mt-1 font-bold text-white`}>
                   {skillData.skill}
                 </Text>
-                <View style={tw`flex-row`}>
-                  <TouchableOpacity
+                <View style={tw`flex-row gap-4`}>
+                  <TouchableOpacity 
                     onPress={() => setEditModalVisible(true)}
-                    style={tw`mr-4`}
+                    style={tw`p-2 bg-orange-500/10 rounded-full`}
                   >
-                    <MaterialIcons name="edit" size={24} color="#FFFFFF" />
+                    <MaterialIcons name="edit" size={22} color="#f97316" />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleSkillDelete}>
-                    <MaterialIcons name="delete-outline" size={24} color="#FF4444" />
+                  <TouchableOpacity 
+                    onPress={handleSkillDelete}
+                    style={tw`p-2 bg-red-500/10 rounded-full`}
+                  >
+                    <MaterialIcons
+                      name="delete-outline"
+                      size={22}
+                      color="#ef4444"
+                    />
                   </TouchableOpacity>
                 </View>
               </View>
             </View>
   
-            <ScrollView 
-              horizontal 
+      
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={tw`px-4 pt-4`}
+              contentContainerStyle={tw`px-4 pt-4 pb-2`}
             >
               {skillData.progressions.map((progression, index) => (
-               <TouchableOpacity
-               key={index}
-               onPress={() => setSelectedProgressionIndex(index)}
-               style={[
-                 tw`px-4 py-2 mr-2 rounded-lg relative`,
-                 {
-                   borderWidth: 1,
-                   borderColor: index === selectedProgressionIndex ? '' : '#666666',
-                   backgroundColor: index === selectedProgressionIndex ? 'transparent' : '#333333',
-                 },
-               ]}
-             >
-               {index === selectedProgressionIndex && (
-                 <LinearGradient
-                   colors={["#f97316", "#ea580c"]}
-                   style={tw`absolute inset-0 rounded-lg`}
-                 />
-               )}
-               <Text style={tw`text-white font-bold relative text-center`}>
-                 {progression}
-               </Text>
-             </TouchableOpacity>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => setSelectedProgressionIndex(index)}
+                  style={tw`mr-3 mb-2`}
+                >
+                  <LinearGradient
+                    colors={
+                      index === selectedProgressionIndex
+                        ? ["#f97316", "#d1580f"]
+                        : ["#404040", "#2d2d2d"]
+                    }
+                    style={[
+                      tw`px-5 py-2.5 rounded-full border`,
+                      {
+                        borderColor: index === selectedProgressionIndex 
+                          ? "#ea580c" 
+                          : "#4b4b4b",
+                        shadowColor: index === selectedProgressionIndex 
+                          ? "#f97316" 
+                          : "transparent",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.4,
+                        shadowRadius: 4
+                      }
+                    ]}
+                  >
+                    <Text style={tw`text-white font-semibold tracking-wide`}>
+                      {progression}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
               ))}
               <TouchableOpacity
                 onPress={openProgressionModal}
-                style={[
-                  tw`px-4 py-2 rounded-lg items-center justify-center`,
-                  {
-                    borderWidth: 1,
-                    borderColor: '#666666',
-                    backgroundColor: '#333333'
-                  }
-                ]}
+                style={tw`h-[42px] w-[42px] items-center justify-center rounded-full bg-gray-800 border-2 border-dashed border-orange-500/50 mr-2`}
               >
-                <Ionicons name="add-outline" size={20} color="#FFFFFF" />
+                <Ionicons name="add" size={24} color="#f97316" />
               </TouchableOpacity>
             </ScrollView>
   
-            <View style={tw`p-4`}>
-              <View style={tw`flex-row justify-between items-center mb-4`}>
+            <View style={tw`p-5`}>
+              <View style={tw`flex-row items-center justify-between mb-6`}>
                 <View style={tw`flex-1`}>
-                  <Text style={[tw`text-sm mb-1`, { color: '#CCCCCC' }]}>
-                    Current Progress
+                  <Text style={tw`text-orange-400/80 text-sm font-medium mb-3`}>
+                    CURRENT PROGRESS
                   </Text>
-                  <View style={tw`flex-row items-center justify-between`}>
-                    <Text style={[tw`text-2xl font-bold`, { color: '#FFFFFF' }]}>
+                  <View style={tw`flex-row items-center gap-5`}>
+                    <Text style={tw`text-4xl font-black text-orange-500`}>
                       {skillData.current[selectedProgressionIndex]?.slice(-1)[0] || 0}
                     </Text>
                     <ProgressCircle
-                      current={skillData.current[selectedProgressionIndex]?.slice(-1)[0] || 0}
-                      goal={skillData.goal[selectedProgressionIndex]?.slice(-1)[0] || 1}
+                      current={
+                        skillData.current[selectedProgressionIndex]?.slice(-1)[0] || 0
+                      }
+                      goal={
+                        skillData.goal[selectedProgressionIndex]?.slice(-1)[0] || 1
+                      }
+                    />
+              
+                      <TouchableOpacity 
+                        onPress={sendProgress}
+                        style={tw`ml-auto`}
+                      >
+                        <LinearGradient
+                          colors={["#f97316", "#ea580c"]}
+                          style={[
+                            tw`rounded-xl px-5 py-3`,
+                            {
+                              shadowColor: "#f97316",
+                              shadowOffset: { width: 0, height: 2 },
+                              shadowOpacity: 0.3,
+                              shadowRadius: 6
+                            }
+                          ]}
+                        >
+                          <Text style={tw`font-bold text-white uppercase tracking-wide text-sm`}>
+                            View Progress
+                          </Text>
+                        </LinearGradient>
+                      </TouchableOpacity>
+           
+                  </View>
+                </View>
+              </View>
+  
+              <View style={tw`flex-row gap-4 mb-4`}>
+                <LinearGradient
+                  colors={["#363636", "#262626"]}
+                  style={tw`flex-1 p-4 rounded-xl border border-orange-500/20`}
+                >
+                  <View style={tw`flex-row items-center gap-2 mb-1`}>
+                    <Ionicons name="arrow-up" size={16} color="#f97316" />
+                    <Text style={tw`text-gray-400 text-sm font-medium`}>Current</Text>
+                  </View>
+                  <Text style={tw`text-2xl font-bold text-orange-400`}>
+                    {skillData.current[selectedProgressionIndex]?.slice(-1)[0] || 0}
+                  </Text>
+                </LinearGradient>
+  
+                <LinearGradient
+                  colors={["#363636", "#262626"]}
+                  style={tw`flex-1 p-4 rounded-xl border border-orange-500/20`}
+                >
+                  <View style={tw`flex-row items-center gap-2 mb-1`}>
+                    <Ionicons name="flag" size={16} color="#f97316" />
+                    <Text style={tw`text-gray-400 text-sm font-medium`}>Goal</Text>
+                  </View>
+                  <Text style={tw`text-2xl font-bold text-orange-400`}>
+                    {skillData.goal[selectedProgressionIndex]?.slice(-1)[0] || 0}
+                  </Text>
+                </LinearGradient>
+              </View>
+            </View>
+          </LinearGradient>
+        </View>
+  
+
+        <Modal transparent visible={progressionModalVisible} animationType="fade">
+          <View style={tw`flex-1 bg-black/95 justify-center items-center p-4`}>
+            <LinearGradient
+              colors={["#2a2a2a", "#1a1a1a"]}
+              style={[
+                tw`rounded-3xl w-full max-w-md`,
+                { borderWidth: 1, borderColor: "#f97316/30" }
+              ]}
+            >
+              <View style={tw`p-5 border-b border-orange-600/30`}>
+                <View style={tw`flex-row justify-between items-center`}>
+                  <Text style={tw`text-xl font-bold text-orange-500`}>
+                    New Progression
+                  </Text>
+                  <TouchableOpacity 
+                    onPress={handleProgressionModalClose}
+                    style={tw`p-1.5 bg-orange-500/10 rounded-full`}
+                  >
+                    <Ionicons name="close" size={22} color="#f97316" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+  
+              <View style={tw`p-5`}>
+                <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+                  PROGRESSION NAME
+                </Text>
+                <TextInput
+                  value={addProgression}
+                  onChangeText={setAddProgression}
+                  style={tw`bg-gray-800 text-white p-3.5 rounded-xl border border-orange-500/30 mb-5 font-medium`}
+                  placeholderTextColor="#6b6b6b"
+                  placeholder="e.g. Advanced Tuck"
+                />
+  
+                <View style={tw`flex-row gap-4 mb-6`}>
+                  <View style={tw`flex-1`}>
+                    <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+                      CURRENT
+                    </Text>
+                    <Dropdown
+                      data={numbers}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Select current"
+                      value={addCurrent}
+                      onChange={(item) => setAddCurrent(item.value)}
+                      placeholderStyle={tw`text-gray-500`}
+                      selectedTextStyle={tw`text-white font-medium`}
+                      itemTextStyle={tw`text-gray-300`}
+                      style={tw`bg-gray-800 rounded-xl border border-orange-500/30`}
+                      containerStyle={tw`bg-gray-800 rounded-xl border border-orange-500/30 mt-2`}
+                      activeColor="#404040"
+                      itemContainerStyle={tw`py-3`}
+                      showsVerticalScrollIndicator={false}
+                    />
+                  </View>
+  
+                  <View style={tw`flex-1`}>
+                    <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+                      GOAL
+                    </Text>
+                    <Dropdown
+                      data={numbers}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Select goal"
+                      value={addGoal}
+                      onChange={(item) => setAddGoal(item.value)}
+                      placeholderStyle={tw`text-gray-500`}
+                      selectedTextStyle={tw`text-white font-medium`}
+                      itemTextStyle={tw`text-gray-300`}
+                      style={tw`bg-gray-800 rounded-xl border border-orange-500/30`}
+                      containerStyle={tw`bg-gray-800 rounded-xl border border-orange-500/30 mt-2`}
+                      activeColor="#404040"
+                      itemContainerStyle={tw`py-3`}
                     />
                   </View>
                 </View>
-              </View>
   
-              <View style={[
-                tw`rounded-lg p-3`,
-                { 
-                  backgroundColor: '#F97316',
-                  borderWidth: 1,
-                  borderColor: ''
-                }
-              ]}>
-                 <LinearGradient
-                   colors={["#f97316", "#ea580c"]}
-                   style={tw`absolute inset-0 rounded-lg`}
-                 />
-                <View style={tw`flex-row justify-between mb-2`}>
-                  <Text style={{fontWeight: 'bold', color: '#FFFFFF' }}>Goal:</Text>
-                  <Text style={{fontWeight: 'bold', color: '#FFFFFF' }}>
-                    {skillData.goal[selectedProgressionIndex]?.slice(-1)[0] || 0}
+                <TouchableOpacity
+                  onPress={submitProgression}
+                  style={[
+                    tw`bg-orange-500 py-4 rounded-xl mt-2`,
+                    {
+                      shadowColor: "#f97316",
+                      shadowOffset: { width: 0, height: 3 },
+                      shadowOpacity: 0.4,
+                      shadowRadius: 6
+                    }
+                  ]}
+                >
+                  <Text style={tw`text-center font-bold text-white uppercase tracking-wide`}>
+                    Create Progression
                   </Text>
-                </View>
-                <View style={tw`flex-row justify-between`}>
-                  <Text style={{fontWeight: 'bold', color: '#FFFFFF' }}>Progress:</Text>
-                  <Text style={{fontWeight: 'bold', color: '#FFFFFF' }}>
-                    {Math.round(
-                      (skillData.current[selectedProgressionIndex]?.slice(-1)[0] / 
-                      skillData.goal[selectedProgressionIndex]?.slice(-1)[0]) * 100
-                    )}%
-                  </Text>
-                </View>
+                </TouchableOpacity>
               </View>
-            </View>
+            </LinearGradient>
           </View>
-          </LinearGradient>
-          
-
-          <Modal
-            transparent={true}
-            visible={progressionModalVisible}
-            animationType="fade"
-          >
-            <SafeAreaView style={tw`flex-1 justify-center items-center bg-black/90`}>
-              <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-                <View style={[
-                  tw`rounded-2xl p-5`,
-                  {
-                    width: width * 0.85,
-                    backgroundColor: '#333333',
-                    borderColor: '#FFA500',
-                    borderWidth: 1,
-                  }
-                ]}>
-                  <View style={tw`flex-row justify-between items-center mb-4`}>
-                    <Text style={[tw`text-xl font-bold`, { color: '#FFA500' }]}>
-                      Add Progression
+        </Modal>
+  
+     
+        <Modal transparent visible={editModalVisible} animationType="fade">
+          <View style={tw`flex-1 bg-black/95 justify-center items-center p-4`}>
+            <LinearGradient
+              colors={["#2a2a2a", "#1a1a1a"]}
+              style={[
+                tw`rounded-3xl w-full max-w-md`,
+                { borderWidth: 1, borderColor: "#f97316/30" }
+              ]}
+            >
+              <View style={tw`p-5 border-b border-orange-600/30`}>
+                <View style={tw`flex-row justify-between items-center`}>
+                  <Text style={tw`text-xl font-bold text-orange-500`}>
+                    Edit Progression
+                  </Text>
+                  <TouchableOpacity 
+                    onPress={handleEditModalClose}
+                    style={tw`p-1.5 bg-orange-500/10 rounded-full`}
+                  >
+                    <Ionicons name="close" size={22} color="#f97316" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+  
+              <View style={tw`p-5`}>
+                <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+                  SELECT PROGRESSION
+                </Text>
+                <Dropdown
+                  data={formattedSkillData}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select progression"
+                  value={editProgression}
+                  onChange={handleEditModalChange}
+                  placeholderStyle={tw`text-gray-500`}
+                  selectedTextStyle={tw`text-white font-medium`}
+                  itemTextStyle={tw`text-gray-300`}
+                  style={tw`bg-gray-800 rounded-xl border border-orange-500/30 mb-5`}
+                  containerStyle={tw`bg-gray-800 rounded-xl border border-orange-500/30 mt-2`}
+                  activeColor="#404040"
+                  itemContainerStyle={tw`py-3`}
+                />
+  
+                <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+                  PROGRESSION NAME
+                </Text>
+                <TextInput
+                  value={editProgressionName}
+                  onChangeText={setEditProgressionName}
+                  style={tw`bg-gray-800 text-white p-3.5 rounded-xl border border-orange-500/30 mb-5 font-medium`}
+                  placeholderTextColor="#6b6b6b"
+                />
+  
+                <View style={tw`flex-row gap-4 mb-6`}>
+                  <View style={tw`flex-1`}>
+                    <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+                      CURRENT
                     </Text>
-                    <TouchableOpacity onPress={handleProgressionModalClose}>
-                      <Ionicons
-                        name="close"
-                        size={24}
-                        color="#FFFFFF"
-                      />
-                    </TouchableOpacity>
+                    <Dropdown
+                      data={numbers}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Select current"
+                      value={editCurrent}
+                      onChange={(item) => setEditCurrent(item.value)}
+                      placeholderStyle={tw`text-gray-500`}
+                      selectedTextStyle={tw`text-white font-medium`}
+                      itemTextStyle={tw`text-gray-300`}
+                      style={tw`bg-gray-800 rounded-xl border border-orange-500/30`}
+                      containerStyle={tw`bg-gray-800 rounded-xl border border-orange-500/30 mt-2`}
+                      activeColor="#404040"
+                      itemContainerStyle={tw`py-3`}
+                    />
                   </View>
   
-                  <View style={tw`space-y-4`}>
-                    <View>
-                      <Text style={[tw`mb-1`, { color: '#CCCCCC' }]}>
-                        Progression Name
-                      </Text>
-                      <TextInput
-                        value={addProgression}
-                        onChangeText={setAddProgression}
-                        placeholder="e.g. advanced tuck"
-                        placeholderTextColor="#666666"
-                        style={[
-                          tw`rounded-lg p-3`,
-                          {
-                            backgroundColor: '#1A1A1A',
-                            color: '#FFFFFF',
-                            borderColor: '#FFA500',
-                            borderWidth: 1,
-                          }
-                        ]}
-                      />
-                    </View>
-  
-                    <View>
-                      <Text style={[tw`mb-1`, { color: '#CCCCCC' }]}>
-                        Current
-                      </Text>
-                      <Dropdown
-                        onChange={(item) => setAddCurrent(item.value)}
-                        data={numbers}
-                        labelField="label"
-                        valueField="value"
-                        placeholder="Select current value"
-                        placeholderStyle={{ color: '#666666' }}
-                        itemTextStyle={{ color: '#FFFFFF' }}
-                        selectedTextStyle={{ color: '#FFFFFF' }}
-                        style={[
-                          tw`rounded-lg p-3`,
-                          {
-                            backgroundColor: '#1A1A1A',
-                            borderColor: '#FFA500',
-                            borderWidth: 1,
-                          }
-                        ]}
-                        containerStyle={{
-                          backgroundColor: '#333333',
-                          borderColor: '#FFA500',
-                        }}
-                      />
-                    </View>
-  
-                    <View>
-                      <Text style={[tw`mb-1`, { color: '#CCCCCC' }]}>
-                        Goal
-                      </Text>
-                      <Dropdown
-                        onChange={(item) => setAddGoal(item.value)}
-                        data={numbers}
-                        labelField="label"
-                        valueField="value"
-                        placeholder="Select goal value"
-                        placeholderStyle={{ color: '#666666' }}
-                        itemTextStyle={{ color: '#FFFFFF' }}
-                        selectedTextStyle={{ color: '#FFFFFF' }}
-                        style={[
-                          tw`rounded-lg p-3`,
-                          {
-                            backgroundColor: '#1A1A1A',
-                            borderColor: '#FFA500',
-                            borderWidth: 1,
-                          }
-                        ]}
-                        containerStyle={{
-                          backgroundColor: '#333333',
-                          borderColor: '#FFA500',
-                        }}
-                      />
-                    </View>
-  
-                    <TouchableOpacity
-                      onPress={submitProgression}
-                      style={[
-                        tw`rounded-lg p-3 items-center mt-4`,
-                        { backgroundColor: '#FFA500' }
-                      ]}
-                    >
-                      <Text style={[tw`font-bold`, { color: '#000000' }]}>
-                        Add Progression
-                      </Text>
-                    </TouchableOpacity>
+                  <View style={tw`flex-1`}>
+                    <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+                      GOAL
+                    </Text>
+                    <Dropdown
+                      data={numbers}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Select goal"
+                      value={editGoal}
+                      onChange={(item) => setEditGoal(item.value)}
+                      placeholderStyle={tw`text-gray-500`}
+                      selectedTextStyle={tw`text-white font-medium`}
+                      itemTextStyle={tw`text-gray-300`}
+                      style={tw`bg-gray-800 rounded-xl border border-orange-500/30`}
+                      containerStyle={tw`bg-gray-800 rounded-xl border border-orange-500/30 mt-2`}
+                      activeColor="#404040"
+                      itemContainerStyle={tw`py-3`}
+                    />
                   </View>
                 </View>
-              </TouchableWithoutFeedback>
-            </SafeAreaView>
-          </Modal>
   
-
-          <Modal
-            transparent={true}
-            visible={editModalVisible}
-            animationType="fade"
-          >
-            <SafeAreaView style={tw`flex-1 justify-center items-center bg-black/90`}>
-              <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-                <View style={[
-                  tw`rounded-2xl p-5`,
-                  {
-                    width: width * 0.85,
-                    backgroundColor: '#333333',
-                    borderColor: '#FFA500',
-                    borderWidth: 1,
-                  }
-                ]}>
-                  <View style={tw`flex-row justify-between items-center mb-4`}>
-                    <Text style={[tw`text-xl font-bold`, { color: '#FFA500' }]}>
-                      Edit Progression
-                    </Text>
-                    <TouchableOpacity onPress={handleEditModalClose}>
-                      <Ionicons
-                        name="close"
-                        size={24}
-                        color="#FFFFFF"
-                      />
-                    </TouchableOpacity>
-                  </View>
+                <TouchableOpacity
+                  onPress={submitEditProgression}
+                  style={[
+                    tw`bg-orange-500 py-4 rounded-xl`,
+                    {
+                      shadowColor: "#f97316",
+                      shadowOffset: { width: 0, height: 3 },
+                      shadowOpacity: 0.4,
+                      shadowRadius: 6
+                    }
+                  ]}
+                >
+                  <Text style={tw`text-center font-bold text-white uppercase tracking-wide`}>
+                    Save Changes
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+          </View>
+        </Modal>
   
-                  <View style={tw`space-y-4`}>
-                    <View>
-                      <Text style={[tw`mb-1`, { color: '#CCCCCC' }]}>
-                        Select Progression
-                      </Text>
-                      <Dropdown
-                        onChange={handleEditModalChange}
-                        data={formattedSkillData}
-                        labelField="label"
-                        valueField="value"
-                        placeholder="Select progression"
-                        placeholderStyle={{ color: '#666666' }}
-                        itemTextStyle={{ color: '#FFFFFF' }}
-                        selectedTextStyle={{ color: '#FFFFFF' }}
-                        style={[
-                          tw`rounded-lg p-3`,
-                          {
-                            backgroundColor: '#1A1A1A',
-                            borderColor: '#FFA500',
-                            borderWidth: 1,
-                          }
-                        ]}
-                        containerStyle={{
-                          backgroundColor: '#333333',
-                          borderColor: '#FFA500',
-                        }}
-                      />
-                    </View>
-  
-                    <View>
-                      <Text style={[tw`mb-1`, { color: '#CCCCCC' }]}>
-                        Name
-                      </Text>
-                      <TextInput
-                        value={editProgressionName}
-                        onChangeText={setEditProgressionName}
-                        placeholder="Progression name"
-                        placeholderTextColor="#666666"
-                        style={[
-                          tw`rounded-lg p-3`,
-                          {
-                            backgroundColor: '#1A1A1A',
-                            color: '#FFFFFF',
-                            borderColor: '#FFA500',
-                            borderWidth: 1,
-                          }
-                        ]}
-                      />
-                    </View>
-  
-                    <View>
-                      <Text style={[tw`mb-1`, { color: '#CCCCCC' }]}>
-                        Current
-                      </Text>
-                      <Dropdown
-                        onChange={(item) => setEditCurrent(item.value)}
-                        data={numbers}
-                        labelField="label"
-                        valueField="value"
-                        placeholder="Select current value"
-                        placeholderStyle={{ color: '#666666' }}
-                        itemTextStyle={{ color: '#FFFFFF' }}
-                        selectedTextStyle={{ color: '#FFFFFF' }}
-                        style={[
-                          tw`rounded-lg p-3`,
-                          {
-                            backgroundColor: '#1A1A1A',
-                            borderColor: '#FFA500',
-                            borderWidth: 1,
-                          }
-                        ]}
-                        containerStyle={{
-                          backgroundColor: '#333333',
-                          borderColor: '#FFA500',
-                        }}
-                      />
-                    </View>
-  
-                    <View>
-                      <Text style={[tw`mb-1`, { color: '#CCCCCC' }]}>
-                        Goal
-                      </Text>
-                      <Dropdown
-                        onChange={(item) => setEditGoal(item.value)}
-                        data={numbers}
-                        labelField="label"
-                        valueField="value"
-                        placeholder="Select goal value"
-                        placeholderStyle={{ color: '#666666' }}
-                        itemTextStyle={{ color: '#FFFFFF' }}
-                        selectedTextStyle={{ color: '#FFFFFF' }}
-                        style={[
-                          tw`rounded-lg p-3`,
-                          {
-                            backgroundColor: '#1A1A1A',
-                            borderColor: '#FFA500',
-                            borderWidth: 1,
-                          }
-                        ]}
-                        containerStyle={{
-                          backgroundColor: '#333333',
-                          borderColor: '#FFA500',
-                        }}
-                      />
-                    </View>
-  
-                    <TouchableOpacity
-                      onPress={submitEditProgression}
-                      style={[
-                        tw`rounded-lg p-3 items-center mt-4`,
-                        { backgroundColor: '#FFA500' }
-                      ]}
-                    >
-                      <Text style={[tw`font-bold`, { color: '#000000' }]}>
-                        Save Changes
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableWithoutFeedback>
-            </SafeAreaView>
-          </Modal>
-        </ScrollView>
-      </View>
     </SafeAreaView>
   );
 };

@@ -408,7 +408,7 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
     console.log(workoutSummary.duration);
 
     const addWorkout = await pool.query(
-      `INSERT INTO workouts(user_id, title, level, duration) VALUES($1, $2, $3, $4) RETURNING workout_id`,
+      `INSERT INTO workouts(user_id, title, level, workout_time) VALUES($1, $2, $3, $4) RETURNING workout_id`,
       [
         user_id,
         workoutSummary.title,
@@ -486,7 +486,7 @@ app.post("/postcustomworkout", verifyToken, async (req, res) => {
 
   try {
     const addWorkout = await pool.query(
-      `INSERT INTO workouts(user_id, title, custom, level, duration) values($1, $2, $3, $4, $5) RETURNING workout_id`,
+      `INSERT INTO workouts(user_id, title, custom, level, workout_time) values($1, $2, $3, $4, $5) RETURNING workout_id`,
       [user_id, title.trim(), true, level, duration]
     );
     console.log(`Number of rows affected: ${addWorkout.rowCount}`);
@@ -494,8 +494,8 @@ app.post("/postcustomworkout", verifyToken, async (req, res) => {
 
     for (const exercise of workoutSummary) {
       const addExercise = await pool.query(
-        `INSERT INTO exercises(workout_id, name, user_id) values($1, $2, $3) RETURNING exercise_id`,
-        [workout_id, exercise.name, user_id]
+        `INSERT INTO exercises(workout_id, name, user_id, custom) values($1, $2, $3, $4) RETURNING exercise_id`,
+        [workout_id, exercise.name, user_id, true]
       );
       const exercise_id = addExercise.rows[0].exercise_id;
       console.log(`Number of rows affected: ${addExercise.rowCount}`);
@@ -508,7 +508,7 @@ app.post("/postcustomworkout", verifyToken, async (req, res) => {
           ? null
           : parseInt(set.duration);
         await pool.query(
-          `INSERT INTO sets(exercise_id, reps, duration, notes, user_id, workout_id) VALUES($1, $2, $3, $4, $5, $6)`,
+          `INSERT INTO sets(exercise_id, reps, duration, notes, user_id, workout_id, custom) VALUES($1, $2, $3, $4, $5, $6, $7)`,
           [
             exercise_id,
             integerReps,
@@ -516,6 +516,7 @@ app.post("/postcustomworkout", verifyToken, async (req, res) => {
             set.notes,
             user_id,
             workout_id,
+            true
           ]
         );
       }
@@ -566,7 +567,7 @@ app.get("/getstats", verifyToken, async (req, res) => {
     );
 
     const totalDuration = await pool.query(
-      `SELECT duration FROM workouts WHERE user_id = $1`,
+      `SELECT workout_time FROM workouts WHERE user_id = $1`,
       [user_id]
     );
     console.log(totalDuration);
@@ -593,7 +594,7 @@ app.get("/getduration", verifyToken, async (req, res) => {
 
   try {
     const thisWeekDuration = await pool.query(
-      `SELECT EXTRACT(EPOCH FROM SUM(duration::interval)) AS total_duration_seconds
+      `SELECT EXTRACT(EPOCH FROM SUM(workout_time::interval)) AS total_duration_seconds
 FROM workouts
 WHERE date >= date_trunc('week', NOW()) AND date < date_trunc('week', NOW()) + INTERVAL '7 days' AND user_id = $1;
 `,
@@ -601,7 +602,7 @@ WHERE date >= date_trunc('week', NOW()) AND date < date_trunc('week', NOW()) + I
     );
 
     const lastWeekDuration = await pool.query(
-      `SELECT EXTRACT(EPOCH FROM SUM(duration::interval)) AS total_duration_seconds
+      `SELECT EXTRACT(EPOCH FROM SUM(workout_time::interval)) AS total_duration_seconds
        FROM workouts
        WHERE date >= date_trunc('week', NOW()) - INTERVAL '7 days'
        AND date < date_trunc('week', NOW()) 
@@ -610,7 +611,7 @@ WHERE date >= date_trunc('week', NOW()) AND date < date_trunc('week', NOW()) + I
     );
 
     const getCustomWorkouts = await pool.query(
-      `SELECT title FROM workouts WHERE custom = true AND user_id = $1`,
+      `SELECT title FROM workouts WHERE custom = true AND user_id = $1 AND routine = true`,
       [user_id]
     )
     const getCustomWorkoutsLength = getCustomWorkouts.rows.length;
@@ -626,6 +627,103 @@ WHERE date >= date_trunc('week', NOW()) AND date < date_trunc('week', NOW()) + I
     res.status(500).send({ message: "Failed to get data" });
   }
 });
+
+app.get("/getcustomworkouts", verifyToken, async (req, res) => {
+
+  try {
+  const userId = req.user.user_id;
+
+  const userWorkouts = await pool.query(
+    "SELECT * FROM workouts WHERE user_id = $1 AND level = 'Custom' AND routine = true",
+    [userId]
+  );
+  const userExercises = await pool.query(
+    "SELECT * FROM exercises WHERE user_id = $1 AND custom = true AND routine = true",
+    [userId]
+  );
+  const userSets = await pool.query("SELECT * FROM sets WHERE user_id = $1 AND custom = true AND routine = true", [
+    userId,
+  ]);
+
+  res.status(200).json({
+    workouts: userWorkouts.rows,
+    exercises: userExercises.rows,
+    sets: userSets.rows,
+  });
+} catch (error) {
+  console.error("Error getting custom workouts:", error);
+  res.status(500).send({ message: "Failed to get data" });
+}
+});
+
+app.get("/getprofilegraph", verifyToken, async (req, res) => {
+  const userId = req.user.user_id;
+
+  const workoutDates = await pool.query(`SELECT date FROM workouts WHERE user_id = $1`, [userId])
+  const workoutTime = await pool.query(`SELECT workout_time FROM workouts WHERE user_id = $1`, [userId])
+
+  console.log(workoutDates.rows);
+  console.log(workoutTime.rows)
+
+  res.status(200).json({
+    workoutDates: workoutDates.rows,
+    workoutTime: workoutTime.rows,
+  })
+
+  try {
+    console.log("Received get request")
+  } catch (error) {
+    console.error("Error getting graph data:", error);
+    res.status(500).send({ message: "Failed to get data" });
+  }
+
+})
+
+app.post("/sendotp", verifyToken, async (req, res) => {
+  try {
+    const { user_id, otp } = req.body;
+    console.log(user_id || "empty user id", otp || "empty otp")
+
+    if (!user_id || !otp) {
+      return res.status(400).json({ message: "user_id and otp are required" });
+    }
+
+    console.log(`Received OTP for user ${user_id}: ${otp}`);
+
+    res.status(200).json({ message: "OTP received successfully" });
+
+  } catch (error) {
+    console.error("Error receiving OTP:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post("/deleteroutine", verifyToken, async (req, res) => {
+  const { user_id, workout_id} = req.body;
+  try {
+    const deleteSets = await pool.query(`UPDATE sets SET routine = false WHERE workout_id = $1 AND user_id = $2`,
+      [workout_id, user_id]
+    )
+
+    const deleteExercises = await pool.query(`UPDATE exercises SET routine = false WHERE workout_id = $1 AND user_id = $2`,
+      [workout_id, user_id]
+    )
+
+    const deleteWorkout = await pool.query(`UPDATE workouts SET routine = false WHERE workout_id = $1 AND user_id = $2`,
+      [workout_id, user_id]
+    )
+    res.status(200).json({ message: "Routine deleted successfully"});
+    
+    
+
+
+  } catch (error) {
+    console.error("Error receiving data:", error);
+  }
+});
+
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

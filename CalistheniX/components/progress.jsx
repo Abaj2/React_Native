@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 const { width } = Dimensions.get("window");
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
-const Progress = ({ isDarkMode, skillsData }) => {
+const Progress = ({ isDarkMode, skillsData, progressId }) => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [selectedDataPoint, setSelectedDataPoint] = useState(null);
   const spinValue = new Animated.Value(0);
@@ -154,6 +154,7 @@ const Progress = ({ isDarkMode, skillsData }) => {
   };
 
   const handleToggleDropdown = (id) => {
+    console.log(id)
     if (openDropdownId === id) {
       Animated.timing(spinValue, {
         toValue: 0,
@@ -173,6 +174,13 @@ const Progress = ({ isDarkMode, skillsData }) => {
     }
     setSelectedDataPoint(null);
   };
+  
+  useEffect(() => {
+    console.log(progressId)
+    if(progressId) {
+      handleToggleDropdown(progressId);
+    }
+  }, [progressId])
 
   const getProgressColor = (progress) => {
     if (progress < 30) return "bg-red-500";
@@ -206,9 +214,9 @@ const Progress = ({ isDarkMode, skillsData }) => {
         showsVerticalScrollIndicator={false}
       >
         <View style={tw`px-5 mb-6`}>
-          <Text style={tw`text-3xl font-extrabold text-white mb-2`}>
+          {/*<Text style={tw`text-3xl font-extrabold text-white mb-2`}>
             Progress Overview
-          </Text>
+          </Text>*/}
           <View style={tw`flex-row justify-between items-center`}>
             <View style={tw`flex-row items-center`}>
               <Icon name="zap" size={20} color="#ffa500" />

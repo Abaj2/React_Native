@@ -47,6 +47,14 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState("Tab1");
 
+  const [progressId, setProgressId] = useState(null);
+
+  const handleProgressId = (id) => {
+    setProgressId(id);
+    console.log("Received progressId from Skill:", id);
+    setSelectedTab("Tab4");
+  };
+
   const [skill, setSkill] = useState("");
   const [progression, setProgression] = useState("");
   const [current, setCurrent] = useState();
@@ -208,16 +216,23 @@ const Home = () => {
     switch (selectedTab) {
       case "Tab1":
         return (
-          <View style={tw`px-5`}>
+          <ScrollView
+          horizontal={false}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={tw`px-5`}
+        >
             {skillsData.map((skillData, index) => (
               <Skill
                 key={index}
                 isDarkMode={isDarkMode}
                 skillData={skillData}
                 loadUserData={loadUserData}
+                selectedTab={selectedTab}
+                setSelectedTab={setSelectedTab}
+                onSendProgress={handleProgressId}
               />
             ))}
-          </View>
+         </ScrollView>
         );
       case "Tab4":
         return (
@@ -226,6 +241,8 @@ const Home = () => {
               isDarkMode={isDarkMode}
               userData={userData}
               skillsData={skillsData}
+              progressId={progressId}
+              
             />
           </View>
         );
@@ -252,6 +269,7 @@ const Home = () => {
       style={tw`flex-1`}
     >
       <SafeAreaView style={tw`flex-1`}>
+        
         <ScrollView
           contentContainerStyle={tw`pb-20`}
           showsVerticalScrollIndicator={false}

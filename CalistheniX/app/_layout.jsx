@@ -18,6 +18,7 @@ import CustomWorkout from "../components/customWorkout.jsx";
 import HistoryMain from "./historyMain.jsx";
 import SettingsMain from "./settingsMain.jsx";
 import ProfileScreen from "./profileScreen.jsx";
+import ProfileSettings from "./settingsPages/profileSettings.jsx";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -83,7 +84,7 @@ function TabNavigator() {
           ),
         }}
       />
-      <Tab.Screen
+      {/*<Tab.Screen
         name="History"
         component={HistoryMain}
         options={{
@@ -92,7 +93,7 @@ function TabNavigator() {
             <History size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
@@ -165,11 +166,11 @@ export default function RootLayout() {
         options={{ headerShown: false }}
         component={CustomWorkout}
       />
-      <Stack.Screen
+     {/* <Stack.Screen
         name="History-Main"
         options={{ headerShown: false }}
         component={HistoryMain}
-      />
+      /> */}
       <Stack.Screen
         name="Settings-Main"
         options={{ headerShown: false }}
@@ -179,6 +180,11 @@ export default function RootLayout() {
         name="Profile"
         options={{ headerShown: false }}
         component={ProfileScreen} />
+
+      <Stack.Screen
+        name="ProfileSettings"
+        options={{ headerShown: false }}
+        component={ProfileSettings} />
     </Stack.Navigator>
   );
 }

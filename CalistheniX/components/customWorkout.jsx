@@ -9,11 +9,15 @@ import {
   Dimensions,
   Alert,
   Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import tw from "twrnc";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 
@@ -25,11 +29,37 @@ const SERVER_URL = Platform.select({
 const CustomWorkout = () => {
   const navigation = useNavigation();
   const [title, setTitle] = useState("");
-  const [workoutSummary, setWorkoutSummary] = useState([]);
   const [currentExercise, setCurrentExercise] = useState(0);
   const [newWorkoutSummary, setNewWorkoutSummary] = useState("");
   const [timer, setTimer] = useState(0);
   const [timerRunning, setTimerRunning] = useState(true);
+
+  const route = useRoute();
+
+  const { workouts, exercisesArray, sets, workoutId, workoutName } =
+    route.params || {};
+  /*console.log(workouts);
+  console.log(exercisesArray);
+  console.log(sets);
+  console.log(workoutId);
+  console.log(workoutName);*/
+
+  const [workoutSummary, setWorkoutSummary] = useState(() => {
+    if (exercisesArray) {
+      return exercisesArray.map((exercise) => ({
+        name: exercise.name,
+        sets: [
+          {
+            reps: "",
+            duration: "",
+            notes: "",
+            type: "reps",
+          },
+        ],
+      }));
+    }
+    return [];
+  });
 
   useEffect(() => {
     let intervalId;
@@ -40,7 +70,6 @@ const CustomWorkout = () => {
     }
     return () => clearInterval(intervalId);
   }, [timerRunning]);
-
 
   const formatTimer = (totalSeconds) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -108,9 +137,20 @@ const CustomWorkout = () => {
     setWorkoutSummary(updatedWorkoutSummary);
   };
 
-  const cancelWorkout = () => {
-    navigation.goBack();
+  const stopTimer = () => {
+    
+    setTimerRunning(false);
   };
+  const cancelWorkout = () => {
+      stopTimer();
+      Alert.alert("Exit Workout?", "Your progress will be lost.", [
+        {
+          text: "OK",
+          onPress: () => navigation.navigate("Home"),
+          style: "cancel",
+        },
+      ]);
+    };
 
   const finishWorkout = async () => {
     try {
@@ -124,7 +164,6 @@ const CustomWorkout = () => {
         return;
       }
 
-    
       setTimerRunning(false);
 
       const response = await axios.post(
@@ -156,173 +195,203 @@ const CustomWorkout = () => {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-black`}>
-      <View style={tw`px-4 py-2 border-b border-gray-800`}>
-        <View style={tw`flex-row justify-between items-center`}>
-          <TouchableOpacity style={tw`p-2`} onPress={cancelWorkout}>
-            <Text style={tw`text-white text-xl`}></Text>
-          </TouchableOpacity>
-          <TextInput
-            style={tw`text-white font-bold text-lg text-center flex-1 mx-4`}
-            placeholder="Workout Title"
-            placeholderTextColor="#6b7280"
-            value={title}
-            onChangeText={setTitle}
-          />
-          <TouchableOpacity onPress={finishWorkout} style={tw`p-2`}>
-            <Text style={tw`text-orange-500 font-bold`}>Finish</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
+        <SafeAreaView style={tw`flex-1 w-full`}>
 
-      <View style={tw`p-4 border-b border-gray-800`}>
-        <View style={tw`flex-row gap-2`}>
-          <TextInput
-            style={tw`flex-1 bg-zinc-900 text-white p-2 rounded-lg`}
-            placeholder="Enter exercise name"
-            placeholderTextColor="#6b7280"
-            value={newWorkoutSummary}
-            onChangeText={setNewWorkoutSummary}
-            onSubmitEditing={addExercise}
-          />
-          <TouchableOpacity
-            onPress={addExercise}
-            style={tw`bg-orange-500 px-4 rounded-lg justify-center`}
-          >
-            <Text style={tw`text-white text-xl`}>+</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {workoutSummary.length > 0 && (
-        <View style={tw`h-14 border-b border-gray-800`}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {workoutSummary.map((exercise, index) => (
-              <TouchableOpacity
-                key={index}
-                style={tw`px-4 h-14 justify-center ${
-                  currentExercise === index
-                    ? "border-b-2 border-orange-500"
-                    : ""
-                }`}
-                onPress={() => setCurrentExercise(index)}
+          <View style={tw`w-full bg-black/30 border-b border-orange-500`}>
+            <View style={tw`flex-row w-full justify-between items-center px-4 py-6`}>
+              <TouchableOpacity 
+                style={tw`h-11 w-11 bg-black/60 rounded-full items-center justify-center border border-gray-800`} 
+                onPress={cancelWorkout}
               >
-                <Text style={tw`text-white font-bold`}>{exercise.name}</Text>
+                <Ionicons name="close" size={20} color="white" />
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
-
-      {workoutSummary.length > 0 && (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={tw`flex-1`}
-          contentContainerStyle={tw`p-4 pb-8`}
-        >
-          <View style={tw`space-y-4 mb-4`}>
-            {workoutSummary[currentExercise].sets.map((set, setIndex) => (
-              <View
-                key={setIndex}
-                style={tw`p-4 mb-4 bg-zinc-900 rounded-xl border border-gray-800`}
-              >
-                <Text style={tw`text-white font-bold mb-3`}>
-                  Set {setIndex + 1}
+              
+              {!workoutName ? (
+                <TextInput
+                  style={tw`text-white font-bold text-xl text-center flex-1 mx-4`}
+                  placeholder="Workout Title"
+                  placeholderTextColor="#6b7280"
+                  value={title}
+                  onChangeText={setTitle}
+                />
+              ) : (
+                <Text style={tw`text-white font-bold text-xl text-center flex-1 mx-4`}>
+                  {workoutName}
                 </Text>
-
-                <View style={tw`flex-row mb-3`}>
+              )}
+              
+              <TouchableOpacity 
+                style={tw`h-11 px-5 bg-orange-500 rounded-full items-center justify-center`}
+                onPress={finishWorkout}
+              >
+                <Text style={tw`text-white font-semibold text-base`}>Finish</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+  
+       
+          <View style={tw`px-4 py-5 bg-black/20 border-b border-gray-800/50`}>
+            <View style={tw`flex-row gap-3`}>
+              <TextInput
+                style={tw`flex-1 bg-black/60 text-white px-5 py-4 rounded-2xl text-base border border-gray-800/50`}
+                placeholder="Enter exercise name"
+                placeholderTextColor="#6b7280"
+                value={newWorkoutSummary}
+                onChangeText={setNewWorkoutSummary}
+                onSubmitEditing={addExercise}
+              />
+              <TouchableOpacity
+                onPress={addExercise}
+                style={tw`w-14 bg-orange-500 rounded-2xl items-center justify-center`}
+              >
+                <Ionicons name="add" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+  
+    
+          {workoutSummary.length > 0 && (
+            <View style={tw`border-b border-gray-800/50`}>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={tw`px-4 py-3`}
+              >
+                {workoutSummary.map((exercise, index) => (
                   <TouchableOpacity
-                    style={tw`flex-1 p-2 ${
-                      set.type === "reps" ? "bg-orange-500" : "bg-gray-800"
-                    } rounded-l-lg`}
-                    onPress={() =>
-                      updateSet(currentExercise, setIndex, "type", "reps")
-                    }
+                    key={index}
+                    style={tw`py-3 px-5 mr-2 rounded-2xl ${
+                      currentExercise === index 
+                        ? "bg-orange-500/10 border border-orange-500/30" 
+                        : "bg-black/40 border border-gray-800/50"
+                    }`}
+                    onPress={() => setCurrentExercise(index)}
                   >
-                    <Text style={tw`text-white text-center`}>Reps</Text>
+                    <Text style={tw`${
+                      currentExercise === index 
+                        ? "text-orange-400 font-bold" 
+                        : "text-gray-400 font-medium"
+                    }`}>
+                      {exercise.name}
+                    </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={tw`flex-1 p-2 ${
-                      set.type === "duration" ? "bg-orange-500" : "bg-gray-800"
-                    } rounded-r-lg`}
-                    onPress={() =>
-                      updateSet(currentExercise, setIndex, "type", "duration")
-                    }
+                ))}
+              </ScrollView>
+            </View>
+          )}
+  
+       
+          {workoutSummary.length > 0 && (
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              style={tw`flex-1`}
+              contentContainerStyle={tw`p-4 pb-8`}
+            >
+              <View style={tw`space-y-5`}>
+                {workoutSummary[currentExercise].sets.map((set, setIndex) => (
+                  <View
+                    key={setIndex}
+                    style={tw`rounded-3xl overflow-hidden border border-gray-800/50 bg-black/20`}
                   >
-                    <Text style={tw`text-white text-center`}>Duration</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={tw`flex-row gap-4`}>
-                  {set.type === "reps" ? (
-                    <View style={tw`flex-1`}>
-                      <Text style={tw`text-gray-400 text-sm`}>Reps</Text>
-                      <TextInput
-                        style={tw`bg-gray-800 text-white p-2 rounded-lg mt-1`}
-                        placeholder="e.g., 12"
-                        placeholderTextColor="#6b7280"
-                        value={set.reps}
-                        onChangeText={(value) =>
-                          updateSet(currentExercise, setIndex, "reps", value)
-                        }
-                        keyboardType="number-pad"
-                      />
-                    </View>
-                  ) : (
-                    <View style={tw`flex-1`}>
-                      <Text style={tw`text-gray-400 text-sm`}>Duration</Text>
-                      <TextInput
-                        style={tw`bg-gray-800 text-white p-2 rounded-lg mt-1`}
-                        placeholder="e.g., 30s"
-                        placeholderTextColor="#6b7280"
-                        value={set.duration}
-                        onChangeText={(value) =>
-                          updateSet(
-                            currentExercise,
-                            setIndex,
-                            "duration",
-                            value
-                          )
-                        }
-                      />
-                    </View>
-                  )}
-                </View>
-                <View style={tw`mt-3`}>
-                  <Text style={tw`text-gray-400 text-sm`}>Notes</Text>
-                  <TextInput
-                    style={tw`bg-gray-800 text-white p-2 rounded-lg mt-1`}
-                    placeholder="Optional notes"
-                    placeholderTextColor="#6b7280"
-                    value={set.notes}
-                    onChangeText={(value) =>
-                      updateSet(currentExercise, setIndex, "notes", value)
-                    }
-                  />
-                </View>
+                    <LinearGradient colors={["#000", "#141414"]} style={tw`px-5 py-4 border-b border-gray-800/30`}>
+                      <Text style={tw`text-white font-bold text-lg`}>Set {setIndex + 1}</Text>
+                    </LinearGradient>
+  
+                    <LinearGradient colors={["#000", "#0f0f0f"]} style={tw`p-5`}>
+                      <View style={tw`flex-row mb-5 bg-black/40 rounded-xl overflow-hidden border border-gray-800/50`}>
+                        <TouchableOpacity
+                          style={tw`flex-1 py-3 ${
+                            set.type === "reps" ? "bg-orange-500" : "bg-black/40"
+                          }`}
+                          onPress={() => updateSet(currentExercise, setIndex, "type", "reps")}
+                        >
+                          <Text style={tw`text-white font-semibold text-center`}>Reps</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={tw`flex-1 py-3 ${
+                            set.type === "duration" ? "bg-orange-500" : "bg-black/40"
+                          }`}
+                          onPress={() => updateSet(currentExercise, setIndex, "type", "duration")}
+                        >
+                          <Text style={tw`text-white font-semibold text-center`}>Duration</Text>
+                        </TouchableOpacity>
+                      </View>
+  
+                      <View style={tw`mb-5`}>
+                        {set.type === "reps" ? (
+                          <View>
+                            <Text style={tw`text-gray-400 text-sm mb-2 ml-1`}>Reps</Text>
+                            <TextInput
+                              style={tw`bg-black/60 text-white px-5 py-4 rounded-xl text-lg font-medium border border-gray-800/50`}
+                              placeholder="e.g., 12"
+                              placeholderTextColor="#6b7280"
+                              value={set.reps}
+                              onChangeText={(value) =>
+                                updateSet(currentExercise, setIndex, "reps", value)
+                              }
+                              keyboardType="number-pad"
+                            />
+                          </View>
+                        ) : (
+                          <View>
+                            <Text style={tw`text-gray-400 text-sm mb-2 ml-1`}>Duration</Text>
+                            <TextInput
+                              style={tw`bg-black/60 text-white px-5 py-4 rounded-xl text-lg font-medium border border-gray-800/50`}
+                              placeholder="e.g., 30s"
+                              placeholderTextColor="#6b7280"
+                              value={set.duration}
+                              onChangeText={(value) =>
+                                updateSet(currentExercise, setIndex, "duration", value)
+                              }
+                            />
+                          </View>
+                        )}
+                      </View>
+  
+                      <View>
+                        <Text style={tw`text-gray-400 text-sm mb-2 ml-1`}>Notes</Text>
+                        <TextInput
+                          style={tw`bg-black/60 text-white px-5 py-4 rounded-xl border border-gray-800/50`}
+                          placeholder="Add notes for this set..."
+                          placeholderTextColor="#6b7280"
+                          value={set.notes}
+                          onChangeText={(value) =>
+                            updateSet(currentExercise, setIndex, "notes", value)
+                          }
+                          multiline
+                        />
+                      </View>
+                    </LinearGradient>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
-
-          <View style={tw`flex-row gap-4 mb-8`}>
-            <TouchableOpacity
-              onPress={() => removeSet(currentExercise)}
-              style={tw`flex-1 bg-gray-800 p-4 rounded-xl`}
-            >
-              <Text style={tw`text-white font-bold text-center`}>
-                Remove Set
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => addSet(currentExercise)}
-              style={tw`flex-1 bg-gray-800 p-4 rounded-xl`}
-            >
-              <Text style={tw`text-white font-bold text-center`}>Add Set</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      )}
-    </SafeAreaView>
+  
+     
+              <View style={tw`flex-row justify-between mt-6`}>
+                <TouchableOpacity
+                  style={tw`flex-1 mr-2 px-6 py-4 rounded-2xl border border-gray-800/50 
+                           flex-row items-center justify-center bg-black/60`}
+                  onPress={() => removeSet(currentExercise)}
+                >
+                  <Ionicons name="remove-circle-outline" size={20} color="white" style={tw`mr-2`} />
+                  <Text style={tw`text-white font-semibold`}>Remove Set</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={tw`flex-1 ml-2 px-6 py-4 rounded-2xl bg-orange-500 
+                           flex-row items-center justify-center`}
+                  onPress={() => addSet(currentExercise)}
+                >
+                  <Ionicons name="add-circle-outline" size={20} color="white" style={tw`mr-2`} />
+                  <Text style={tw`text-white font-semibold`}>Add Set</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </LinearGradient>
+    </TouchableWithoutFeedback>
   );
 };
 

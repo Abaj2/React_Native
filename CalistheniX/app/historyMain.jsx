@@ -6,11 +6,14 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import { Search } from "lucide-react-native";
 import tw from "twrnc";
 import HistoryCard from "../components/historyCard.jsx";
 import { LinearGradient } from "expo-linear-gradient";
+
+const { width, height } = Dimensions.get("window");
 
 const HistoryMain = () => {
   const [workoutData, setWorkoutData] = useState([]);
@@ -67,12 +70,11 @@ const HistoryMain = () => {
   };
 
   return (
-    <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
+    /*<LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>*/
       <SafeAreaView style={tw`flex-1`}>
         <View style={tw`flex-1 px-4`}>
-          <Text style={tw`font-bold text-2xl text-white mt-5 text-center`}>
-            Workout History
-          </Text>
+         {/* <Text style={tw`font-bold text-2xl text-white mt-5 text-center`}>
+          </Text>*/}
 
           <View
             style={tw`border ${
@@ -101,12 +103,13 @@ const HistoryMain = () => {
             />
           </View>
 
-          <View style={tw`flex-row justify-around my-3`}>
+          <View style={[tw`flex-row gap-2 self-center my-3`, {}]}>
             {["Tab1", "Tab2"].map((tab, index) => (
               <TouchableOpacity
                 key={index}
                 style={[
-                  tw`px-6 py-2 rounded-full`,
+                  tw`py-2 rounded-xl`,
+                  { width: width * 0.44},
                   selectedTab === tab
                     ? isDarkMode
                       ? tw`bg-orange-500`
@@ -117,7 +120,7 @@ const HistoryMain = () => {
               >
                 <Text
                   style={[
-                    tw`text-base font-semibold`,
+                    tw`self-center text-base font-semibold`,
                     selectedTab === tab
                       ? tw`text-white`
                       : isDarkMode
@@ -125,7 +128,7 @@ const HistoryMain = () => {
                       : tw`text-gray-600`,
                   ]}
                 >
-                  {tab === "Tab1" ? "History" : "Custom"}
+                  {tab === "Tab1" ? "History" : "Routines"}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -134,7 +137,7 @@ const HistoryMain = () => {
           <View style={tw`flex-1`}>{renderContent()}</View>
         </View>
       </SafeAreaView>
-    </LinearGradient>
+    /*</LinearGradient>*/
   );
 };
 
