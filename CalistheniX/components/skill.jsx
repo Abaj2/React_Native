@@ -573,8 +573,8 @@ const Skill = ({
   
               <View style={tw`flex-row gap-4 mb-4`}>
                 <LinearGradient
-                  colors={["#363636", "#262626"]}
-                  style={tw`flex-1 p-4 rounded-xl border border-orange-500/20`}
+                  colors={["#000000", "#000000"]}
+                  style={tw`flex-1 p-4 rounded-xl border border-orange-500`}
                 >
                   <View style={tw`flex-row items-center gap-2 mb-1`}>
                     <Ionicons name="arrow-up" size={16} color="#f97316" />
@@ -586,8 +586,8 @@ const Skill = ({
                 </LinearGradient>
   
                 <LinearGradient
-                  colors={["#363636", "#262626"]}
-                  style={tw`flex-1 p-4 rounded-xl border border-orange-500/20`}
+                  colors={["#000000", "#000000"]}
+                  style={tw`flex-1 p-4 rounded-xl border border-orange-500`}
                 >
                   <View style={tw`flex-row items-center gap-2 mb-1`}>
                     <Ionicons name="flag" size={16} color="#f97316" />

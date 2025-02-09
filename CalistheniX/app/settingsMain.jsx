@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Dropdown } from "react-native-element-dropdown";
 
 import SettingsCard from "../components/settingsCard.jsx";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width, height } = Dimensions.get("window");
 
@@ -53,7 +54,8 @@ const SettingsMain = () => {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-black`}>
+    <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
+    <SafeAreaView style={tw`flex-1`}>
       <StatusBar barStyle="light-content" />
       <ScrollView contentContainerStyle={tw`pb-10`}>
   
@@ -213,6 +215,7 @@ const SettingsMain = () => {
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
+    </LinearGradient>
   );
 };
 

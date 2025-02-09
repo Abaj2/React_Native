@@ -32,7 +32,7 @@ const SettingsCard = ({ iconName, cardName }) => {
   return (
     <View
       style={[
-        tw`self-center mb-2 flex-row justify-between items-center bg-[#0e1419] rounded-xl`,
+        tw`self-center mb-2 flex-row justify-between items-center bg-zinc-900 rounded-xl`,
         { width: width * 0.9, height: height * 0.06 },
       ]}
     >

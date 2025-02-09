@@ -5,8 +5,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
-import { Home as HomeIcon, Dumbbell, User, History } from "lucide-react-native";
+import { Home as HomeIcon, Dumbbell, User, History, BarChart, ListOrdered, BarChart2 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { MaterialIcons } from "@expo/vector-icons";
 
 import SignIn from "./auth/signIn.jsx";
 import SignUp from "./auth/signUp.jsx";
@@ -19,6 +20,7 @@ import HistoryMain from "./historyMain.jsx";
 import SettingsMain from "./settingsMain.jsx";
 import ProfileScreen from "./profileScreen.jsx";
 import ProfileSettings from "./settingsPages/profileSettings.jsx";
+import Leaderboard from "./leaderboard.jsx";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -94,6 +96,15 @@ function TabNavigator() {
           ),
         }}
       /> */}
+      <Tab.Screen
+      name="Leaderboard"
+      component={Leaderboard}
+      options={{
+        tabBarLabel: "Leaderboard",
+        tabBarIcon: ({ color, size, focused }) => (
+          <MaterialIcons name="leaderboard" size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
+        ),
+      }} />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}

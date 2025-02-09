@@ -8,6 +8,7 @@ import {
   Image,
   Platform,
   ScrollView,
+  StyleSheet,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
@@ -239,29 +240,27 @@ const ProfileScreen = () => {
     const saturday = new Date(sunday);
     saturday.setDate(sunday.getDate() + 6);
     saturday.setHours(23, 59, 59, 999);
-
+  
     const groupedData = {};
     const originalValues = {};
     for (let i = 0; i < workoutDates.length; i++) {
       const dateObj = new Date(workoutDates[i].date);
       if (dateObj >= sunday && dateObj <= saturday) {
         const dateKey = dateObj.toISOString().split("T")[0];
-        const [hh, mm, ss] = workoutTimes[i].workout_time
-          .split(":")
-          .map(Number);
+        const [hh, mm, ss] = workoutTimes[i].workout_time.split(":").map(Number);
         const minutes = (hh * 3600 + mm * 60 + ss) / 60;
         groupedData[dateKey] = (groupedData[dateKey] || 0) + minutes;
         originalValues[dateKey] = minutes;
       }
     }
-
+  
     const weekDates = [];
     let current = new Date(sunday);
     while (current <= saturday) {
       weekDates.push(current.toISOString().split("T")[0]);
       current.setDate(current.getDate() + 1);
     }
-
+  
     const { dataValues, originalValuesArray } = weekDates.reduce(
       (acc, date) => {
         const value = groupedData[date] || 0;
@@ -271,10 +270,10 @@ const ProfileScreen = () => {
       },
       { dataValues: [], originalValuesArray: [] }
     );
-
+  
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const labels = weekDates.map((date) => dayNames[new Date(date).getDay()]);
-
+  
     const screenWidth = Dimensions.get("window").width;
     const chartWidth = screenWidth - 40;
     const [tooltipPos, setTooltipPos] = useState({
@@ -284,22 +283,12 @@ const ProfileScreen = () => {
       value: 0,
       index: null,
     });
-
+  
     return (
       <View style={{ paddingHorizontal: 20, paddingTop: 40 }}>
-        <Text
-          style={{
-            color: "#fff",
-            fontWeight: "bold",
-            textAlign: "center",
-            fontSize: 20,
-            marginBottom: 16,
-          }}
-        >
-          Daily Workout Duration
-        </Text>
-
-        <View style={{ position: "relative", direction: "ltr" }}>
+        <Text style={styles.chartTitle}>Daily Workout Duration</Text>
+  
+        <View style={[styles.chartContainer, { borderColor: "#f97316" }]}>
           <BarChart
             data={{
               labels: labels,
@@ -310,26 +299,25 @@ const ProfileScreen = () => {
             fromZero
             chartConfig={{
               backgroundColor: "#000",
-              backgroundGradientFrom: "#1a1a1a",
+              backgroundGradientFrom: "#0f0f0f",
               backgroundGradientTo: "#000",
               decimalPlaces: 0,
-
               color: () => `rgba(249, 115, 22, 1)`,
-              labelColor: () => `rgba(255, 255, 255, 1)`,
+              labelColor: () => `rgba(255, 255, 255, 0.8)`,
               style: { borderRadius: 16 },
               formatYLabel: (value) => `${value}m`,
-              propsForVerticalLabels: { fill: "#fff" },
-              propsForHorizontalLabels: { fill: "#fff" },
+              propsForVerticalLabels: { fill: "#fff", fontSize: 12 },
+              propsForHorizontalLabels: { fill: "#fff", fontSize: 12 },
               maxValue: 60,
               segments: 4,
-
               propsForBackgroundLines: {
-                stroke: "rgba(128, 128, 128, 0.3)",
-                strokeDasharray: "",
+                stroke: "rgba(255, 255, 255, 0.1)",
+                strokeWidth: 1,
               },
-
-              fillShadowGradient: "rgba(249, 115, 22, 1)",
+              fillShadowGradient: "#fb923c",
               fillShadowGradientOpacity: 1,
+              barPercentage: 0.5,
+              useShadowColorFromDataset: false,
             }}
             style={{
               marginVertical: 8,
@@ -339,11 +327,9 @@ const ProfileScreen = () => {
             verticalLabelRotation={0}
             showValuesOnTopOfBars={false}
             onDataPointClick={(data) => {
-              const isSamePoint =
-                tooltipPos.x === data.x && tooltipPos.y === data.y;
+              const isSamePoint = tooltipPos.x === data.x && tooltipPos.y === data.y;
               setTooltipPos({
                 x: data.x,
-
                 y: data.y - 50,
                 value: originalValuesArray[data.index],
                 index: data.index,
@@ -351,69 +337,97 @@ const ProfileScreen = () => {
               });
             }}
           />
-          <Svg
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              height: 250,
-              width: chartWidth,
-            }}
-          >
+  
+          <Svg style={styles.gridLine}>
             <Line
               x1="70"
               y1="0"
               x2="70"
               y2="250"
-              stroke="rgba(128, 128, 128, 0.3)"
+              stroke="rgba(255, 255, 255, 0.1)"
               strokeWidth="1"
             />
           </Svg>
-
+  
           {tooltipPos.visible && (
-            <View
-              style={{
-                position: "absolute",
-                left:
-                  tooltipPos.x > chartWidth - 70
-                    ? chartWidth - 70
-                    : tooltipPos.x - 25,
+            <View style={[
+              styles.tooltip,
+              {
+                left: tooltipPos.x > chartWidth - 70 ? chartWidth - 70 : tooltipPos.x - 25,
                 top: tooltipPos.y < 0 ? 0 : tooltipPos.y,
-                backgroundColor: "rgba(249, 115, 22, 0.9)",
-                padding: 8,
-                borderRadius: 6,
-                flexDirection: "row",
-                alignItems: "center",
-                zIndex: 1000,
-                elevation: 10,
-              }}
-            >
-              <Text style={{ color: "white", fontWeight: "bold" }}>
+              }
+            ]}>
+              <Text style={styles.tooltipText}>
                 {Math.round(tooltipPos.value)}m
               </Text>
-              <View
-                style={{
-                  position: "absolute",
-                  bottom: -10,
-                  left: 20,
-                  width: 0,
-                  height: 0,
-                  backgroundColor: "transparent",
-                  borderStyle: "solid",
-                  borderLeftWidth: 5,
-                  borderRightWidth: 5,
-                  borderTopWidth: 10,
-                  borderLeftColor: "transparent",
-                  borderRightColor: "transparent",
-                  borderTopColor: "rgba(249, 115, 22, 0.9)",
-                }}
-              />
+              <View style={styles.tooltipArrow} />
             </View>
           )}
         </View>
       </View>
     );
   };
+  
+  const styles = StyleSheet.create({
+    chartTitle: {
+      color: "#fff",
+      fontWeight: "bold",
+      textAlign: "center",
+      fontSize: 20,
+      marginBottom: 24,
+      letterSpacing: 0.5,
+    },
+    chartContainer: {
+      position: "relative",
+      direction: "ltr",
+      borderWidth: 2,
+      borderRadius: 16,
+      backgroundColor: "#0f0f0f",
+      overflow: "hidden",
+    },
+    gridLine: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      height: 250,
+      width: "100%",
+    },
+    tooltip: {
+      position: "absolute",
+      backgroundColor: "rgba(249, 115, 22, 0.95)",
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      zIndex: 1000,
+      elevation: 10,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+    },
+    tooltipText: {
+      color: "white",
+      fontWeight: "700",
+      fontSize: 14,
+      includeFontPadding: false,
+    },
+    tooltipArrow: {
+      position: "absolute",
+      bottom: -10,
+      left: 20,
+      width: 0,
+      height: 0,
+      borderStyle: "solid",
+      borderLeftWidth: 5,
+      borderRightWidth: 5,
+      borderTopWidth: 10,
+      borderLeftColor: "transparent",
+      borderRightColor: "transparent",
+      borderTopColor: "rgba(249, 115, 22, 0.95)",
+    },
+  });
 
   const calculateTotalDuration = (durations) => {
     if (!durations || !Array.isArray(durations)) {
@@ -488,9 +502,11 @@ const ProfileScreen = () => {
           </LinearGradient>
           {profileBarGraph()}
           <LinearGradient
-            colors={["#f97316", "#ea580c"]}
-            style={tw`p-7 mx-5 my-6 rounded-xl shadow-lg`}
-          >
+  colors={["rgba(249,115,22,0.4)", "rgba(234,88,12,0.1)"]} 
+  start={{ x: 0, y: 0 }} 
+  end={{ x: 1, y: 1 }}   
+  style={[tw`p-7 mx-5 my-6 rounded-xl shadow-lg`, {}]} 
+>
             <View style={tw`flex-row justify-evenly items-center`}>
               <View style={tw`flex-1 items-center`}>
                 <Text style={tw`text-white text-2xl font-bold text-center`}>

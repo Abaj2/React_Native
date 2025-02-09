@@ -208,7 +208,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1`}>
+    <SafeAreaView style={[tw`flex-1 self-center`, {width}]}>
       <ScrollView
         contentContainerStyle={tw`py-6`}
         showsVerticalScrollIndicator={false}
@@ -243,8 +243,9 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
             <View
               key={item.id}
               style={[
-                tw`mb-4 border border-zinc-700 w-full self-center mx-5 rounded-2xl overflow-hidden`,
+                tw`mb-4 border border-orange-500 self-center mx-5 rounded-2xl overflow-hidden`,
                 {
+                  width: width * 0.95,
                   shadowColor: "#ffa500",
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: openDropdownId === item.id ? 0.3 : 0.1,

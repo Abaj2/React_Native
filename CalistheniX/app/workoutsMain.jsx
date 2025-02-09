@@ -196,7 +196,7 @@ const WorkoutsMain = () => {
     } catch (err) {
       console.error(err);
     }
-  }
+  };
 
   return (
     <LinearGradient colors={["#09090b", "#18181b"]} style={tw`flex-1`}>
@@ -223,8 +223,12 @@ const WorkoutsMain = () => {
 
             <View style={tw`flex-row justify-between mb-6`}>
               <LinearGradient
-                colors={["#f97316", "#ea580c"]}
-                style={tw`p-4 rounded-2xl w-[48%]`}
+                colors={["rgba(249,115,22,0.4)", "rgba(234,88,12,0.1)"]}
+                end={{ x: 1, y: 1 }}
+                style={[
+                  tw`p-4 rounded-2xl w-[48%] border border-orange-500`,
+                  {},
+                ]}
               >
                 <Text style={tw`text-white text-xs font-bold mb-1`}>
                   Active
@@ -279,7 +283,7 @@ const WorkoutsMain = () => {
             </View>
           </View>
 
-          <View style={[tw`px-5 mb-6`, { height: height * 0.4 }]}>
+          <View style={[tw`px-5 mb-6`, { height: height * 0.5 }]}>
             <View style={tw`flex-row justify-between items-center mb-4`}>
               <Text style={tw`text-xl font-black text-white`}>
                 Your Routines
@@ -290,7 +294,7 @@ const WorkoutsMain = () => {
                 </Text> */}
               </TouchableOpacity>
             </View>
-            <ScrollView>
+            <ScrollView style={[tw``, {}]}>
               {workouts.length === 0 ? (
                 <LinearGradient
                   colors={["#1a1a1a", "#000000"]}
@@ -305,9 +309,11 @@ const WorkoutsMain = () => {
                   <LinearGradient
                     key={workout.workout_id}
                     colors={["#1a1a1a", "#000000"]}
-                    style={tw`rounded-3xl p-6 mb-4`}
+                    style={tw`border-2 border-orange-500 rounded-3xl p-6 mb-4`}
                   >
-                    <View style={tw`flex-row justify-between items-start mb-4`}>
+                    <View
+                      style={tw` flex-row justify-between items-start mb-4`}
+                    >
                       <Text
                         style={tw`text-white text-lg font-bold max-w-[60%]`}
                       >
@@ -319,15 +325,19 @@ const WorkoutsMain = () => {
                         </Text>
                       </View>
                       <View>
-                      <TouchableOpacity onPress={() => deleteRoutine(workout.workout_id)}>
-                        <View style={tw`bg-red-500/10 px-2 py-1 rounded-full`}>
-                          <MaterialIcons
-                            name="delete-outline"
-                            size={22}
-                            color="#ef4444"
-                          />
-                        </View>
-                      </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => deleteRoutine(workout.workout_id)}
+                        >
+                          <View
+                            style={tw`bg-red-500/10 px-2 py-1 rounded-full`}
+                          >
+                            <MaterialIcons
+                              name="delete-outline"
+                              size={22}
+                              color="#ef4444"
+                            />
+                          </View>
+                        </TouchableOpacity>
                       </View>
                     </View>
                     <View style={tw`flex-row items-center mb-4`}>

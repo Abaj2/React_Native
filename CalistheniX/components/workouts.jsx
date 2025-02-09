@@ -652,10 +652,10 @@ const Workouts = ({ isDarkMode }) => {
           >
             <LinearGradient colors={["#f97316", "#ea580c"]} style={tw`p-6`}>
               <Text style={tw`text-white font-black text-xl mb-2`}>
-                Custom Routine
+                Custom Workout
               </Text>
               <Text style={tw`text-orange-100 text-sm mb-4`}>
-                Build your personalised workout
+                Build your own workout
               </Text>
               <View style={tw`flex-row items-center`}>
                 <View style={tw`bg-white/10 p-2 rounded-full`}>
