@@ -29,7 +29,9 @@ CREATE TABLE public.exercises (
     exercise_id integer NOT NULL,
     workout_id integer,
     name character varying(255),
-    user_id integer
+    user_id integer,
+    custom boolean DEFAULT false,
+    routine boolean DEFAULT true
 );
 
 
@@ -68,7 +70,9 @@ CREATE TABLE public.sets (
     duration integer,
     notes text,
     workout_id integer,
-    user_id integer
+    user_id integer,
+    custom boolean DEFAULT false,
+    routine boolean DEFAULT true
 );
 
 
@@ -184,7 +188,8 @@ CREATE TABLE public.workouts (
     level character varying(255),
     date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     custom boolean DEFAULT false,
-    duration text
+    workout_time text,
+    routine boolean DEFAULT true
 );
 
 
@@ -251,13 +256,20 @@ ALTER TABLE ONLY public.workouts ALTER COLUMN workout_id SET DEFAULT nextval('pu
 -- Data for Name: exercises; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.exercises (exercise_id, workout_id, name, user_id) FROM stdin;
-84	69	Hello	16
-85	70	Weighted Pull-Ups	16
-86	70	Band-Assisted Muscle-Ups	16
-87	70	Negative Muscle-Ups	16
-88	71	Advanced Tuck Hold	16
-89	71	Single Leg Extensions	16
+COPY public.exercises (exercise_id, workout_id, name, user_id, custom, routine) FROM stdin;
+85	70	Weighted Pull-Ups	16	f	t
+86	70	Band-Assisted Muscle-Ups	16	f	t
+87	70	Negative Muscle-Ups	16	f	t
+88	71	Advanced Tuck Hold	16	f	t
+89	71	Single Leg Extensions	16	f	t
+91	73	g	16	t	t
+92	74	vbnn	16	t	t
+95	77	ccvbbgfcc	16	t	t
+96	77	gggggg	16	t	t
+97	78	Advanced Tuck Hold	16	f	t
+98	78	Single Leg Extensions	16	f	t
+93	75	test	16	t	f
+94	76	k	16	t	f
 \.
 
 
@@ -265,24 +277,37 @@ COPY public.exercises (exercise_id, workout_id, name, user_id) FROM stdin;
 -- Data for Name: sets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.sets (set_id, exercise_id, reps, duration, notes, workout_id, user_id) FROM stdin;
-184	84	4	\N		69	16
-185	85	4	\N		70	16
-186	85	5	\N		70	16
-187	85	\N	\N		70	16
-188	86	\N	\N		70	16
-189	86	\N	\N		70	16
-190	86	\N	\N		70	16
-191	87	\N	\N		70	16
-192	87	\N	\N		70	16
-193	87	\N	\N		70	16
-194	88	\N	4		71	16
-195	88	\N	\N		71	16
-196	88	\N	\N		71	16
-197	88	\N	\N		71	16
-198	89	\N	\N		71	16
-199	89	\N	\N		71	16
-200	89	\N	\N		71	16
+COPY public.sets (set_id, exercise_id, reps, duration, notes, workout_id, user_id, custom, routine) FROM stdin;
+185	85	4	\N		70	16	f	t
+186	85	5	\N		70	16	f	t
+187	85	\N	\N		70	16	f	t
+188	86	\N	\N		70	16	f	t
+189	86	\N	\N		70	16	f	t
+190	86	\N	\N		70	16	f	t
+191	87	\N	\N		70	16	f	t
+192	87	\N	\N		70	16	f	t
+193	87	\N	\N		70	16	f	t
+194	88	\N	4		71	16	f	t
+195	88	\N	\N		71	16	f	t
+196	88	\N	\N		71	16	f	t
+197	88	\N	\N		71	16	f	t
+198	89	\N	\N		71	16	f	t
+199	89	\N	\N		71	16	f	t
+200	89	\N	\N		71	16	f	t
+202	91	\N	\N		73	16	t	t
+203	92	5	\N		74	16	t	t
+206	95	2	\N		77	16	t	t
+207	95	5	\N		77	16	t	t
+208	96	\N	\N		77	16	t	t
+209	97	\N	4		78	16	f	t
+210	97	\N	\N		78	16	f	t
+211	97	\N	\N		78	16	f	t
+212	97	\N	\N		78	16	f	t
+213	98	\N	\N		78	16	f	t
+214	98	\N	\N		78	16	f	t
+215	98	\N	\N		78	16	f	t
+204	93	5	\N		75	16	t	f
+205	94	\N	\N		76	16	t	f
 \.
 
 
@@ -291,7 +316,8 @@ COPY public.sets (set_id, exercise_id, reps, duration, notes, workout_id, user_i
 --
 
 COPY public.skills (id, skill, progressions, user_id, current, goal, date, date_formatted) FROM stdin;
-47	Front Lever	{"Advanced Tuck",Tuck}	16	[[3, 4, 6, 13, 14, 16, 18, 19, 6], [5, 7]]	[[8, 20], [8]]	[[1737336604471, 1737336616895, 1737348015519, 1737348059825, 1737349728465, 1737349756343, 1737349763407, 1737349775370, 1738206525716], [1737336610879, 1737371470293]]	[["20/01/25 12:30", "20/01/25 12:30", "20/01/25 15:40", "20/01/25 15:40", "20/01/25 16:08", "20/01/25 16:09", "20/01/25 16:09", "20/01/25 16:09", "30/01/25 14:08"], ["20/01/25 12:30", "20/01/25 22:11"]]
+50	Muscle Up	{Full}	16	[[3, 4]]	[[4]]	[[1738664503738, 1738996195544]]	[["04/02/25 21:21", "08/02/25 17:29"]]
+47	Front Lever	{"Advanced Tuck",Tuck,"Full FL"}	16	[[3, 4, 6, 13, 14, 16, 18, 19, 6, 2], [5, 7], [4]]	[[8, 20], [8], [5]]	[[1737336604471, 1737336616895, 1737348015519, 1737348059825, 1737349728465, 1737349756343, 1737349763407, 1737349775370, 1738206525716, 1738402074082], [1737336610879, 1737371470293], [1738391075397]]	[["20/01/25 12:30", "20/01/25 12:30", "20/01/25 15:40", "20/01/25 15:40", "20/01/25 16:08", "20/01/25 16:09", "20/01/25 16:09", "20/01/25 16:09", "30/01/25 14:08", "01/02/25 20:27"], ["20/01/25 12:30", "20/01/25 22:11"], ["01/02/25 17:24"]]
 \.
 
 
@@ -314,10 +340,15 @@ COPY public.users (user_id, email, password_hash, username, profile_pic) FROM st
 -- Data for Name: workouts; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.workouts (workout_id, user_id, title, level, date, custom, duration) FROM stdin;
-69	16	Test	Custom	2025-01-30 12:10:51.820617	t	00:00:10
-70	16	Muscle Up	Advanced	2025-01-30 12:15:07.755993	f	00:00:11
-71	16	Front Lever	Intermediate	2025-01-30 12:54:18.450316	f	00:01:06
+COPY public.workouts (workout_id, user_id, title, level, date, custom, workout_time, routine) FROM stdin;
+70	16	Muscle Up	Advanced	2025-01-30 12:15:07.755993	f	00:00:11	t
+71	16	Front Lever	Intermediate	2025-01-30 12:54:18.450316	f	00:01:06	t
+77	16	k	Custom	2025-02-04 15:14:31.167652	t	00:00:24	t
+78	16	Front Lever	Intermediate	2025-02-04 17:40:51.68788	f	00:54:43	t
+74	16	f	Custom	2025-02-03 12:54:23.120315	t	00:23:12	t
+73	16	ggffg	Custom	2025-02-02 12:30:01.079929	t	00:55:12	t
+75	16	Hello	Custom	2025-02-04 11:30:36.923563	t	00:00:10	f
+76	16	s	Custom	2025-02-04 11:35:08.848708	t	00:23:12	f
 \.
 
 
@@ -325,21 +356,21 @@ COPY public.workouts (workout_id, user_id, title, level, date, custom, duration)
 -- Name: exercises_exercise_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.exercises_exercise_id_seq', 89, true);
+SELECT pg_catalog.setval('public.exercises_exercise_id_seq', 98, true);
 
 
 --
 -- Name: sets_set_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.sets_set_id_seq', 200, true);
+SELECT pg_catalog.setval('public.sets_set_id_seq', 215, true);
 
 
 --
 -- Name: skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.skills_id_seq', 48, true);
+SELECT pg_catalog.setval('public.skills_id_seq', 50, true);
 
 
 --
@@ -353,7 +384,7 @@ SELECT pg_catalog.setval('public.users_user_id_seq', 16, true);
 -- Name: workouts_workout_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.workouts_workout_id_seq', 71, true);
+SELECT pg_catalog.setval('public.workouts_workout_id_seq', 78, true);
 
 
 --
