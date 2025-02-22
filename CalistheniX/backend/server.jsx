@@ -1,5 +1,6 @@
 const express = require("express");
 const { OAuth2Client } = require("google-auth-library");
+const nodemailer = require("nodemailer");
 const { Pool } = require("pg");
 const cors = require("cors");
 const multer = require("multer");
@@ -22,6 +23,14 @@ const pool = new Pool({
   database: "calisthenix",
   password: postgresPassword,
   port: 5432,
+});
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 pool
@@ -440,7 +449,6 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
   }
 });
 app.get("/getworkouts", verifyToken, async (req, res) => {
-
   const userId = req.user.user_id;
 
   const userWorkouts = await pool.query(
@@ -516,7 +524,7 @@ app.post("/postcustomworkout", verifyToken, async (req, res) => {
             set.notes,
             user_id,
             workout_id,
-            true
+            true,
           ]
         );
       }
@@ -613,9 +621,8 @@ WHERE date >= date_trunc('week', NOW()) AND date < date_trunc('week', NOW()) + I
     const getCustomWorkouts = await pool.query(
       `SELECT title FROM workouts WHERE custom = true AND user_id = $1 AND routine = true`,
       [user_id]
-    )
+    );
     const getCustomWorkoutsLength = getCustomWorkouts.rows.length;
-
 
     res.status(200).json({
       thisWeekDuration: thisWeekDuration.rows[0],
@@ -629,101 +636,192 @@ WHERE date >= date_trunc('week', NOW()) AND date < date_trunc('week', NOW()) + I
 });
 
 app.get("/getcustomworkouts", verifyToken, async (req, res) => {
-
   try {
-  const userId = req.user.user_id;
+    const userId = req.user.user_id;
 
-  const userWorkouts = await pool.query(
-    "SELECT * FROM workouts WHERE user_id = $1 AND level = 'Custom' AND routine = true",
-    [userId]
-  );
-  const userExercises = await pool.query(
-    "SELECT * FROM exercises WHERE user_id = $1 AND custom = true AND routine = true",
-    [userId]
-  );
-  const userSets = await pool.query("SELECT * FROM sets WHERE user_id = $1 AND custom = true AND routine = true", [
-    userId,
-  ]);
+    const userWorkouts = await pool.query(
+      "SELECT * FROM workouts WHERE user_id = $1 AND level = 'Custom' AND routine = true",
+      [userId]
+    );
+    const userExercises = await pool.query(
+      "SELECT * FROM exercises WHERE user_id = $1 AND custom = true AND routine = true",
+      [userId]
+    );
+    const userSets = await pool.query(
+      "SELECT * FROM sets WHERE user_id = $1 AND custom = true AND routine = true",
+      [userId]
+    );
 
-  res.status(200).json({
-    workouts: userWorkouts.rows,
-    exercises: userExercises.rows,
-    sets: userSets.rows,
-  });
-} catch (error) {
-  console.error("Error getting custom workouts:", error);
-  res.status(500).send({ message: "Failed to get data" });
-}
+    res.status(200).json({
+      workouts: userWorkouts.rows,
+      exercises: userExercises.rows,
+      sets: userSets.rows,
+    });
+  } catch (error) {
+    console.error("Error getting custom workouts:", error);
+    res.status(500).send({ message: "Failed to get data" });
+  }
 });
 
 app.get("/getprofilegraph", verifyToken, async (req, res) => {
   const userId = req.user.user_id;
 
-  const workoutDates = await pool.query(`SELECT date FROM workouts WHERE user_id = $1`, [userId])
-  const workoutTime = await pool.query(`SELECT workout_time FROM workouts WHERE user_id = $1`, [userId])
+  const workoutDates = await pool.query(
+    `SELECT date FROM workouts WHERE user_id = $1`,
+    [userId]
+  );
+  const workoutTime = await pool.query(
+    `SELECT workout_time FROM workouts WHERE user_id = $1`,
+    [userId]
+  );
 
   console.log(workoutDates.rows);
-  console.log(workoutTime.rows)
+  console.log(workoutTime.rows);
 
   res.status(200).json({
     workoutDates: workoutDates.rows,
     workoutTime: workoutTime.rows,
-  })
+  });
 
   try {
-    console.log("Received get request")
+    console.log("Received get request");
   } catch (error) {
     console.error("Error getting graph data:", error);
     res.status(500).send({ message: "Failed to get data" });
   }
-
-})
+});
 
 app.post("/sendotp", verifyToken, async (req, res) => {
   try {
-    const { user_id, otp } = req.body;
-    console.log(user_id || "empty user id", otp || "empty otp")
+    const { user_id, otp, newUsername, newEmail, oldEmail } = req.body;
+    // console.log(user_id || "empty user id", otp || "empty otp", newUsername || "empty username", newEmail || "empty username", oldEmail || "no email");
 
     if (!user_id || !otp) {
       return res.status(400).json({ message: "user_id and otp are required" });
     }
 
-    console.log(`Received OTP for user ${user_id}: ${otp}`);
+    if (!oldEmail) {
+      return res.status(400).json({ message: "Old email is required" });
+    }
 
-    res.status(200).json({ message: "OTP received successfully" });
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: oldEmail,
+      subject: "Your OTP Code for CalistheniX",
+      text: `Your OTP code is: ${otp}`,
+      html: `<p>Your OTP code is: <strong>${otp}</strong></p>`,
+    };
 
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending OTP email:", error);
+        return res.status(500).json({ message: "Failed to send OTP email" });
+      }
+      console.log("Email sent: " + info.response);
+      res.status(200).json({ message: `OTP sent successfully to ${oldEmail}` });
+    });
   } catch (error) {
     console.error("Error receiving OTP:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-app.post("/deleteroutine", verifyToken, async (req, res) => {
-  const { user_id, workout_id} = req.body;
+app.post("/editprofilesettings", verifyToken, async (req, res) => {
+  const { user_id, otp, newUsername, newEmail, oldEmail } = req.body;
+
   try {
-    const deleteSets = await pool.query(`UPDATE sets SET routine = false WHERE workout_id = $1 AND user_id = $2`,
+    console.log("inserting data");
+    const updateProfile = await pool.query(
+      `UPDATE users SET email = $1, username = $2 WHERE user_id = $3`,
+      [newEmail.trim(), newUsername.trim(), user_id]
+    );
+    res.status(200).json({ message: "Sucessfully updated profile settings" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error" });
+  }
+});
+
+app.post("/deleteroutine", verifyToken, async (req, res) => {
+  const { user_id, workout_id } = req.body;
+  try {
+    const deleteSets = await pool.query(
+      `UPDATE sets SET routine = false WHERE workout_id = $1 AND user_id = $2`,
       [workout_id, user_id]
-    )
+    );
 
-    const deleteExercises = await pool.query(`UPDATE exercises SET routine = false WHERE workout_id = $1 AND user_id = $2`,
+    const deleteExercises = await pool.query(
+      `UPDATE exercises SET routine = false WHERE workout_id = $1 AND user_id = $2`,
       [workout_id, user_id]
-    )
+    );
 
-    const deleteWorkout = await pool.query(`UPDATE workouts SET routine = false WHERE workout_id = $1 AND user_id = $2`,
+    const deleteWorkout = await pool.query(
+      `UPDATE workouts SET routine = false WHERE workout_id = $1 AND user_id = $2`,
       [workout_id, user_id]
-    )
-    res.status(200).json({ message: "Routine deleted successfully"});
-    
-    
-
-
+    );
+    res.status(200).json({ message: "Routine deleted successfully" });
   } catch (error) {
     console.error("Error receiving data:", error);
   }
 });
 
+app.get("/leaderboardstats", verifyToken, async (req, res) => {
+  try {
+    const workoutStats = await pool.query(
+      `SELECT workout_id, user_id FROM workouts WHERE DATE_TRUNC('month', date) = DATE_TRUNC('month', CURRENT_DATE)`,
+      []
+    );
 
+    const workoutTime = await pool.query(
+      `SELECT workout_id, user_id, workout_time FROM workouts WHERE DATE_TRUNC('month', date) = DATE_TRUNC('month', CURRENT_DATE)`
+    );
 
+    const users = await pool.query(`SELECT user_id, username FROM users`);
+
+    console.log(workoutTime.rows);
+    console.log(users.rows);
+
+    res.status(200).json({
+      workoutStats: workoutStats.rows,
+      users: users.rows,
+      workoutTime: workoutTime.rows,
+    });
+  } catch (error) {
+    console.error("Error getting data:", error);
+  }
+});
+
+app.get("/getusers", verifyToken, async (req, res) => {
+
+  try {
+    const { userId } = req.query;
+    const users = await pool.query(`SELECT user_id, username FROM users WHERE user_id != $1`, 
+      [userId]
+    );
+
+    const workouts = await pool.query(
+      `SELECT user_id, COUNT(*) AS workout_count FROM workouts GROUP BY user_id ORDER BY workout_count DESC`
+    );
+
+    const followers = await pool.query(
+      `SELECT follower_id, following_id
+FROM followers;
+
+`
+    );
+  
+
+    
+    res.status(200).json({
+      users: users.rows,
+      workouts: workouts.rows,
+      followers: followers.rows,
+      current_user_id: userId,
+    })
+  } catch (err) {
+    console.error("Error getting data:", err);
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

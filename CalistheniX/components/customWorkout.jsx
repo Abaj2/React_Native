@@ -196,8 +196,11 @@ const CustomWorkout = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      
       <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
+
         <SafeAreaView style={tw`flex-1 w-full`}>
+          <ScrollView showsVerticalScrollIndicator={false}>
 
           <View style={tw`w-full bg-black/30 border-b border-orange-500`}>
             <View style={tw`flex-row w-full justify-between items-center px-4 py-6`}>
@@ -223,7 +226,7 @@ const CustomWorkout = () => {
               )}
               
               <TouchableOpacity 
-                style={tw`h-11 px-5 bg-orange-500 rounded-full items-center justify-center`}
+                style={tw`h-9 px-3 bg-orange-500 rounded-full items-center justify-center`}
                 onPress={finishWorkout}
               >
                 <Text style={tw`text-white font-semibold text-base`}>Finish</Text>
@@ -235,7 +238,7 @@ const CustomWorkout = () => {
           <View style={tw`px-4 py-5 bg-black/20 border-b border-gray-800/50`}>
             <View style={tw`flex-row gap-3`}>
               <TextInput
-                style={tw`flex-1 bg-black/60 text-white px-5 py-4 rounded-2xl text-base border border-gray-800/50`}
+                style={tw`flex-1 bg-black/60 text-white px-5 py-2 rounded-2xl text-base border border-gray-800/50`}
                 placeholder="Enter exercise name"
                 placeholderTextColor="#6b7280"
                 value={newWorkoutSummary}
@@ -244,7 +247,7 @@ const CustomWorkout = () => {
               />
               <TouchableOpacity
                 onPress={addExercise}
-                style={tw`w-14 bg-orange-500 rounded-2xl items-center justify-center`}
+                style={tw`w-12 bg-orange-500 rounded-2xl items-center justify-center`}
               >
                 <Ionicons name="add" size={24} color="white" />
               </TouchableOpacity>
@@ -284,18 +287,15 @@ const CustomWorkout = () => {
   
        
           {workoutSummary.length > 0 && (
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              style={tw`flex-1`}
-              contentContainerStyle={tw`p-4 pb-8`}
-            >
+            <View style={tw`flex-1 p-4 pb-8`}>
+           
               <View style={tw`space-y-5`}>
                 {workoutSummary[currentExercise].sets.map((set, setIndex) => (
                   <View
                     key={setIndex}
                     style={tw`rounded-3xl overflow-hidden border border-gray-800/50 bg-black/20`}
                   >
-                    <LinearGradient colors={["#000", "#141414"]} style={tw`px-5 py-4 border-b border-gray-800/30`}>
+                    <LinearGradient colors={["#0f0f0f", "#000"]} style={tw`px-5 py-4 border-b border-gray-800/80`}>
                       <Text style={tw`text-white font-bold text-lg`}>Set {setIndex + 1}</Text>
                     </LinearGradient>
   
@@ -325,7 +325,7 @@ const CustomWorkout = () => {
                             <Text style={tw`text-gray-400 text-sm mb-2 ml-1`}>Reps</Text>
                             <TextInput
                               style={tw`bg-black/60 text-white px-5 py-4 rounded-xl text-lg font-medium border border-gray-800/50`}
-                              placeholder="e.g., 12"
+                              placeholder="e.g. 12"
                               placeholderTextColor="#6b7280"
                               value={set.reps}
                               onChangeText={(value) =>
@@ -339,7 +339,7 @@ const CustomWorkout = () => {
                             <Text style={tw`text-gray-400 text-sm mb-2 ml-1`}>Duration</Text>
                             <TextInput
                               style={tw`bg-black/60 text-white px-5 py-4 rounded-xl text-lg font-medium border border-gray-800/50`}
-                              placeholder="e.g., 30s"
+                              placeholder="e.g. 30s"
                               placeholderTextColor="#6b7280"
                               value={set.duration}
                               onChangeText={(value) =>
@@ -387,8 +387,10 @@ const CustomWorkout = () => {
                   <Text style={tw`text-white font-semibold`}>Add Set</Text>
                 </TouchableOpacity>
               </View>
-            </ScrollView>
+              </View>
+        
           )}
+          </ScrollView>
         </SafeAreaView>
       </LinearGradient>
     </TouchableWithoutFeedback>

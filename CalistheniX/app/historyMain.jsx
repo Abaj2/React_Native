@@ -76,15 +76,15 @@ const HistoryMain = () => {
          {/* <Text style={tw`font-bold text-2xl text-white mt-5 text-center`}>
           </Text>*/}
 
-          <View
-            style={tw`border ${
+       {/*   <View
+            style={[tw`border ${
               isFocused ? "border-orange-500" : "border-gray-800"
-            } h-12 flex-row items-center bg-[#1E1E1E] rounded-xl mt-4 mb-2 p-2`}
+            } h-12 flex-row items-center bg-[#1E1E1E] rounded-xl self-center mt-4 mb-2`, {width: width * 0.9}]}
           >
             <Search
               color={isFocused || searchQuery ? "darkorange" : "#666"}
               size={20}
-              style={tw`mr-2`}
+              style={tw`ml-2 mr-2`}
             />
             <TextInput
               placeholder="Search workouts"
@@ -94,7 +94,7 @@ const HistoryMain = () => {
               onBlur={() => setIsFocused(false)}
               onChangeText={handleSearch}
               style={[
-                tw`flex-1 text-white`,
+                tw`flex-1 ml-2 text-white`,
                 {
                   paddingVertical: 0,
                   lineHeight: 20,
@@ -102,8 +102,9 @@ const HistoryMain = () => {
               ]}
             />
           </View>
+          */}
 
-          <View style={[tw`flex-row gap-2 self-center my-3`, {}]}>
+         {/* <View style={[tw`flex-row gap-2 self-center my-5`, {}]}>
             {["Tab1", "Tab2"].map((tab, index) => (
               <TouchableOpacity
                 key={index}
@@ -133,6 +134,7 @@ const HistoryMain = () => {
               </TouchableOpacity>
             ))}
           </View>
+          */}
 
           <View style={tw`flex-1`}>{renderContent()}</View>
         </View>

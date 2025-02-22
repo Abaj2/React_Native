@@ -220,7 +220,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
           <View style={tw`flex-row justify-between items-center`}>
             <View style={tw`flex-row items-center`}>
               <Icon name="zap" size={20} color="#ffa500" />
-              <Text style={tw`text-orange-500 ml-2 font-medium`}>
+              <Text style={tw`text-orange-400 ml-2 font-medium`}>
                 {`${skillsData.length} Active Skill${skillsData.length > 1 ? 's' : ''}`}
               </Text>
             </View>
@@ -243,7 +243,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
             <View
               key={item.id}
               style={[
-                tw`mb-4 border border-orange-500 self-center mx-5 rounded-2xl overflow-hidden`,
+                tw`mb-4 border border-orange-400 self-center mx-5 rounded-2xl overflow-hidden`,
                 {
                   width: width * 0.95,
                   shadowColor: "#ffa500",
@@ -266,7 +266,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
                       </Text>
                       <View style={tw`flex-row items-center`}>
                         <Icon name="activity" size={16} color="#ffa500" />
-                        <Text style={tw`text-orange-500 text-sm ml-2`}>
+                        <Text style={tw`text-orange-400 text-sm ml-2`}>
                           {`${item.progressions.length} Progression${
                             item.progressions.length > 1 ? "s" : ""
                           }`}

@@ -5,7 +5,15 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
-import { Home as HomeIcon, Dumbbell, User, History, BarChart, ListOrdered, BarChart2 } from "lucide-react-native";
+import {
+  Home as HomeIcon,
+  Dumbbell,
+  User,
+  History,
+  BarChart,
+  ListOrdered,
+  BarChart2,
+} from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -21,6 +29,9 @@ import SettingsMain from "./settingsMain.jsx";
 import ProfileScreen from "./profileScreen.jsx";
 import ProfileSettings from "./settingsPages/profileSettings.jsx";
 import Leaderboard from "./leaderboard.jsx";
+import SearchUser, { searchScreenOptions } from "../components/searchUser.jsx";
+import userProfile from "./userProfile.jsx";
+import UserProfile from "./userProfile.jsx";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -97,14 +108,20 @@ function TabNavigator() {
         }}
       /> */}
       <Tab.Screen
-      name="Leaderboard"
-      component={Leaderboard}
-      options={{
-        tabBarLabel: "Leaderboard",
-        tabBarIcon: ({ color, size, focused }) => (
-          <MaterialIcons name="leaderboard" size={24} color={color} strokeWidth={focused ? 2.5 : 2} />
-        ),
-      }} />
+        name="Leaderboard"
+        component={Leaderboard}
+        options={{
+          tabBarLabel: "Leaderboard",
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialIcons
+              name="leaderboard"
+              size={24}
+              color={color}
+              strokeWidth={focused ? 2.5 : 2}
+            />
+          ),
+        }}
+      />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
@@ -177,7 +194,37 @@ export default function RootLayout() {
         options={{ headerShown: false }}
         component={CustomWorkout}
       />
-     {/* <Stack.Screen
+      <Stack.Screen
+        name="User-Profile"
+        options={{ headerShown: false }}
+        component={UserProfile} />
+    
+        <Stack.Screen
+          name="Search-User"
+          component={SearchUser}
+          options={{
+            headerShown: true,
+            headerTitle: 'Find Friends',
+            headerStyle: {
+              backgroundColor: '#000',
+              borderBottomWidth: 1,
+              borderBottomColor: '#27272a',
+            },
+            headerTitleStyle: {
+              color: '#fff',
+              fontSize: 18,
+              fontWeight: 'bold',
+            },
+            headerTintColor: '#f97316',
+            headerShadowVisible: false,
+            headerBackTitleVisible: false,
+            headerTitleAlign: 'center',
+            presentation: 'modal'
+          }}
+        />
+
+
+      {/* <Stack.Screen
         name="History-Main"
         options={{ headerShown: false }}
         component={HistoryMain}
@@ -190,12 +237,14 @@ export default function RootLayout() {
       <Stack.Screen
         name="Profile"
         options={{ headerShown: false }}
-        component={ProfileScreen} />
+        component={ProfileScreen}
+      />
 
       <Stack.Screen
         name="ProfileSettings"
         options={{ headerShown: false }}
-        component={ProfileSettings} />
+        component={ProfileSettings}
+      />
     </Stack.Navigator>
   );
 }

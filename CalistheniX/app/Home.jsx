@@ -304,6 +304,15 @@ const Home = () => {
                   color={isDarkMode ? "#f97316" : "lightskyblue"}
                 />
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Search-User')}
+                style={tw`p-2 rounded-full ${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'}`}
+                >
+                  <Icon
+                    name="search"
+                    size={24}
+                    color={isDarkMode ? "white" : "black"} />
+                </TouchableOpacity>
               
               <TouchableOpacity 
                 onPress={() => navigation.navigate("Settings-Main")}
@@ -318,8 +327,7 @@ const Home = () => {
             </View>
           </View>
 
-          {/* Enhanced Tab Navigation */}
-          <View style={tw`mx-5 mt-6 bg-transparent`}>
+          <View style={tw`mx-2 mt-6 bg-transparent`}>
             <View style={tw`flex-row justify-between bg-transparent rounded-xl p-1 ${isDarkMode ? 'bg-gray-800/30' : 'bg-gray-200/50'}`}>
               {["Tab1", "Tab4"].map((tab) => (
                 <TouchableOpacity
@@ -349,100 +357,116 @@ const Home = () => {
           </View>
 
         
-          <Modal
-            transparent={true}
-            visible={modalVisible}
-            animationType="fade"
+          <Modal transparent visible={modalVisible} animationType="fade">
+  <View style={tw`flex-1 bg-black/95 justify-center items-center p-4`}>
+    <LinearGradient
+      colors={["#2a2a2a", "#1a1a1a"]}
+      style={[
+        tw`rounded-3xl w-full max-w-md`,
+        { borderWidth: 1, borderColor: "#f97316/30" }
+      ]}
+    >
+      <View style={tw`p-5 border-b border-orange-600/30`}>
+        <View style={tw`flex-row justify-between items-center`}>
+          <Text style={tw`text-xl font-bold text-orange-500`}>
+            New Skill
+          </Text>
+          <TouchableOpacity 
+            onPress={handleModalClose}
+            style={tw`p-1.5 bg-orange-500/10 rounded-full`}
           >
-            <SafeAreaView style={tw`flex-1 justify-center items-center bg-black/70`}>
-              <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-                <View style={[
-                  tw`${isDarkMode ? "bg-gray-900" : "bg-white"} rounded-2xl p-6`,
-                  { width: width * 0.85 }
-                ]}>
-                  {/* Modal Header */}
-                  <View style={tw`flex-row justify-between items-center mb-6`}>
-                    <Text style={[
-                      tw`text-2xl font-bold`,
-                      isDarkMode ? tw`text-white` : tw`text-black`
-                    ]}>
-                      New Skill
-                    </Text>
-                    <TouchableOpacity 
-                      onPress={handleModalClose}
-                      style={tw`p-1`}
-                    >
-                      <Ionicons
-                        name="close-circle"
-                        size={30}
-                        color={isDarkMode ? "#64748b" : "#94a3b8"}
-                      />
-                    </TouchableOpacity>
-                  </View>
+            <Ionicons name="close" size={22} color="#f97316" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-                
-                  <View style={tw`space-y-5`}>
-                    {['Skill', 'Progression', 'Current', 'Goal'].map((label, index) => (
-                      <View key={label}>
-                        <Text style={[
-                          tw`text-sm font-medium mb-1`,
-                          isDarkMode ? tw`text-gray-300` : tw`text-gray-600`
-                        ]}>
-                          {label}
-                        </Text>
-                        {label === 'Current' || label === 'Goal' ? (
-                          <Dropdown
-                            onChange={item => label === 'Current' ? setCurrent(item.value) : setGoal(item.value)}
-                            data={numbers}
-                            labelField="label"
-                            valueField="value"
-                            placeholder={`Select ${label}`}
-                            placeholderStyle={[
-                              tw`text-center`,
-                              isDarkMode ? tw`text-gray-400` : tw`text-gray-500`
-                            ]}
-                            style={[
-                              tw`rounded-lg border px-4 py-2`,
-                              isDarkMode ? tw`bg-gray-800 border-gray-700` : tw`bg-gray-50 border-gray-200`
-                            ]}
-                            selectedTextStyle={[
-                              tw`text-center`,
-                              isDarkMode ? tw`text-white` : tw`text-black`
-                            ]}
-                          />
-                        ) : (
-                          <TextInput
-                            value={label === 'Skill' ? skill : progression}
-                            onChangeText={text => label === 'Skill' ? setSkill(text) : setProgression(text)}
-                            placeholder={`e.g. ${label.toLowerCase()}`}
-                            placeholderTextColor={isDarkMode ? "#475569" : "#94a3b8"}
-                            style={[
-                              tw`rounded-lg border px-4 py-2 text-center`,
-                              isDarkMode ? tw`bg-gray-800 border-gray-700 text-white` : tw`bg-gray-50 border-gray-200 text-black`
-                            ]}
-                          />
-                        )}
-                      </View>
-                    ))}
+      <View style={tw`p-5`}>
+        <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+          SKILL NAME
+        </Text>
+        <TextInput
+          value={skill}
+          onChangeText={setSkill}
+          placeholder="e.g. Front Lever"
+          placeholderTextColor="#6b6b6b"
+          style={tw`bg-gray-800 text-white p-3.5 rounded-xl border border-orange-500/30 mb-5 font-medium`}
+        />
 
-                    <TouchableOpacity
-                      onPress={submitSkill}
-                      style={[
-                        tw`py-3 rounded-lg items-center mt-4`,
-                        isDarkMode ? 
-                          tw`bg-orange-500` : 
-                          tw`bg-blue-500`
-                      ]}
-                    >
-                      <Text style={tw`text-white font-semibold`}>
-                        Create Skill
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableWithoutFeedback>
-            </SafeAreaView>
-          </Modal>
+        <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+          PROGRESSION NAME
+        </Text>
+        <TextInput
+          value={progression}
+          onChangeText={setProgression}
+          placeholder="e.g. Tuck Front Lever"
+          placeholderTextColor="#6b6b6b"
+          style={tw`bg-gray-800 text-white p-3.5 rounded-xl border border-orange-500/30 mb-5 font-medium`}
+        />
+
+        <View style={tw`flex-row gap-4 mb-6`}>
+          <View style={tw`flex-1`}>
+            <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+              CURRENT
+            </Text>
+            <Dropdown
+              data={numbers}
+              labelField="label"
+              valueField="value"
+              placeholder="Select current"
+              value={current}
+              onChange={(item) => setCurrent(item.value)}
+              placeholderStyle={tw`text-gray-500`}
+              selectedTextStyle={tw`text-white font-medium`}
+              itemTextStyle={tw`text-gray-300`}
+              style={tw`bg-gray-800 rounded-xl border border-orange-500/30`}
+              containerStyle={tw`bg-gray-800 rounded-xl border border-orange-500/30 mt-2`}
+              activeColor="#404040"
+              itemContainerStyle={tw`py-3`}
+            />
+          </View>
+
+          <View style={tw`flex-1`}>
+            <Text style={tw`text-orange-400/80 text-sm font-medium mb-2`}>
+              GOAL
+            </Text>
+            <Dropdown
+              data={numbers}
+              labelField="label"
+              valueField="value"
+              placeholder="Select goal"
+              value={goal}
+              onChange={(item) => setGoal(item.value)}
+              placeholderStyle={tw`text-gray-500`}
+              selectedTextStyle={tw`text-white font-medium`}
+              itemTextStyle={tw`text-gray-300`}
+              style={tw`bg-gray-800 rounded-xl border border-orange-500/30`}
+              containerStyle={tw`bg-gray-800 rounded-xl border border-orange-500/30 mt-2`}
+              activeColor="#404040"
+              itemContainerStyle={tw`py-3`}
+            />
+          </View>
+        </View>
+
+        <TouchableOpacity
+          onPress={submitSkill}
+          style={[
+            tw`bg-orange-500 py-4 rounded-xl`,
+            {
+              shadowColor: "#f97316",
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.4,
+              shadowRadius: 6
+            }
+          ]}
+        >
+          <Text style={tw`text-center font-bold text-white uppercase tracking-wide`}>
+            Create Skill
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
+  </View>
+</Modal>
         </ScrollView>
 
       

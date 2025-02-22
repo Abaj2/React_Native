@@ -249,7 +249,7 @@ const WorkoutSession = () => {
               )}
             </View>
             <TouchableOpacity
-              style={tw`h-11 px-5 bg-orange-500 rounded-full items-center justify-center`}
+              style={tw`h-9 px-3 bg-orange-500 rounded-full items-center justify-center`}
               onPress={finishWorkout}
             >
               <Text style={tw`text-white font-semibold`}>Finish</Text>
@@ -294,7 +294,7 @@ const WorkoutSession = () => {
                 style={tw`mb-6 rounded-3xl overflow-hidden border border-gray-800/50 bg-black/20`}
               >
                 <LinearGradient 
-  colors={["#0f0f0f", "#1a1a1a"]} 
+  colors={["#0f0f0f", "#000"]} 
   style={tw`px-5 py-4 border-b border-gray-800/30`}
 >
                   <Text style={tw`text-white font-bold text-lg`}>
@@ -388,7 +388,7 @@ const WorkoutSession = () => {
                 style={tw`mb-5 rounded-3xl overflow-hidden border border-gray-800/50 bg-black/20`}
               >
                 <LinearGradient
-                  colors={["#0f0f0f", "#1a1a1a"]}
+                  colors={["#0f0f0f", "#000"]}
                   style={tw`px-5 py-4 border-b border-gray-800/30`}
                 >
                   <View style={tw`flex-row justify-between items-center`}>

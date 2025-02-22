@@ -9,6 +9,7 @@ import {
   Dimensions,
   Modal,
   Platform,
+  Alert,
 } from "react-native";
 import tw from "twrnc";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,6 +24,11 @@ const SEND_OTP_URL = Platform.select({
   ios: "http://192.168.1.155:4005/sendotp",
 });
 
+const EDIT_PROFILE_SETTINGS_URL = Platform.select({
+  android: "http://10.0.2.2:4005/editprofilesettings",
+  ios: "http://192.168.1.155:4005/editprofilesettings",
+});
+
 const ProfileSettings = () => {
   const [oldEmail, setOldEmail] = useState("");
   const [oldUsername, setOldUsername] = useState("");
@@ -33,6 +39,7 @@ const ProfileSettings = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
 
+  const [otp, setOtp] = useState();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -62,6 +69,7 @@ const ProfileSettings = () => {
   const generateOTP = async () => {
     
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    setOtp(otp)
     setGeneratedOtp(otp);
     console.log(`Generated OTP: ${otp}`);
   
@@ -70,7 +78,7 @@ const ProfileSettings = () => {
       console.log("OTP expired.");
     }, 15 * 60 * 1000);
 
-    // Send OTP to backend
+    
     const user_id = userData.user_id;
     console.log("Test")
     const jwtToken = await AsyncStorage.getItem("jwtToken");
@@ -82,6 +90,9 @@ const ProfileSettings = () => {
         {
           user_id: user_id,
           otp: otp,
+          newEmail,
+          newUsername,
+          oldEmail,
         },
         {
           headers: {
@@ -95,15 +106,60 @@ const ProfileSettings = () => {
       }
 
     } catch (err) {
-      console.error("Error sending OTP:", err);
+      console.error("Error updating profile", err);
     }
   };
 
-  const verifyOTP = () => {
+  const verifyOTP = async () => {
     if (userOtp === generatedOtp) {
-      setModalVisible(false);
-      alert("Profile Updated Successfully!");
-      navigation.goBack();
+      console.log("verifying otp")
+      const user_id = userData.user_id;
+      const jwtToken = await AsyncStorage.getItem("jwtToken");
+
+
+      try {
+        const response = await axios.post(
+          EDIT_PROFILE_SETTINGS_URL,
+          {
+            user_id: user_id,
+            otp: otp,
+            newEmail,
+            newUsername,
+            oldEmail,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${jwtToken}`,
+            },
+          }
+        );
+  
+        if (response.status === 200) {
+          const storedUserData = await AsyncStorage.getItem("userData");
+  
+          if (storedUserData) {
+            const parsedUserData = JSON.parse(storedUserData);
+
+            const updatedUserData = {
+              ...parsedUserData,
+              email: newEmail,
+              username: newUsername,
+            };
+
+            await AsyncStorage.setItem("userData", JSON.stringify(updatedUserData));
+  
+            console.log("Updated AsyncStorage userData:", updatedUserData);
+
+            setUserData(updatedUserData);
+          }
+          setModalVisible(false);
+          navigation.goBack();
+          Alert.alert("Successfully changed profile data");
+        }
+  
+      } catch (err) {
+        console.error("Error sending OTP:", err);
+      }
     } else {
       alert("Invalid OTP. Please try again.");
     }
@@ -112,6 +168,11 @@ const ProfileSettings = () => {
   const handleSave = () => {
     if (!validateEmail(newEmail)) {
       alert("Invalid Email. Please enter a valid email address.");
+      return;
+    }
+
+    if (oldEmail === newEmail && oldUsername === newUsername) {
+      alert("You haven't changed any profile details")
       return;
     }
     generateOTP();

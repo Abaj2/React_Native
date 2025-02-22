@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/Feather";
 import { BarChart } from "react-native-chart-kit";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
@@ -56,6 +57,7 @@ const ProfileScreen = () => {
     totalSkills: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -102,19 +104,27 @@ const ProfileScreen = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const initializeData = async () => {
-      const userData = await fetchUserData();
-      if (userData) {
-        await fetchStats(userData);
-        await fetchProfileGraph(userData);
-      } else {
-        setIsLoading(false);
-      }
-    };
+ useFocusEffect(
+    useCallback(() => {
+      const initializeData = async () => {
+        setIsLoading(true);
 
-    initializeData();
-  }, [fetchUserData, fetchStats]);
+        const userData = await fetchUserData();
+        if (userData) {
+          await fetchStats(userData);
+          await fetchProfileGraph(userData);
+        } else {
+          setIsLoading(false);
+        }
+      };
+
+      initializeData();
+
+      return () => {
+      
+      };
+    }, [fetchUserData, fetchStats, fetchProfileGraph])
+  );
 
   const handleLogout = async () => {
     Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
@@ -231,6 +241,49 @@ const ProfileScreen = () => {
     }
   }, []);
 
+
+  function calculateDailyStreak(workoutDates) {
+    if (workoutDates.length === 0) return 0;
+  
+ 
+    const uniqueDates = [...new Set(
+      workoutDates.map(entry => {
+        const date = new Date(entry.date);
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+      })
+    )].sort((a, b) => b - a); 
+  
+    if (uniqueDates.length === 0) return 0;
+  
+ 
+    const today = new Date();
+    const todayUTC = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate()
+    );
+  
+    const lastWorkoutUTC = uniqueDates[0];
+    const dayDifference = (todayUTC - lastWorkoutUTC) / (1000 * 3600 * 24);
+  
+    if (dayDifference > 1) return 0;
+ 
+    let streak = 1;
+    for (let i = 1; i < uniqueDates.length; i++) {
+      const previousDay = uniqueDates[i - 1];
+      const currentDay = uniqueDates[i];
+      
+  
+      if ((previousDay - currentDay) === (1000 * 3600 * 24)) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+  
+    return streak;
+  }
+
   const profileBarGraph = () => {
     const today = new Date();
     const dayOfWeek = today.getDay();
@@ -240,27 +293,29 @@ const ProfileScreen = () => {
     const saturday = new Date(sunday);
     saturday.setDate(sunday.getDate() + 6);
     saturday.setHours(23, 59, 59, 999);
-  
+
     const groupedData = {};
     const originalValues = {};
     for (let i = 0; i < workoutDates.length; i++) {
       const dateObj = new Date(workoutDates[i].date);
       if (dateObj >= sunday && dateObj <= saturday) {
         const dateKey = dateObj.toISOString().split("T")[0];
-        const [hh, mm, ss] = workoutTimes[i].workout_time.split(":").map(Number);
+        const [hh, mm, ss] = workoutTimes[i].workout_time
+          .split(":")
+          .map(Number);
         const minutes = (hh * 3600 + mm * 60 + ss) / 60;
         groupedData[dateKey] = (groupedData[dateKey] || 0) + minutes;
         originalValues[dateKey] = minutes;
       }
     }
-  
+
     const weekDates = [];
     let current = new Date(sunday);
     while (current <= saturday) {
       weekDates.push(current.toISOString().split("T")[0]);
       current.setDate(current.getDate() + 1);
     }
-  
+
     const { dataValues, originalValuesArray } = weekDates.reduce(
       (acc, date) => {
         const value = groupedData[date] || 0;
@@ -270,10 +325,10 @@ const ProfileScreen = () => {
       },
       { dataValues: [], originalValuesArray: [] }
     );
-  
+
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const labels = weekDates.map((date) => dayNames[new Date(date).getDay()]);
-  
+
     const screenWidth = Dimensions.get("window").width;
     const chartWidth = screenWidth - 40;
     const [tooltipPos, setTooltipPos] = useState({
@@ -283,11 +338,11 @@ const ProfileScreen = () => {
       value: 0,
       index: null,
     });
-  
+
     return (
       <View style={{ paddingHorizontal: 20, paddingTop: 40 }}>
         <Text style={styles.chartTitle}>Daily Workout Duration</Text>
-  
+
         <View style={[styles.chartContainer, { borderColor: "#f97316" }]}>
           <BarChart
             data={{
@@ -327,7 +382,8 @@ const ProfileScreen = () => {
             verticalLabelRotation={0}
             showValuesOnTopOfBars={false}
             onDataPointClick={(data) => {
-              const isSamePoint = tooltipPos.x === data.x && tooltipPos.y === data.y;
+              const isSamePoint =
+                tooltipPos.x === data.x && tooltipPos.y === data.y;
               setTooltipPos({
                 x: data.x,
                 y: data.y - 50,
@@ -337,7 +393,7 @@ const ProfileScreen = () => {
               });
             }}
           />
-  
+
           <Svg style={styles.gridLine}>
             <Line
               x1="70"
@@ -348,15 +404,20 @@ const ProfileScreen = () => {
               strokeWidth="1"
             />
           </Svg>
-  
+
           {tooltipPos.visible && (
-            <View style={[
-              styles.tooltip,
-              {
-                left: tooltipPos.x > chartWidth - 70 ? chartWidth - 70 : tooltipPos.x - 25,
-                top: tooltipPos.y < 0 ? 0 : tooltipPos.y,
-              }
-            ]}>
+            <View
+              style={[
+                styles.tooltip,
+                {
+                  left:
+                    tooltipPos.x > chartWidth - 70
+                      ? chartWidth - 70
+                      : tooltipPos.x - 25,
+                  top: tooltipPos.y < 0 ? 0 : tooltipPos.y,
+                },
+              ]}
+            >
               <Text style={styles.tooltipText}>
                 {Math.round(tooltipPos.value)}m
               </Text>
@@ -367,7 +428,7 @@ const ProfileScreen = () => {
       </View>
     );
   };
-  
+
   const styles = StyleSheet.create({
     chartTitle: {
       color: "#fff",
@@ -463,103 +524,151 @@ const ProfileScreen = () => {
       <ScrollView
         style={tw`flex-1`}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={tw`pb-30`}
       >
-        <View style={tw`flex-1`}>
-          <LinearGradient
-            colors={["#1f2937", "#111827"]}
-            style={tw`rounded-b-3xl pb-6 shadow-lg`}
-          >
-            <View style={tw`pt-20 px-5`}>
-              <View style={tw`flex-row items-center`}>
-                <TouchableOpacity onPress={handleChangeProfilePicture}>
-                  <View style={tw`relative`}>
-                    <Image
-                      source={
-                        profilePic
-                          ? { uri: profilePic }
-                          : blackDefaultProfilePic
-                      }
-                      style={tw`w-24 h-24 rounded-full border-4 border-orange-500`}
-                    />
-                    <View
-                      style={tw`absolute bottom-0 right-0 bg-orange-500 p-2 rounded-full shadow-lg`}
-                    >
-                      <Icon name="edit" size={16} color="white" />
-                    </View>
+        <LinearGradient
+          colors={["#000", "#1a1a1a"]}
+          style={tw`rounded-b-[40px] pb-8 shadow-xl`}
+        >
+          <View style={tw`pt-16 px-6`}>
+            <View style={tw`flex-row items-center`}>
+              <TouchableOpacity
+                onPress={handleChangeProfilePicture}
+                style={tw`shadow-lg`}
+              >
+                <View style={tw`relative`}>
+                  <Image
+                    source={
+                      profilePic ? { uri: profilePic } : blackDefaultProfilePic
+                    }
+                    style={tw`w-28 h-28 rounded-full border-4 border-orange-500`}
+                  />
+                  <View
+                    style={tw`absolute bottom-0 right-0 bg-orange-500 p-2 rounded-full border-2 border-white`}
+                  >
+                    <Icon name="edit" size={18} color="white" />
                   </View>
-                </TouchableOpacity>
-
-                <View style={tw`ml-4`}>
-                  <Text style={tw`text-white text-2xl font-bold`}>
-                    {userData ? userData.username : "Loading..."}
-                  </Text>
-                  <Text style={tw`text-gray-300`}>
-                    {userData ? userData.email : "Loading..."}
-                  </Text>
                 </View>
+              </TouchableOpacity>
+
+              <View style={tw`ml-5 flex-1`}>
+                <Text style={tw`text-white text-2xl font-bold mb-1`}>
+                  {userData?.username || "Loading..."}
+                </Text>
+                <Text style={tw`text-gray-300 text-base`}>
+                  {userData?.email || "Loading..."}
+                </Text>
               </View>
             </View>
-          </LinearGradient>
-          {profileBarGraph()}
-          <LinearGradient
-  colors={["rgba(249,115,22,0.4)", "rgba(234,88,12,0.1)"]} 
-  start={{ x: 0, y: 0 }} 
-  end={{ x: 1, y: 1 }}   
-  style={[tw`p-7 mx-5 my-6 rounded-xl shadow-lg`, {}]} 
->
-            <View style={tw`flex-row justify-evenly items-center`}>
-              <View style={tw`flex-1 items-center`}>
-                <Text style={tw`text-white text-2xl font-bold text-center`}>
-                  {stats?.totalWorkouts ? `${stats.totalWorkouts}` : "None"}
+          </View>
+        </LinearGradient>
+
+        <View style={tw`px-5 mt-6`}>
+          <View style={tw`flex-row justify-between gap-4 mb-4`}>
+            <LinearGradient
+              colors={["#000", "#1a1a1a"]}
+              style={tw`flex-1 p-4 rounded-2xl shadow-lg`}
+            >
+              <View style={tw`items-center`}>
+                <Ionicons name="barbell-outline" size={28} color="#f97316" />
+                <Text style={tw`text-white text-2xl font-bold mt-2`}>
+                  {stats?.totalWorkouts || 0}
                 </Text>
-                <Text style={tw`text-white text-sm text-center`}>
+                <Text style={tw`text-slate-400 text-xs mt-1`}>
                   Total Workouts
                 </Text>
               </View>
-              <View style={tw`flex-1 items-center`}>
-                <Text style={tw`text-white text-2xl font-bold text-center`}>
+            </LinearGradient>
+
+            <LinearGradient
+              colors={["#000", "#1a1a1a"]}
+              style={tw`flex-1 p-4 rounded-2xl shadow-lg`}
+            >
+              <View style={tw`items-center`}>
+                <Ionicons name="time-outline" size={28} color="#f97316" />
+                <Text style={tw`text-white text-2xl font-bold mt-2`}>
                   {totalDuration}
                 </Text>
-                <Text style={tw`text-white text-sm text-center`}>
+                <Text style={tw`text-slate-400 text-xs mt-1`}>
                   Training Time
                 </Text>
               </View>
-              <View style={tw`flex-1 items-center`}>
-                <Text style={tw`text-white text-2xl font-bold text-center`}>
-                  {stats?.totalSkills ? `${stats.totalSkills}` : "None"}
+            </LinearGradient>
+          </View>
+
+          <View style={tw`flex-row justify-between gap-4`}>
+            <LinearGradient
+              colors={["#000", "#1a1a1a"]}
+              style={tw`flex-1 p-4 rounded-2xl shadow-lg`}
+            >
+              <View style={tw`items-center`}>
+                <Ionicons name="trophy-outline" size={28} color="#f97316" />
+                <Text style={tw`text-white text-2xl font-bold mt-2`}>
+                  {stats?.totalSkills || 0}
                 </Text>
-                <Text style={tw`text-white text-sm text-center`}>
+                <Text style={tw`text-slate-400 text-xs mt-1`}>
                   Total Skills
                 </Text>
               </View>
-            </View>
-          </LinearGradient>
+            </LinearGradient>
 
-          <View style={tw`px-5 mt-2`}>
-            <TouchableOpacity
-              style={tw`flex-row items-center justify-between bg-zinc-900 p-4 rounded-lg mb-4 shadow-lg`}
-              onPress={() => navigation.navigate("Settings-Main")}
+            <LinearGradient
+              colors={["#000", "#1a1a1a"]}
+              style={tw`flex-1 p-4 rounded-2xl shadow-lg`}
             >
-              <View style={tw`flex-row items-center`}>
-                <Icon name="settings" size={24} color="orange" />
-                <Text style={tw`text-white ml-4 text-base`}>App Settings</Text>
+              <View style={tw`items-center`}>
+                <Ionicons name="flame-outline" size={28} color="#f97316" />
+                <Text style={tw`text-white text-2xl font-bold mt-2`}>
+                  {calculateDailyStreak(workoutDates)}
+                </Text>
+                <Text style={tw`text-slate-400 text-xs mt-1`}>Daily Streak</Text>
               </View>
-              <Ionicons name="chevron-forward" color="orange" size={24} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={tw`flex-row items-center justify-between bg-zinc-900 p-4 rounded-lg shadow-lg`}
-              onPress={handleLogout}
-            >
-              <View style={tw`flex-row items-center`}>
-                <Ionicons name="exit-outline" size={24} color="orange" />
-                <Text style={tw`text-white ml-4 text-base`}>Logout</Text>
-              </View>
-              <Ionicons name="chevron-forward" color="orange" size={24} />
-            </TouchableOpacity>
+            </LinearGradient>
           </View>
         </View>
-        <View style={tw`mt-5`}>
+
+        <View style={tw`px-5 mt-8 mb-6`}>
+  <Text style={tw`text-white text-xl font-bold mb-4`}>
+    Quick Actions
+  </Text>
+  
+  <View style={tw`flex flex-col gap-3`}>
+    <TouchableOpacity
+      style={tw`flex-row items-center justify-between p-5 bg-zinc-900 rounded-2xl shadow-lg`}
+      onPress={() => navigation.navigate("Settings-Main")}
+    >
+      <View style={tw`flex-row items-center`}>
+        <Ionicons name="settings-outline" size={24} color="#f97316" />
+        <Text style={tw`text-white ml-4 text-base font-medium`}>App Settings</Text>
+      </View>
+      <Ionicons name="chevron-forward" color="#64748b" size={20} />
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      style={tw`flex-row items-center justify-between p-5 bg-zinc-900 rounded-2xl shadow-lg`}
+      onPress={() => navigation.navigate("Achievements")}
+    >
+      <View style={tw`flex-row items-center`}>
+        <Ionicons name="medal-outline" size={24} color="#f97316" />
+        <Text style={tw`text-white ml-4 text-base font-medium`}>Achievements</Text>
+      </View>
+      <Ionicons name="chevron-forward" color="#64748b" size={20} />
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      style={tw`flex-row items-center justify-between p-5 bg-zinc-900 rounded-2xl shadow-lg`}
+      onPress={handleLogout}
+    >
+      <View style={tw`flex-row items-center`}>
+        <Ionicons name="exit-outline" size={24} color="#f97316" />
+        <Text style={tw`text-white ml-4 text-base font-medium`}>Logout</Text>
+      </View>
+      <Ionicons name="chevron-forward" color="#64748b" size={20} />
+    </TouchableOpacity>
+  </View>
+</View>
+
+        <View style={tw`mt-3`}>
           <HistoryMain />
         </View>
       </ScrollView>

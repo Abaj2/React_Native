@@ -17,6 +17,7 @@ import { Ionicons } from "react-native-vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import tw from "twrnc";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width, height } = Dimensions.get("window");
 
@@ -75,113 +76,125 @@ const SignIn = () => {
   };
 
   return (
-    <SafeAreaView style={tw`justify-center items-center`}>
-      <StatusBar barStyle="dark-content" />
-      <ScrollView style={tw``}>
-        <View style={tw`text-center justify-center items-center mb-8 mt-16`}>
-          <Text style={tw`text-3xl font-bold text-gray-900`}>CalistheniX</Text>
-          <Text style={tw`text-xl text-gray-500`}>
-            Track your calisthenics progress
-          </Text>
-        </View>
-
-        <View
-          style={[
-            tw`border border-gray-200 border-2 rounded-xl`,
-            { width: width * 0.9, height: height * 0.55 },
-          ]}
-        >
-          <Text style={tw`mt-8 ml-8 text-xl font-bold`}>Welcome back</Text>
-          <Text style={[tw`text-gray-500 mt-2 ml-8`, { fontSize: 16 }]}>
-            Enter your details to access your account
-          </Text>
-          <Text style={[tw`ml-8 mt-8 text-xl font-bold`, { fontSize: 16 }]}>
-            Email
-          </Text>
-          <View style={tw`ml-8 mt-2 justify-center`}>
-            <MaterialIcons
-              name="mail-outline"
-              size={20}
-              color="gray"
-              style={tw`absolute ml-3`}
-            />
-            <TextInput
-              style={[
-                tw`border border-gray-300 rounded-lg pl-10`,
-                { width: width * 0.72, height: height * 0.04 },
-              ]}
-              placeholder="your@email.com"
-              placeholderTextColor="gray"
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-          <View style={tw`flex-row justify-between`}>
-            <Text style={[tw`ml-8 mt-3 text-xl font-bold`, { fontSize: 16 }]}>
-              Password
-            </Text>
-            <Text
-              style={[tw`mr-8 mt-3 text-xl text-blue-500`, { fontSize: 15 }]}
-            >
-              Forgot Password?
+    <LinearGradient
+        colors={["#000", "#1a1a1a"]}
+        style={tw`flex-1`}
+      >
+    <SafeAreaView style={tw`flex-1`}>
+      <LinearGradient
+        colors={["#000", "#1a1a1a"]}
+        style={tw`flex-1`}
+      >
+        <StatusBar barStyle="light-content" />
+        <ScrollView style={tw`w-full`}>
+          <View style={tw`text-center justify-center items-center mb-8 mt-16`}>
+            <Text style={tw`text-4xl font-black text-orange-500`}>CalistheniX</Text>
+            <Text style={tw`text-sm text-zinc-400`}>
+              Track your calisthenics progress
             </Text>
           </View>
-          <View style={tw`ml-8 mt-2 justify-center`}>
-            <MaterialIcons
-              name="lock-outline"
-              size={20}
-              color="gray"
-              style={tw`absolute ml-3`}
-            />
-            <TextInput
-              style={[
-                tw`border border-gray-300 rounded-lg pl-10`,
-                { width: width * 0.72, height: height * 0.04 },
-              ]}
-              secureTextEntry={true}
-              autoCapitalize="none"
-              value={password}
-              onChangeText={setPassword}
-            />
-          </View>
-          <TouchableOpacity
-            style={tw`mt-8 justify-center items-center`}
-            onPress={handleSubmit}
+  
+          <View
+            style={[
+              tw`mx-4 rounded-3xl overflow-hidden bg-zinc-900 border border-zinc-800`,
+              { height: height * 0.55 },
+            ]}
           >
-            <View
-              style={[
-                tw`rounded-lg bg-[#293241] text-center justify-center items-center`,
-                { width: width * 0.72, height: height * 0.04 },
-              ]}
-            >
-              <View style={tw`items-center flex-row`}>
-                <Text
-                  style={[tw`text-white text-xl font-bold`, { fontSize: 15 }]}
-                >
-                  Sign in
-                </Text>
-                <Ionicons
-                  style={tw`ml-1`}
-                  name="arrow-forward"
+            <View style={tw`p-6`}>
+              <Text style={tw`text-2xl font-black text-white`}>
+                Welcome back
+              </Text>
+              <Text style={tw`text-zinc-400 mt-1 text-sm`}>
+                Enter your details to access your account
+              </Text>
+            </View>
+  
+            <View style={tw`px-6`}>
+              <Text style={tw`text-[15px] font-bold text-white mb-2`}>
+                Email
+              </Text>
+              <View style={tw`justify-center mb-4`}>
+                <MaterialIcons
+                  name="mail-outline"
                   size={20}
-                  color="white"
+                  color="#f97316"
+                  style={tw`absolute ml-3 z-10`}
+                />
+                <TextInput
+                  value={email}
+                  onChangeText={setEmail}
+                  style={tw`bg-zinc-800 rounded-xl pl-10 py-3 text-white border border-zinc-700`}
+                  placeholder="your@email.com"
+                  placeholderTextColor="#71717a"
                 />
               </View>
+  
+              <View style={tw`flex-row justify-between items-center`}>
+                <Text style={tw`text-[15px] font-bold text-white mb-2`}>
+                  Password
+                </Text>
+                <Text style={tw`text-orange-500 text-sm font-semibold`}>
+                  Forgot Password?
+                </Text>
+              </View>
+              <View style={tw`justify-center mb-6`}>
+                <MaterialIcons
+                  name="lock-outline"
+                  size={20}
+                  color="#f97316"
+                  style={tw`absolute ml-3 z-10`}
+                />
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  style={tw`bg-zinc-800 rounded-xl pl-10 py-3 text-white border border-zinc-700`}
+                  secureTextEntry={true}
+                  autoCapitalize="none"
+                  placeholder="Enter password"
+                  placeholderTextColor="#71717a"
+                />
+              </View>
+  
+              <TouchableOpacity
+                onPress={handleSubmit}
+                style={tw`mb-6`}
+              >
+                <LinearGradient
+                  colors={["#f97316", "#ea580c"]}
+                  style={tw`rounded-xl py-3`}
+                >
+                  <View style={tw`flex-row justify-center items-center`}>
+                    <Text style={tw`text-white font-bold text-base`}>
+                      Sign in
+                    </Text>
+                    <Ionicons
+                      style={tw`ml-2`}
+                      name="arrow-forward"
+                      size={20}
+                      color="white"
+                    />
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+  
+              <View style={tw`flex-row items-center justify-center mb-6`}>
+                <View style={tw`flex-1 border-t border-zinc-800`} />
+                <Text style={tw`mx-4 text-zinc-500 text-sm`}>or</Text>
+                <View style={tw`flex-1 border-t border-zinc-800`} />
+              </View>
+  
+              <View style={tw`flex-row justify-center items-center`}>
+                <Text style={tw`text-zinc-400 text-sm`}>Don't have an account?</Text>
+                <TouchableOpacity onPress={() => navigation.navigate("Sign-up")}>
+                  <Text style={tw`ml-2 font-bold text-orange-500`}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </TouchableOpacity>
-          <View style={[tw`ml-8 my-6 flex-row items-center justify-center`]}>
-            <View style={tw`flex-1 border-t border-gray-300`} />
-            <View style={tw`flex-1 mr-8 border-t border-gray-300`} />
           </View>
-          <View style={tw`flex-row justify-center items-center mt-3`}>
-            <Text style={tw`text-gray-500`}>Don't have an account?</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Sign-up")}>
-              <Text style={tw`ml-2 font-bold text-blue-500`}>Sign Up</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </LinearGradient>
     </SafeAreaView>
+    </LinearGradient>
   );
 };
 

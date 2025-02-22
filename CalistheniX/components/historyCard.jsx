@@ -52,191 +52,242 @@ const HistoryCard = ({
   }, []);
 
   const toggleExpandWorkout = (workoutId) => {
-    setExpandedWorkouts(prev => 
-      prev.includes(workoutId) 
-        ? prev.filter(id => id !== workoutId) 
+    setExpandedWorkouts((prev) =>
+      prev.includes(workoutId)
+        ? prev.filter((id) => id !== workoutId)
         : [...prev, workoutId]
     );
   };
 
   const getLevelColor = (level) => {
     switch (level.toLowerCase()) {
-      case "beginner": return "#22c55e";
-      case "intermediate": return "#eab308";
-      case "advanced": return "#ef4444";
-      case "custom": return "#3b82f6";
-      default: return "#6b7280";
+      case "beginner":
+        return "#22c55e";
+      case "intermediate":
+        return "#eab308";
+      case "advanced":
+        return "#ef4444";
+      case "custom":
+        return "#3b82f6";
+      default:
+        return "#6b7280";
     }
   };
 
   const formatDate = (isoString) => {
     const date = new Date(isoString);
-    return date.toLocaleString("en-GB", {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).replace(/,/g, '');
+    return date
+      .toLocaleString("en-GB", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+      .replace(/,/g, "");
   };
 
   const getWorkoutStats = (workoutId) => {
-    const exercises = exercisesData.filter(ex => ex.workout_id === workoutId);
-    const sets = setsData.filter(set => set.workout_id === workoutId);
+    const exercises = exercisesData.filter((ex) => ex.workout_id === workoutId);
+    const sets = setsData.filter((set) => set.workout_id === workoutId);
     return {
       totalExercises: exercises.length,
       totalSets: sets.length,
-      totalReps: sets.reduce((acc, set) => acc + (set.reps || 0), 0)
+      totalReps: sets.reduce((acc, set) => acc + (set.reps || 0), 0),
     };
   };
 
-  const displayedWorkouts = (filteredWorkouts || workoutsData)
-    .filter(workout => isCustom ? workout.custom : !workout.custom);
+  const displayedWorkouts = (filteredWorkouts || workoutsData).filter(
+    (workout) => (isCustom ? workout.custom : !workout.custom)
+  );
 
   return (
     <SafeAreaView style={tw`flex-1`}>
-      <ScrollView style={tw`py-6`} showsVerticalScrollIndicator={false}>
+      <ScrollView style={tw``} showsVerticalScrollIndicator={false}>
         {displayedWorkouts.map((workout) => {
           const stats = getWorkoutStats(workout.workout_id);
           const isExpanded = expandedWorkouts.includes(workout.workout_id);
 
           return (
-            <View key={workout.workout_id} style={tw`mb-5 p-4 mx-4 w-[100%] self-center shadow-xl rounded-3xl overflow-hidden border-l-4 border-l-orange-500`}>
-            {/*  <LinearGradient
+            <View
+              key={workout.workout_id}
+              style={[tw`mb-5 p-4 mx-4 self-center shadow-xl rounded-3xl overflow-hidden border-l-4 border-r-4 border-r-orange-500 border-l-orange-500`, {width: width * 0.9}]}
+            >
+              {/*  <LinearGradient
                 colors={["#18181b", "#09090b"]}
                 style={tw`p-4`}
               > */}
-              
-                <View style={tw`flex-row justify-between items-start mb-4`}>
-                  <View style={tw`flex-1 pr-4`}>
-                    <View style={tw`flex-row items-center mb-2`}>
-                      <Icon name="calendar" size={18} color="#f97316" style={tw`mr-2`} />
-                      <Text style={tw`text-white font-bold text-lg`}>
-                        {workout.title}
-                      </Text>
-                    </View>
-                    <Text style={tw`text-orange-500 text-xs font-medium uppercase tracking-wider`}>
-                      {formatDate(workout.date)}
-                    </Text>
-                  </View>
-                  
-                  <View style={tw`items-end`}>
-                    <View style={[
-                      tw`px-2 py-1 rounded-full`,
-                      { backgroundColor: getLevelColor(workout.level) + '20' }
-                    ]}>
-                      <Text style={[
-                        tw`text-xs font-semibold uppercase tracking-wider`,
-                        { color: getLevelColor(workout.level) }
-                      ]}>
-                        {workout.level}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
 
-       
-                <View style={tw`flex-row justify-between mb-5`}>
-                  <View style={tw`items-center`}>
-                    <Icon name="dumbbell" size={20} color="#f97316" />
-                    <Text style={tw`text-white font-bold mt-1`}>{stats.totalExercises}</Text>
-                    <Text style={tw`text-gray-400 text-xs`}>Exercises</Text>
-                  </View>
-                  <View style={tw`items-center`}>
-                    <Icon name="repeat" size={20} color="#f97316" />
-                    <Text style={tw`text-white font-bold mt-1`}>{stats.totalSets}</Text>
-                    <Text style={tw`text-gray-400 text-xs`}>Sets</Text>
-                  </View>
-                  <View style={tw`items-center`}>
-                    <Icon name="chart-bar" size={20} color="#f97316" />
-                    <Text style={tw`text-white font-bold mt-1`}>{stats.totalReps}</Text>
-                    <Text style={tw`text-gray-400 text-xs`}>Reps</Text>
-                  </View>
-                </View>
-
-                <TouchableOpacity
-                  onPress={() => toggleExpandWorkout(workout.workout_id)}
-                  style={tw`bg-orange-500 rounded-xl py-3`}
-                >
-                  <View style={tw`flex-row justify-center items-center`}>
-                    <Text style={tw`text-white font-medium mr-2`}>
-                      {isExpanded ? "Hide Details" : "Show Details"}
-                    </Text>
+              <View style={tw`flex-row justify-between items-start mb-4`}>
+                <View style={tw`flex-1`}>
+                  <View style={tw`flex-row items-center mb-2`}>
                     <Icon
-                      name={isExpanded ? "chevron-up" : "chevron-down"}
-                      size={20}
-                      color="white"
+                      name="calendar"
+                      size={18}
+                      color="#f97316"
+                      style={tw`mr-2`}
                     />
+                    <Text style={tw`text-white font-bold text-lg`}>
+                      {workout.title}
+                    </Text>
                   </View>
-                </TouchableOpacity>
+                  <Text
+                    style={tw`text-orange-500 text-xs font-medium uppercase tracking-wider`}
+                  >
+                    {formatDate(workout.date)}
+                  </Text>
+                </View>
 
-          
-                {isExpanded && (
-                  <View style={tw`mt-4`}>
-                    {exercisesData
-                      .filter(ex => ex.workout_id === workout.workout_id)
-                      .map((exercise) => (
-                        <View key={exercise.exercise_id} style={tw`mb-6`}>
-                    
-                          <View style={tw`flex-row items-center mb-4`}>
-                            <LinearGradient
-                              colors={["#f97316", "#ea580c"]}
-                              style={tw`p-2 rounded-lg mr-3`}
-                            >
-                              <Icon name="run-fast" size={20} color="white" />
-                            </LinearGradient>
-                            <Text style={tw`text-white font-semibold text-base`}>
-                              {exercise.name}
-                            </Text>
-                          </View>
+                <View style={tw`items-end`}>
+                  <View
+                    style={[
+                      tw`px-2 py-1 rounded-full`,
+                      { backgroundColor: getLevelColor(workout.level) + "20" },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        tw`text-xs font-semibold uppercase tracking-wider`,
+                        { color: getLevelColor(workout.level) },
+                      ]}
+                    >
+                      {workout.level}
+                    </Text>
+                  </View>
+                </View>
+              </View>
 
-                          {setsData
-                            .filter(set => 
+              <View style={tw`flex-row justify-between mb-5`}>
+                <View style={tw`items-center`}>
+                  <Icon name="dumbbell" size={20} color="#f97316" />
+                  <Text style={tw`text-white font-bold mt-1`}>
+                    {stats.totalExercises}
+                  </Text>
+                  <Text style={tw`text-gray-400 text-xs`}>Exercises</Text>
+                </View>
+                <View style={tw`items-center`}>
+                  <Icon name="repeat" size={20} color="#f97316" />
+                  <Text style={tw`text-white font-bold mt-1`}>
+                    {stats.totalSets}
+                  </Text>
+                  <Text style={tw`text-gray-400 text-xs`}>Sets</Text>
+                </View>
+                <View style={tw`items-center`}>
+                  <Icon name="chart-bar" size={20} color="#f97316" />
+                  <Text style={tw`text-white font-bold mt-1`}>
+                    {stats.totalReps}
+                  </Text>
+                  <Text style={tw`text-gray-400 text-xs`}>Reps</Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => toggleExpandWorkout(workout.workout_id)}
+                style={tw`bg-orange-500 rounded-xl py-3`}
+              >
+                <View style={tw`flex-row justify-center items-center`}>
+                  <Text style={tw`text-white font-medium mr-2`}>
+                    {isExpanded ? "Hide Details" : "Show Details"}
+                  </Text>
+                  <Icon
+                    name={isExpanded ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color="white"
+                  />
+                </View>
+              </TouchableOpacity>
+
+              {isExpanded && (
+                <View style={tw`mt-4`}>
+                  {exercisesData
+                    .filter((ex) => ex.workout_id === workout.workout_id)
+                    .map((exercise) => (
+                      <View key={exercise.exercise_id} style={tw`mb-6`}>
+                        <View style={tw`flex-row items-center mb-4`}>
+                         
+                          <Text style={tw`text-white font-semibold text-base`}>
+                            {exercise.name}
+                          </Text>
+                        </View>
+
+                        {setsData
+                          .filter(
+                            (set) =>
                               set.workout_id === workout.workout_id &&
                               set.exercise_id === exercise.exercise_id
-                            )
-                            .map((set, index) => (
-                              <View 
-                                key={index}
-                                style={tw`bg-black/30 mb-3 p-4 rounded-xl border border-gray-800`}
+                          )
+                          .map((set, index) => (
+                            <View
+                              key={index}
+                              style={tw`bg-black/30 mb-3 p-4 rounded-xl border border-gray-800`}
+                            >
+                              <View
+                                style={tw`flex-row justify-between items-center mb-2`}
                               >
-                                <View style={tw`flex-row justify-between items-center mb-2`}>
-                                  <Text style={tw`text-gray-400 text-xs font-medium`}>
-                                    Set {index + 1}
-                                  </Text>
-                                  <View style={tw`flex-row items-center`}>
-                                    <View style={[
+                                <Text
+                                  style={tw`text-gray-400 text-xs font-medium`}
+                                >
+                                  Set {index + 1}
+                                </Text>
+                                <View style={tw`flex-row items-center`}>
+                                  <View
+                                    style={[
                                       tw`px-3 py-1 rounded-full flex-row items-center`,
-                                      { backgroundColor: set.duration ? '#05966920' : `${set.reps === null ? '#FF000053' : '#f9731620'}` }
-                                    ]}>
-                                      <Icon
-                                        name={set.duration ? "timer-outline" : "dumbbell"}
-                                        size={14}
-                                        color={set.duration ? '#34d399' : '#f97316'}
-                                        style={tw`mr-2`}
-                                      />
-                                      <Text style={[
+                                      {
+                                        backgroundColor: set.duration
+                                          ? "#05966920"
+                                          : `${
+                                              set.reps === null
+                                                ? "#FF000053"
+                                                : "#f9731620"
+                                            }`,
+                                      },
+                                    ]}
+                                  >
+                                    <Icon
+                                      name={
+                                        set.duration
+                                          ? "timer-outline"
+                                          : "dumbbell"
+                                      }
+                                      size={14}
+                                      color={
+                                        set.duration ? "#34d399" : "#f97316"
+                                      }
+                                      style={tw`mr-2`}
+                                    />
+                                    <Text
+                                      style={[
                                         tw`text-xs font-semibold`,
-                                        { color: set.duration ? '#34d399' : '#f97316' }
-                                      ]}>
-                                        {set.duration ? `${set.duration}s` : `${set.reps === null ? '0' : set.reps} reps`}
-                                      </Text>
-                                    </View>
+                                        {
+                                          color: set.duration
+                                            ? "#34d399"
+                                            : "#f97316",
+                                        },
+                                      ]}
+                                    >
+                                      {set.duration
+                                        ? `${set.duration}s`
+                                        : `${
+                                            set.reps === null ? "0" : set.reps
+                                          } reps`}
+                                    </Text>
                                   </View>
                                 </View>
-
-                                {set.notes && (
-                                  <Text style={tw`text-gray-500 text-sm italic`}>
-                                    "{set.notes}"
-                                  </Text>
-                                )}
                               </View>
-                            ))}
-                        </View>
-                      ))}
-                  </View>
-                )}
+
+                              {set.notes && (
+                                <Text style={tw`text-gray-500 text-sm italic`}>
+                                  "{set.notes}"
+                                </Text>
+                              )}
+                            </View>
+                          ))}
+                      </View>
+                    ))}
+                </View>
+              )}
               {/*</LinearGradient>*/}
             </View>
           );

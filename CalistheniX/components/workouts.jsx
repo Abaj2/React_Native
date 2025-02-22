@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "axios"
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -621,25 +621,7 @@ const Workouts = ({ isDarkMode }) => {
     </View>
   );
 
-  const ModalHeader = ({ title, subtitle }) => (
-    <LinearGradient
-      colors={["#18181b", "#09090b"]}
-      style={tw`border-b border-orange-800 p-6 rounded-t-3xl`}
-    >
-      <View style={tw`flex-row justify-between items-center`}>
-        <View>
-          <Text style={tw`text-2xl font-black text-white`}>{title}</Text>
-          <Text style={tw`text-orange-400 font-semibold mt-1`}>{subtitle}</Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => setIsModalVisible(false)}
-          style={tw`p-2 bg-orange-500/20 rounded-full`}
-        >
-          <Ionicons name="close" size={20} color="#f97316" />
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
-  );
+
 
   return (
     <SafeAreaView style={tw`flex-1`}>
@@ -750,10 +732,24 @@ const Workouts = ({ isDarkMode }) => {
               { width: width * 0.95 },
             ]}
           >
-            <ModalHeader
-              title={selectedWorkout?.title}
-              subtitle="Skill Levels"
-            />
+            <LinearGradient
+      colors={["#18181b", "#09090b"]}
+      style={tw`border-b border-orange-800 p-6 rounded-t-3xl`}
+    >
+      <View style={tw`flex-row justify-between items-center`}>
+        <View>
+          <Text style={tw`text-2xl font-black text-white`}>{selectedWorkout?.title}</Text>
+          <Text style={tw`text-orange-400 font-semibold mt-1`}>{"SkillLevels"}</Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => setIsModalVisible(false)}
+          style={tw`p-2 bg-orange-500/20 rounded-full`}
+        >
+          <Ionicons name="close" size={20} color="#f97316" />
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
+       
 
             <ScrollView style={tw`flex-1 p-4`}>
               {selectedWorkout?.levels.map((level, levelIndex) => (
@@ -791,10 +787,24 @@ const Workouts = ({ isDarkMode }) => {
                 { width: width * 0.9 },
               ]}
             >
-              <ModalHeader
-                title="Select Difficulty"
-                subtitle="Choose your challenge level"
-              />
+              <LinearGradient
+      colors={["#18181b", "#09090b"]}
+      style={tw`border-b border-orange-800 p-6 rounded-t-3xl`}
+    >
+      <View style={tw`flex-row justify-between items-center`}>
+        <View>
+          <Text style={tw`text-2xl font-black text-white`}>Select Difficulty</Text>
+          <Text style={tw`text-orange-400 font-semibold mt-1`}>Choose your challenge level</Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => setIsModalVisible(false)}
+          style={tw`p-2 bg-orange-500/20 rounded-full`}
+        >
+          <Ionicons name="close" size={20} color="#f97316" />
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
+           
 
               <View style={tw`mt-4`}>
                 {selectedWorkout?.levels.map((level, index) => (
