@@ -60,6 +60,42 @@ ALTER SEQUENCE public.exercises_exercise_id_seq OWNED BY public.exercises.exerci
 
 
 --
+-- Name: followers; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.followers (
+    id integer NOT NULL,
+    follower_id integer,
+    following_id integer,
+    created_at timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.followers OWNER TO postgres;
+
+--
+-- Name: followers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.followers_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.followers_id_seq OWNER TO postgres;
+
+--
+-- Name: followers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.followers_id_seq OWNED BY public.followers.id;
+
+
+--
 -- Name: sets; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -149,7 +185,8 @@ CREATE TABLE public.users (
     email character varying(255),
     password_hash character varying(255),
     username character varying(255),
-    profile_pic bytea
+    profile_pic bytea,
+    name character varying(255)
 );
 
 
@@ -225,6 +262,13 @@ ALTER TABLE ONLY public.exercises ALTER COLUMN exercise_id SET DEFAULT nextval('
 
 
 --
+-- Name: followers id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.followers ALTER COLUMN id SET DEFAULT nextval('public.followers_id_seq'::regclass);
+
+
+--
 -- Name: sets set_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -263,13 +307,39 @@ COPY public.exercises (exercise_id, workout_id, name, user_id, custom, routine) 
 88	71	Advanced Tuck Hold	16	f	t
 89	71	Single Leg Extensions	16	f	t
 91	73	g	16	t	t
-92	74	vbnn	16	t	t
 95	77	ccvbbgfcc	16	t	t
 96	77	gggggg	16	t	t
 97	78	Advanced Tuck Hold	16	f	t
 98	78	Single Leg Extensions	16	f	t
 93	75	test	16	t	f
 94	76	k	16	t	f
+99	79	Advanced Tuck Hold	16	f	t
+100	79	Single Leg Extensions	16	f	t
+92	74	vbnn	16	t	f
+101	80	Advanced Tuck Hold	16	f	t
+102	80	Single Leg Extensions	16	f	t
+104	82	Advanced Tuck Hold	16	f	t
+105	82	Single Leg Extensions	16	f	t
+106	83	Explosive Pull-Ups	16	f	t
+107	83	Russian Dips	16	f	t
+108	84	Advanced Tuck Hold	16	f	t
+109	84	Single Leg Extensions	16	f	t
+103	81	g	16	t	f
+110	85	Advanced Tuck Hold	\N	f	t
+111	85	Single Leg Extensions	\N	f	t
+112	86	Straddle Front Lever Hold	\N	f	t
+113	86	One Leg Front Lever Pulls	\N	f	t
+114	87	Advanced Tuck Hold	17	f	t
+115	87	Single Leg Extensions	17	f	t
+\.
+
+
+--
+-- Data for Name: followers; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.followers (id, follower_id, following_id, created_at) FROM stdin;
+2	16	15	2025-02-22 16:53:28.110614
 \.
 
 
@@ -295,7 +365,6 @@ COPY public.sets (set_id, exercise_id, reps, duration, notes, workout_id, user_i
 199	89	\N	\N		71	16	f	t
 200	89	\N	\N		71	16	f	t
 202	91	\N	\N		73	16	t	t
-203	92	5	\N		74	16	t	t
 206	95	2	\N		77	16	t	t
 207	95	5	\N		77	16	t	t
 208	96	\N	\N		77	16	t	t
@@ -308,6 +377,65 @@ COPY public.sets (set_id, exercise_id, reps, duration, notes, workout_id, user_i
 215	98	\N	\N		78	16	f	t
 204	93	5	\N		75	16	t	f
 205	94	\N	\N		76	16	t	f
+216	99	\N	1		79	16	f	t
+217	99	\N	\N		79	16	f	t
+218	99	\N	\N		79	16	f	t
+219	99	\N	\N		79	16	f	t
+220	100	\N	\N		79	16	f	t
+221	100	\N	\N		79	16	f	t
+222	100	\N	\N		79	16	f	t
+203	92	5	\N		74	16	t	f
+223	101	\N	\N		80	16	f	t
+224	101	\N	\N		80	16	f	t
+225	101	\N	\N		80	16	f	t
+226	101	\N	\N		80	16	f	t
+227	102	\N	\N		80	16	f	t
+228	102	\N	\N		80	16	f	t
+229	102	\N	\N		80	16	f	t
+231	104	\N	5		82	16	f	t
+232	104	\N	\N		82	16	f	t
+233	104	\N	\N		82	16	f	t
+234	104	\N	\N		82	16	f	t
+235	105	\N	\N		82	16	f	t
+236	105	\N	\N		82	16	f	t
+237	105	\N	\N		82	16	f	t
+238	106	\N	\N		83	16	f	t
+239	106	5	\N		83	16	f	t
+240	106	\N	\N		83	16	f	t
+241	106	\N	\N		83	16	f	t
+242	107	\N	\N		83	16	f	t
+243	107	\N	\N		83	16	f	t
+244	107	\N	\N		83	16	f	t
+245	108	\N	5		84	16	f	t
+246	108	\N	\N		84	16	f	t
+247	108	\N	\N		84	16	f	t
+248	108	\N	\N		84	16	f	t
+249	109	\N	\N		84	16	f	t
+250	109	\N	\N		84	16	f	t
+251	109	\N	\N		84	16	f	t
+230	103	5	\N		81	16	t	f
+252	110	\N	4		85	\N	f	t
+253	110	\N	\N		85	\N	f	t
+254	110	\N	\N		85	\N	f	t
+255	110	\N	\N		85	\N	f	t
+256	111	\N	\N		85	\N	f	t
+257	111	\N	\N		85	\N	f	t
+258	111	\N	\N		85	\N	f	t
+259	112	\N	5		86	\N	f	t
+260	112	\N	\N		86	\N	f	t
+261	112	\N	\N		86	\N	f	t
+262	112	\N	\N		86	\N	f	t
+263	112	\N	\N		86	\N	f	t
+264	113	\N	\N		86	\N	f	t
+265	113	\N	\N		86	\N	f	t
+266	113	\N	\N		86	\N	f	t
+267	114	\N	5		87	17	f	t
+268	114	\N	\N		87	17	f	t
+269	114	\N	\N		87	17	f	t
+270	114	\N	\N		87	17	f	t
+271	115	\N	\N		87	17	f	t
+272	115	\N	\N		87	17	f	t
+273	115	\N	\N		87	17	f	t
 \.
 
 
@@ -317,6 +445,7 @@ COPY public.sets (set_id, exercise_id, reps, duration, notes, workout_id, user_i
 
 COPY public.skills (id, skill, progressions, user_id, current, goal, date, date_formatted) FROM stdin;
 50	Muscle Up	{Full}	16	[[3, 4]]	[[4]]	[[1738664503738, 1738996195544]]	[["04/02/25 21:21", "08/02/25 17:29"]]
+53	Planche	{Full}	17	[[2, 3]]	[[5]]	[[1740816134567, 1740880623999]]	[["01/03/25 19:02", "02/03/25 12:57"]]
 47	Front Lever	{"Advanced Tuck",Tuck,"Full FL"}	16	[[3, 4, 6, 13, 14, 16, 18, 19, 6, 2], [5, 7], [4]]	[[8, 20], [8], [5]]	[[1737336604471, 1737336616895, 1737348015519, 1737348059825, 1737349728465, 1737349756343, 1737349763407, 1737349775370, 1738206525716, 1738402074082], [1737336610879, 1737371470293], [1738391075397]]	[["20/01/25 12:30", "20/01/25 12:30", "20/01/25 15:40", "20/01/25 15:40", "20/01/25 16:08", "20/01/25 16:09", "20/01/25 16:09", "20/01/25 16:09", "30/01/25 14:08", "01/02/25 20:27"], ["20/01/25 12:30", "20/01/25 22:11"], ["01/02/25 17:24"]]
 \.
 
@@ -325,14 +454,11 @@ COPY public.skills (id, skill, progressions, user_id, current, goal, date, date_
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (user_id, email, password_hash, username, profile_pic) FROM stdin;
-10	aatavbajaj@gmail.com	$2a$10$bz4wGxpt4w/8k7mMoFWSLuxVLnAMF1BidtFeLjRPnucUnBXt2SRaC	hello200	\N
-11	aaaavbajaj@gmail.com	$2a$10$zP6Ic/aTdKFsNlqe7NJA9.CiY3k7M8raY8wLvF19tPApeb6CDk0gy	hello20	\N
-12	aa@gmail.com	$2a$10$a1zKg4rbSrAYVJY0Tc7R1us3dScmMd0GZ8fnFFkdMEzgq3makmnka	laksk	\N
-13	aarav@gmail.com	$2a$10$JIUbeqBPN8qsL35MaBVGU.EnkF.WrNKgvWEz36z4s2cULf8lAaT5e	takak	\N
-14	stables@gmail.com	$2a$10$tdXjSIotOFiqUpvVAovYwu9xXWbh8Thm5TDqEb3RaWSqaARiZ7M/e	testaayah	\N
-15	alalal@gmail.com	$2a$10$UPuBJARzahnbTSFvpFDoVuxw62UnqTUvKztj7zyKRHEhHN0Pe2QcW	papslsk	\N
-16	aaravbajaj08@gmail.com	$2a$10$c2sWDgFpmcKEVofYIMxyyOc.r9JxdkN43bvVFLIm3DrAexaQBl.9q	aarav	\N
+COPY public.users (user_id, email, password_hash, username, profile_pic, name) FROM stdin;
+14	stables@gmail.com	$2a$10$tdXjSIotOFiqUpvVAovYwu9xXWbh8Thm5TDqEb3RaWSqaARiZ7M/e	testaayah	\N	stables
+15	alalal@gmail.com	$2a$10$UPuBJARzahnbTSFvpFDoVuxw62UnqTUvKztj7zyKRHEhHN0Pe2QcW	papslsk	\N	alal
+16	aaravbajaj08@gmail.com	$2a$10$c2sWDgFpmcKEVofYIMxyyOc.r9JxdkN43bvVFLIm3DrAexaQBl.9q	aarav	\N	Aarav Bajaj
+17	aaravbajaj101@gmail.com	$2a$10$oVPUTHQoV6/.0c5YwyQUC.KRKsZwag1WU/xBfWwTbydGP.yjK7kbu	Aarav2	\N	Aarav2
 \.
 
 
@@ -341,14 +467,23 @@ COPY public.users (user_id, email, password_hash, username, profile_pic) FROM st
 --
 
 COPY public.workouts (workout_id, user_id, title, level, date, custom, workout_time, routine) FROM stdin;
+82	16	Front Lever	Intermediate	2025-02-10 06:13:01.730372	f	00:00:06	t
+83	16	Muscle Up	Intermediate	2025-02-10 06:25:37.90515	f	00:00:08	t
+84	16	Front Lever	Intermediate	2025-03-01 17:39:31.403938	f	00:00:06	t
+81	16	he	Custom	2025-02-09 19:10:10.44342	t	00:00:08	f
+85	\N	Front Lever	Intermediate	2025-03-01 18:21:07.360258	f	00:00:03	t
+86	\N	Front Lever	Advanced	2025-03-01 18:22:15.260459	f	00:00:05	t
+87	17	Front Lever	Intermediate	2025-03-01 18:32:04.177874	f	00:00:04	t
 70	16	Muscle Up	Advanced	2025-01-30 12:15:07.755993	f	00:00:11	t
 71	16	Front Lever	Intermediate	2025-01-30 12:54:18.450316	f	00:01:06	t
 77	16	k	Custom	2025-02-04 15:14:31.167652	t	00:00:24	t
 78	16	Front Lever	Intermediate	2025-02-04 17:40:51.68788	f	00:54:43	t
-74	16	f	Custom	2025-02-03 12:54:23.120315	t	00:23:12	t
-73	16	ggffg	Custom	2025-02-02 12:30:01.079929	t	00:55:12	t
 75	16	Hello	Custom	2025-02-04 11:30:36.923563	t	00:00:10	f
-76	16	s	Custom	2025-02-04 11:35:08.848708	t	00:23:12	f
+79	15	Front Lever	Intermediate	2025-02-09 11:19:08.054228	f	00:22:12	t
+74	14	f	Custom	2025-02-03 12:54:23.120315	t	00:23:12	f
+76	15	s	Custom	2025-02-04 11:35:08.848708	t	00:23:12	f
+73	13	ggffg	Custom	2025-02-02 12:30:01.079929	t	00:55:12	t
+80	16	Front Lever	Intermediate	2025-02-09 19:02:52.930339	f	00:55:12	t
 \.
 
 
@@ -356,35 +491,42 @@ COPY public.workouts (workout_id, user_id, title, level, date, custom, workout_t
 -- Name: exercises_exercise_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.exercises_exercise_id_seq', 98, true);
+SELECT pg_catalog.setval('public.exercises_exercise_id_seq', 115, true);
+
+
+--
+-- Name: followers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.followers_id_seq', 8, true);
 
 
 --
 -- Name: sets_set_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.sets_set_id_seq', 215, true);
+SELECT pg_catalog.setval('public.sets_set_id_seq', 273, true);
 
 
 --
 -- Name: skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.skills_id_seq', 50, true);
+SELECT pg_catalog.setval('public.skills_id_seq', 53, true);
 
 
 --
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_user_id_seq', 16, true);
+SELECT pg_catalog.setval('public.users_user_id_seq', 17, true);
 
 
 --
 -- Name: workouts_workout_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.workouts_workout_id_seq', 78, true);
+SELECT pg_catalog.setval('public.workouts_workout_id_seq', 87, true);
 
 
 --
@@ -393,6 +535,14 @@ SELECT pg_catalog.setval('public.workouts_workout_id_seq', 78, true);
 
 ALTER TABLE ONLY public.exercises
     ADD CONSTRAINT exercises_pkey PRIMARY KEY (exercise_id);
+
+
+--
+-- Name: followers followers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.followers
+    ADD CONSTRAINT followers_pkey PRIMARY KEY (id);
 
 
 --
@@ -409,6 +559,14 @@ ALTER TABLE ONLY public.sets
 
 ALTER TABLE ONLY public.skills
     ADD CONSTRAINT skills_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: followers unique_follow; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.followers
+    ADD CONSTRAINT unique_follow UNIQUE (follower_id, following_id);
 
 
 --
@@ -449,6 +607,22 @@ ALTER TABLE ONLY public.exercises
 
 ALTER TABLE ONLY public.sets
     ADD CONSTRAINT fk_workout_id FOREIGN KEY (workout_id) REFERENCES public.workouts(workout_id) ON DELETE CASCADE;
+
+
+--
+-- Name: followers followers_follower_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.followers
+    ADD CONSTRAINT followers_follower_id_fkey FOREIGN KEY (follower_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: followers followers_following_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.followers
+    ADD CONSTRAINT followers_following_id_fkey FOREIGN KEY (following_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --
