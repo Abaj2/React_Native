@@ -25,6 +25,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Line } from "react-native-svg";
 import HistoryCard from "../components/historyCard";
 import HistoryMain from "./historyMain";
+import ProfileBarGraph from "../components/profileBarGraph";
 
 const { width, height } = Dimensions.get("window");
 
@@ -58,6 +59,8 @@ const ProfileScreen = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -66,6 +69,7 @@ const ProfileScreen = () => {
         const parsedUserData = JSON.parse(storedUserData);
         setUserData(parsedUserData);
         setUsername(parsedUserData.username);
+        console.log(parsedUserData);
         return parsedUserData;
       }
       return null;
@@ -95,7 +99,11 @@ const ProfileScreen = () => {
           totalSkills: response.data.stats.totalSkills || 0,
           totalDuration: response.data.stats.totalDuration || 0,
         });
-        console.log("total duration", response.data.stats.totalDuration);
+
+        setFollowers(response.data.stats.followers);
+        setFollowing(response.data.stats.following);
+        console.log(response.data.stats.followers);
+        console.log(response.data.stats.following);
       }
     } catch (error) {
       console.error("Error getting stats:", error);
@@ -104,7 +112,7 @@ const ProfileScreen = () => {
     }
   }, []);
 
- useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       const initializeData = async () => {
         setIsLoading(true);
@@ -120,9 +128,7 @@ const ProfileScreen = () => {
 
       initializeData();
 
-      return () => {
-      
-      };
+      return () => {};
     }, [fetchUserData, fetchStats, fetchProfileGraph])
   );
 
@@ -241,46 +247,48 @@ const ProfileScreen = () => {
     }
   }, []);
 
-
   function calculateDailyStreak(workoutDates) {
     if (workoutDates.length === 0) return 0;
-  
- 
-    const uniqueDates = [...new Set(
-      workoutDates.map(entry => {
-        const date = new Date(entry.date);
-        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-      })
-    )].sort((a, b) => b - a); 
-  
+
+    const uniqueDates = [
+      ...new Set(
+        workoutDates.map((entry) => {
+          const date = new Date(entry.date);
+          return Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate()
+          );
+        })
+      ),
+    ].sort((a, b) => b - a);
+
     if (uniqueDates.length === 0) return 0;
-  
- 
+
     const today = new Date();
     const todayUTC = Date.UTC(
       today.getUTCFullYear(),
       today.getUTCMonth(),
       today.getUTCDate()
     );
-  
+
     const lastWorkoutUTC = uniqueDates[0];
     const dayDifference = (todayUTC - lastWorkoutUTC) / (1000 * 3600 * 24);
-  
+
     if (dayDifference > 1) return 0;
- 
+
     let streak = 1;
     for (let i = 1; i < uniqueDates.length; i++) {
       const previousDay = uniqueDates[i - 1];
       const currentDay = uniqueDates[i];
-      
-  
-      if ((previousDay - currentDay) === (1000 * 3600 * 24)) {
+
+      if (previousDay - currentDay === 1000 * 3600 * 24) {
         streak++;
       } else {
         break;
       }
     }
-  
+
     return streak;
   }
 
@@ -492,7 +500,7 @@ const ProfileScreen = () => {
 
   const calculateTotalDuration = (durations) => {
     if (!durations || !Array.isArray(durations)) {
-      return "0 seconds";
+      return "0";
     }
 
     const durationToSeconds = (duration) => {
@@ -528,148 +536,192 @@ const ProfileScreen = () => {
       >
         <LinearGradient
           colors={["#000", "#1a1a1a"]}
-          style={tw`rounded-b-[40px] pb-8 shadow-xl`}
+          style={tw`rounded-b-[40px] pb-6 shadow-xl`}
         >
           <View style={tw`pt-16 px-6`}>
-            <View style={tw`flex-row items-center`}>
-              <TouchableOpacity
-                onPress={handleChangeProfilePicture}
-                style={tw`shadow-lg`}
-              >
-                <View style={tw`relative`}>
-                  <Image
-                    source={
-                      profilePic ? { uri: profilePic } : blackDefaultProfilePic
-                    }
-                    style={tw`w-28 h-28 rounded-full border-4 border-orange-500`}
-                  />
-                  <View
-                    style={tw`absolute bottom-0 right-0 bg-orange-500 p-2 rounded-full border-2 border-white`}
-                  >
-                    <Icon name="edit" size={18} color="white" />
+            <View style={tw`flex-row items-center justify-between`}>
+              <View style={tw`flex-row items-center`}>
+                <TouchableOpacity
+                  onPress={handleChangeProfilePicture}
+                  style={tw`shadow-lg`}
+                >
+                  <View style={tw`relative`}>
+                    <Image
+                      source={
+                        profilePic
+                          ? { uri: profilePic }
+                          : blackDefaultProfilePic
+                      }
+                      style={tw`w-24 h-24 rounded-full border-4 border-orange-500`}
+                    />
+                    <View
+                      style={tw`absolute bottom-0 right-0 bg-orange-500 p-2 rounded-full border-2 border-white`}
+                    >
+                      <Icon name="edit" size={16} color="white" />
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
 
-              <View style={tw`ml-5 flex-1`}>
-                <Text style={tw`text-white text-2xl font-bold mb-1`}>
-                  {userData?.username || "Loading..."}
+                <View style={tw`ml-4 flex-1`}>
+                  <Text style={tw`text-white text-2xl font-bold`}>
+                    {userData?.name || "Loading..."}
+                  </Text>
+                  <Text style={tw`text-gray-300 text-base mb-1`}>
+                    @{userData?.username || "Loading..."}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View
+              style={tw`flex-row justify-around mt-6 bg-zinc-900 rounded-2xl p-3`}
+            >
+              <View style={tw`items-center px-2`}>
+                <Text style={tw`text-white text-xl font-bold`}>
+                  {followers.length || 0}
                 </Text>
-                <Text style={tw`text-gray-300 text-base`}>
-                  {userData?.email || "Loading..."}
+                <Text style={tw`text-gray-400 text-sm`}>Followers</Text>
+              </View>
+              <View style={tw`h-full w-px bg-zinc-800`} />
+              <View style={tw`items-center px-2`}>
+                <Text style={tw`text-white text-xl font-bold`}>
+                  {following.length || 0}
                 </Text>
+                <Text style={tw`text-gray-400 text-sm`}>Following</Text>
+              </View>
+              <View style={tw`h-full w-px bg-zinc-800`} />
+              <View style={tw`items-center px-2`}>
+                <Text style={tw`text-white text-xl font-bold`}>
+                  {calculateDailyStreak(workoutDates)}
+                </Text>
+                <Text style={tw`text-gray-400 text-sm`}>Streak</Text>
               </View>
             </View>
           </View>
         </LinearGradient>
+        <ProfileBarGraph workoutDates={workoutDates} styles={styles}/>
 
         <View style={tw`px-5 mt-6`}>
-          <View style={tw`flex-row justify-between gap-4 mb-4`}>
-            <LinearGradient
-              colors={["#000", "#1a1a1a"]}
-              style={tw`flex-1 p-4 rounded-2xl shadow-lg`}
-            >
-              <View style={tw`items-center`}>
-                <Ionicons name="barbell-outline" size={28} color="#f97316" />
-                <Text style={tw`text-white text-2xl font-bold mt-2`}>
-                  {stats?.totalWorkouts || 0}
-                </Text>
-                <Text style={tw`text-slate-400 text-xs mt-1`}>
-                  Total Workouts
-                </Text>
-              </View>
-            </LinearGradient>
-
-            <LinearGradient
-              colors={["#000", "#1a1a1a"]}
-              style={tw`flex-1 p-4 rounded-2xl shadow-lg`}
-            >
-              <View style={tw`items-center`}>
-                <Ionicons name="time-outline" size={28} color="#f97316" />
-                <Text style={tw`text-white text-2xl font-bold mt-2`}>
-                  {totalDuration}
-                </Text>
-                <Text style={tw`text-slate-400 text-xs mt-1`}>
-                  Training Time
-                </Text>
-              </View>
-            </LinearGradient>
+          <View style={tw`flex-row items-center justify-between mb-3`}>
+            <Text style={tw`text-white text-xl font-bold`}>
+              Progress Summary
+            </Text>
           </View>
 
-          <View style={tw`flex-row justify-between gap-4`}>
-            <LinearGradient
-              colors={["#000", "#1a1a1a"]}
-              style={tw`flex-1 p-4 rounded-2xl shadow-lg`}
-            >
-              <View style={tw`items-center`}>
-                <Ionicons name="trophy-outline" size={28} color="#f97316" />
-                <Text style={tw`text-white text-2xl font-bold mt-2`}>
-                  {stats?.totalSkills || 0}
-                </Text>
-                <Text style={tw`text-slate-400 text-xs mt-1`}>
-                  Total Skills
-                </Text>
+          <LinearGradient
+            colors={["#1a1a1a", "#222"]}
+            style={tw`p-4 rounded-3xl shadow-lg mb-4`}
+          >
+            <View style={tw`flex-row justify-between items-center mb-4`}>
+              <View style={tw`flex-row items-center`}>
+                <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
+                  <Ionicons name="barbell" size={24} color="white" />
+                </View>
+                <View style={tw`ml-3`}>
+                  <Text style={tw`text-white font-bold text-lg`}>
+                    Total Workouts
+                  </Text>
+                  <Text style={tw`text-gray-400 text-sm`}>This month</Text>
+                </View>
               </View>
-            </LinearGradient>
+              <Text style={tw`text-white text-2xl font-bold`}>
+                {stats?.totalWorkouts || 0}
+              </Text>
+            </View>
 
-            <LinearGradient
-              colors={["#000", "#1a1a1a"]}
-              style={tw`flex-1 p-4 rounded-2xl shadow-lg`}
-            >
-              <View style={tw`items-center`}>
-                <Ionicons name="flame-outline" size={28} color="#f97316" />
-                <Text style={tw`text-white text-2xl font-bold mt-2`}>
-                  {calculateDailyStreak(workoutDates)}
-                </Text>
-                <Text style={tw`text-slate-400 text-xs mt-1`}>Daily Streak</Text>
+            <View style={tw`flex-row justify-between items-center mb-4`}>
+              <View style={tw`flex-row items-center`}>
+                <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
+                  <Ionicons name="time" size={24} color="white" />
+                </View>
+                <View style={tw`ml-3`}>
+                  <Text style={tw`text-white font-bold text-lg`}>
+                    Training Time
+                  </Text>
+                  <Text style={tw`text-gray-400 text-sm`}>Total hours</Text>
+                </View>
               </View>
-            </LinearGradient>
+              <Text style={tw`text-white text-2xl font-bold`}>
+                {totalDuration}
+              </Text>
+            </View>
+
+            <View style={tw`flex-row justify-between items-center`}>
+              <View style={tw`flex-row items-center`}>
+                <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
+                  <Ionicons name="trophy" size={24} color="white" />
+                </View>
+                <View style={tw`ml-3`}>
+                  <Text style={tw`text-white font-bold text-lg`}>Skills</Text>
+                  <Text style={tw`text-gray-400 text-sm`}>Total skills</Text>
+                </View>
+              </View>
+              <Text style={tw`text-white text-2xl font-bold`}>
+                {stats?.totalSkills || 0}
+              </Text>
+            </View>
+          </LinearGradient>
+        </View>
+
+        {/* Quick Actions */}
+        <View style={tw`px-5 mt-4 mb-6`}>
+          <Text style={tw`text-white text-xl font-bold mb-4`}>
+            Quick Actions
+          </Text>
+
+          <View style={tw`flex-row justify-between gap-3 mb-3`}>
+            <TouchableOpacity
+              style={tw`flex-1 bg-zinc-900 p-4 rounded-2xl shadow-lg items-center`}
+              onPress={() => navigation.navigate("Settings-Main")}
+            >
+              <View style={tw`bg-zinc-800 p-3 rounded-full mb-2`}>
+                <Ionicons name="settings-outline" size={24} color="#f97316" />
+              </View>
+              <Text style={tw`text-white text-sm font-medium`}>Settings</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={tw`flex-1 bg-zinc-900 p-4 rounded-2xl shadow-lg items-center`}
+              onPress={handleLogout}
+            >
+              <View style={tw`bg-zinc-800 p-3 rounded-full mb-2`}>
+                <Ionicons name="exit-outline" size={24} color="#f97316" />
+              </View>
+              <Text style={tw`text-white text-sm font-medium`}>Logout</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        <View style={tw`px-5 mt-8 mb-6`}>
-  <Text style={tw`text-white text-xl font-bold mb-4`}>
-    Quick Actions
-  </Text>
-  
-  <View style={tw`flex flex-col gap-3`}>
-    <TouchableOpacity
-      style={tw`flex-row items-center justify-between p-5 bg-zinc-900 rounded-2xl shadow-lg`}
-      onPress={() => navigation.navigate("Settings-Main")}
-    >
-      <View style={tw`flex-row items-center`}>
-        <Ionicons name="settings-outline" size={24} color="#f97316" />
-        <Text style={tw`text-white ml-4 text-base font-medium`}>App Settings</Text>
-      </View>
-      <Ionicons name="chevron-forward" color="#64748b" size={20} />
-    </TouchableOpacity>
+        {/* Workout History */}
+        <View style={tw`mb-4`}>
+          <View style={tw`flex-row items-center justify-between mb-3`}>
+            <Text style={tw`ml-5 text-white mb-2 text-xl font-bold`}>
+              Recent Workouts
+            </Text>
+          </View>
 
-    <TouchableOpacity
-      style={tw`flex-row items-center justify-between p-5 bg-zinc-900 rounded-2xl shadow-lg`}
-      onPress={() => navigation.navigate("Achievements")}
-    >
-      <View style={tw`flex-row items-center`}>
-        <Ionicons name="medal-outline" size={24} color="#f97316" />
-        <Text style={tw`text-white ml-4 text-base font-medium`}>Achievements</Text>
-      </View>
-      <Ionicons name="chevron-forward" color="#64748b" size={20} />
-    </TouchableOpacity>
+          <View style={tw`px-5 mb-4`}>
+            <View style={tw`flex-row items-center justify-between mb-3`}></View>
 
-    <TouchableOpacity
-      style={tw`flex-row items-center justify-between p-5 bg-zinc-900 rounded-2xl shadow-lg`}
-      onPress={handleLogout}
-    >
-      <View style={tw`flex-row items-center`}>
-        <Ionicons name="exit-outline" size={24} color="#f97316" />
-        <Text style={tw`text-white ml-4 text-base font-medium`}>Logout</Text>
-      </View>
-      <Ionicons name="chevron-forward" color="#64748b" size={20} />
-    </TouchableOpacity>
-  </View>
-</View>
-
-        <View style={tw`mt-3`}>
-          <HistoryMain />
+            {stats.totalWorkouts > 0 ? (
+              <HistoryCard user_id={userData.user_id} widthNumber={0.9} />
+            ) : (
+              <View style={tw`flex-1 items-center justify-center mt-10`}>
+                <Icon
+                  name="package"
+                  size={60}
+                  color="#ffa500"
+                  style={tw`opacity-50 mb-4`}
+                />
+                <Text style={tw`text-orange-500 text-xl font-bold mb-2`}>
+                  No Workout Data Yet
+                </Text>
+                <Text style={tw`text-zinc-500 text-center px-10`}>
+                  Finish a workout for your history to display here.
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       </ScrollView>
     </LinearGradient>

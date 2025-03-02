@@ -30,76 +30,105 @@ const LeaderboardCard = ({ username, workouts, rank, user_id, metric }) => {
   }, []);
 
   return (
-    <View>
+    <View style={tw`px-4 py-3`}>
       <View
-        style={[
-          tw`self-center justify-center mt-6 ${
-            username === storageUsername
-              ? "bg-orange-500"
-              : "bg-zinc-900 border-gray-500 "
-          } border rounded-2xl`,
-          { width: width * 0.9, height: height * 0.1 },
-        ]}
+        style={tw`flex-row items-center justify-between ${
+          username === storageUsername ? "opacity-100" : "opacity-100"
+        }`}
       >
-        <View style={tw`flex-row items-center`}>
-          {rank === 1 && (
-            <MaterialCommunityIcons
-              style={tw`ml-5`}
-              name="crown"
-              size={35}
-              color="yellow"
-            />
-          )}
-          {rank === 2 && (
-            <Ionicons
-              style={tw`ml-5`}
-              name="medal-outline"
-              size={35}
-              color="#808080"
-            />
-          )}
-
-          {rank === 3 && (
-            <Ionicons
-              style={tw`ml-5`}
-              name="medal-outline"
-              size={35}
-              color="#8B4513"
-            />
-          )}
-          {rank > 3 && (
-            <Text style={tw`ml-7 mr-2 text-4xl text-gray-500`}>{rank}</Text>
-          )}
-
-          <Image
-            source={blackDefaultProfilePic}
-            style={tw`w-12 h-12 rounded-full ml-5`}
-          />
-          <View>
-            <Text style={tw`ml-4 font-bold text-xl text-white`}>
-              {username}
-            </Text>
-            {workouts && (
-              <Text
-                style={tw`ml-4 mt-2 ${
-                  username === storageUsername
-                    ? "text-gray-850"
-                    : "text-gray-500"
-                }`}
-              >{`${workouts} workout${workouts > 1 ? "s" : ""}`}</Text>
+        {/* Left Section: Rank and Profile */}
+        <View style={tw`flex-row items-center flex-1`}>
+          {/* Rank Badge */}
+          <View style={tw`mr-3 w-10 items-center justify-center`}>
+            {rank === 1 && (
+              <View style={tw`bg-yellow-500/20 p-1 rounded-full`}>
+                <MaterialCommunityIcons
+                  name="crown"
+                  size={28}
+                  color="gold"
+                />
+              </View>
             )}
-            {metric && (
-              <Text
-                style={tw`ml-4 mt-2 ${
-                  username === storageUsername
-                    ? "text-gray-850"
-                    : "text-gray-500"
-                }`}
-              >{metric}</Text>
+            {rank === 2 && (
+              <View style={tw`bg-gray-400/20 p-1 rounded-full`}>
+                <Ionicons
+                  name="medal-outline"
+                  size={26}
+                  color="silver"
+                />
+              </View>
+            )}
+            {rank === 3 && (
+              <View style={tw`bg-orange-800/20 p-1 rounded-full`}>
+                <Ionicons
+                  name="medal-outline"
+                  size={26}
+                  color="#CD7F32" // Bronze color
+                />
+              </View>
+            )}
+            {rank > 3 && (
+              <View style={tw`${username === storageUsername ? "bg-orange-500/20" : "bg-zinc-800"} w-9 h-9 rounded-full items-center justify-center`}>
+                <Text style={tw`${username === storageUsername ? "text-orange-400" : "text-gray-400"} font-bold text-lg`}>
+                  {rank}
+                </Text>
+              </View>
             )}
           </View>
+  
+          {/* Profile Image */}
+          <Image
+            source={blackDefaultProfilePic}
+            style={tw`w-10 h-10 rounded-full ${
+              username === storageUsername ? "border-2 border-orange-500" : ""
+            }`}
+          />
+  
+          {/* Username */}
+          <View style={tw`ml-3 flex-1`}>
+            <Text 
+              style={tw`font-bold text-lg ${
+                username === storageUsername ? "text-orange-400" : "text-white"
+              }`}
+              numberOfLines={1}
+            >
+              {username}
+            </Text>
+          </View>
+        </View>
+  
+        {/* Right Section: Stats */}
+        <View style={tw`${
+          username === storageUsername 
+            ? "bg-orange-500" 
+            : "bg-zinc-800"
+          } px-3 py-1 rounded-full`}
+        >
+          {workouts && (
+            <Text
+              style={tw`font-bold ${
+                username === storageUsername ? "text-white" : "text-gray-300"
+              }`}
+            >
+              {`${workouts} workout${workouts > 1 ? "s" : ""}`}
+            </Text>
+          )}
+          {metric && (
+            <Text
+              style={tw`font-bold ${
+                username === storageUsername ? "text-white" : "text-gray-300"
+              }`}
+            >
+              {metric}
+            </Text>
+          )}
         </View>
       </View>
+      
+      {/* Highlight for current user */}
+      {username === storageUsername && (
+        <View style={tw`absolute left-0 top-0 bottom-0 w-1 bg-orange-500 rounded-r-full`} />
+      )}
     </View>
   );
 };

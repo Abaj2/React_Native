@@ -80,7 +80,7 @@ const formatDate = () => {
 };
 
 app.post("/signup", async (req, res) => {
-  const { email, username, password, confirmPassword } = req.body;
+  const { email, username, password, confirmPassword, name } = req.body;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const usernameRegex = /^[a-zA-Z0-9._]{3,15}$/;
   console.log("received request:", email);
@@ -117,8 +117,8 @@ app.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      "INSERT INTO users(email, username, password_hash) VALUES ($1, $2, $3) RETURNING user_id, email, username",
-      [email, username, hashedPassword]
+      "INSERT INTO users(email, username, password_hash, name) VALUES ($1, $2, $3, $4) RETURNING user_id, email, username, name",
+      [email, username, hashedPassword, name]
     );
 
     const token = generateJWT(result.rows[0]);
@@ -130,6 +130,7 @@ app.post("/signup", async (req, res) => {
         username: user.username,
         email: user.email,
         user_id: user.user_id,
+        name: user.name
       },
       token,
     });
@@ -162,6 +163,7 @@ app.post("/signin", async (req, res) => {
     }
 
     const token = generateJWT(user);
+    
 
     res.status(200).json({
       message: "Login successful",
@@ -169,6 +171,8 @@ app.post("/signin", async (req, res) => {
         username: user.username,
         email: user.email,
         user_id: user.user_id,
+        name: user.name
+
       },
       token,
     });
@@ -225,16 +229,14 @@ app.get("/fetchskills", verifyToken, async (req, res) => {
       userId,
     ]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "No skill found" });
-    }
-    res.status(200).json({ skills: result.rows });
-    console.log(JSON.stringify(result.rows));
+   
+    res.status(200).json({ skills: result.rows || [] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 app.post("/addprogression", verifyToken, async (req, res) => {
   try {
@@ -449,7 +451,7 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
   }
 });
 app.get("/getworkouts", verifyToken, async (req, res) => {
-  const userId = req.user.user_id;
+  const userId = req.query.user_id
 
   const userWorkouts = await pool.query(
     "SELECT * FROM workouts WHERE user_id = $1",
@@ -578,12 +580,23 @@ app.get("/getstats", verifyToken, async (req, res) => {
       `SELECT workout_time FROM workouts WHERE user_id = $1`,
       [user_id]
     );
-    console.log(totalDuration);
+    
+    const following = await pool.query(`
+      SELECT following_id FROM followers WHERE follower_id = $1`,
+      [user_id]
+    )
+
+    const followers = await pool.query(`
+      SELECT follower_id FROM followers WHERE following_id = $1`,
+    [user_id]
+  )
 
     const stats = {
       totalWorkouts: totalWorkouts.rows.length,
       totalSkills: totalSkills.rows.length,
       totalDuration: totalDuration.rows,
+      following: following.rows,
+      followers: followers.rows,
     };
 
     res.status(200).json({ stats });
@@ -822,6 +835,64 @@ FROM followers;
     console.error("Error getting data:", err);
   }
 });
+
+app.post("/followuser", verifyToken, async (req, res) => {
+  const { follower_id, following_id } = req.body;
+  try {
+    const insertFollower = await pool.query(`INSERT INTO followers(follower_id, following_id) VALUES($1, $2)`,
+      [follower_id, following_id]
+    )
+
+    console.log(insertFollower.rowCount)
+
+  } catch (err) {
+    console.error("Error inserting follower", err)
+  }
+})
+
+app.post("/unfollowuser", verifyToken, async (req, res) => {
+  const { follower_id, following_id } = req.body;
+  try {
+    const deleteFollower = await pool.query(`DELETE FROM followers WHERE follower_id = $1 AND following_id = $2`,
+      [follower_id, following_id]
+    )
+
+    console.log(deleteFollower)
+
+  } catch (err) {
+    console.error("Error inserting follower", err)
+  }
+})
+
+app.get('/userdetails', async (req, res) => {
+  const { user_id } = req.query
+  console.log(user_id)
+
+  try {
+    const userDetails = await pool.query(`SELECT username, name FROM users WHERE user_id = $1`,
+      [user_id]
+    )
+
+    const followers = await pool.query(`SELECT follower_id FROM followers WHERE following_id = $1`,
+      [user_id]
+    )
+
+    const following = await pool.query(`SELECT following_id FROM followers WHERE follower_id = $1`,
+      [user_id]
+    )
+
+    res.status(200).json({
+      userDetails: userDetails.rows,
+      followers: followers.rows,
+      following: following.rows
+    })
+
+  } catch (err) {
+    console.error('Error getting users profile details', err)
+  }
+})
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

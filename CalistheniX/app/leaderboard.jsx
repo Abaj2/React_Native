@@ -154,11 +154,12 @@ const Leaderboard = () => {
     const groupWorkoutsByUser = (workouts) => {
       const workoutCount = {};
       workouts.forEach((workout) => {
-        workoutCount[workout.username] = (workoutCount[workout.username] || 0) + 1;
+        if (workout.username !== "Unknown") {
+          workoutCount[workout.username] = (workoutCount[workout.username] || 0) + 1;
+        }
       });
       return workoutCount;
     };
-
     const workoutsByUser = groupWorkoutsByUser(monthlyWorkouts);
     const workoutEntries = Object.entries(workoutsByUser);
 
@@ -200,15 +201,17 @@ const Leaderboard = () => {
       const timeMap = {};
       
       times.forEach((time) => {
-        if (!timeMap[time.user_id]) {
-          timeMap[time.user_id] = {
-            username: time.username,
-            totalSeconds: 0
-          };
+        if (time.username !== "Unknown") {
+          if (!timeMap[time.user_id]) {
+            timeMap[time.user_id] = {
+              username: time.username,
+              totalSeconds: 0
+            };
+          }
+          timeMap[time.user_id].totalSeconds += timeStringToSeconds(time.workout_time);
         }
-        timeMap[time.user_id].totalSeconds += timeStringToSeconds(time.workout_time);
       });
-
+  
       return Object.values(timeMap).map(user => ({
         username: user.username,
         totalSeconds: user.totalSeconds,
@@ -239,26 +242,34 @@ const Leaderboard = () => {
 
   return (
     <LinearGradient colors={["#000000", "#1a1a1a"]} style={tw`flex-1`}>
-      <ScrollView showsVerticalScrollIndicator={false} style={tw`flex-1`}>
-        <SafeAreaView>
-          <View>
-            <Text style={tw`text-white font-bold text-3xl mb- mt-8 self-center`}>
-              Leaderboards
-            </Text>
-
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={tw`flex-row gap-3`}>
-                <TouchableOpacity onPress={() => setSelectedTab("Tab1")}>
+      <SafeAreaView style={tw`flex-1`}>
+        <ScrollView showsVerticalScrollIndicator={false} style={tw`flex-1`}>
+          <View style={tw`px-4 pb-8`}>
+            {/* Header */}
+            <View style={tw`flex-row items-center justify-between mt-8 mb-6`}>
+              <Text style={tw`text-white font-bold text-3xl`}>
+                Leaderboards
+              </Text>
+              <Ionicons name="trophy-outline" size={28} color="#f97316" />
+            </View>
+  
+            {/* Tabs */}
+            <View style={tw`mb-6`}>
+              <View style={tw`flex-row gap-3 justify-between`}>
+                <TouchableOpacity 
+                  style={tw`flex-1`} 
+                  onPress={() => setSelectedTab("Tab1")}
+                >
                   <View
-                    style={tw`flex-row gap-2 rounded-2xl p-3 ml-5 mt-5 ${
+                    style={tw`flex-row gap-2 rounded-2xl py-3 px-4 ${
                       selectedTab === "Tab1"
                         ? "bg-orange-500"
-                        : "border border-zinc-800"
-                    } justify-center items-center text-center`}
+                        : "bg-zinc-900 border border-zinc-800"
+                    } justify-center items-center`}
                   >
                     <Ionicons
                       name="calendar-clear-outline"
-                      size={24}
+                      size={22}
                       color="white"
                     />
                     <Text style={tw`font-bold text-white`}>
@@ -266,125 +277,153 @@ const Leaderboard = () => {
                     </Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setSelectedTab("Tab2")}>
+                <TouchableOpacity 
+                  style={tw`flex-1`} 
+                  onPress={() => setSelectedTab("Tab2")}
+                >
                   <View
-                    style={tw`flex-row gap-2 rounded-2xl p-3 mt-5 ${
+                    style={tw`flex-row gap-2 rounded-2xl py-3 px-4 ${
                       selectedTab === "Tab2"
                         ? "bg-orange-500"
-                        : "border border-zinc-800"
-                    } justify-center items-center text-center`}
+                        : "bg-zinc-900 border border-zinc-800"
+                    } justify-center items-center`}
                   >
                     <Ionicons
                       name="stopwatch-outline"
-                      size={24}
+                      size={22}
                       color="white"
                     />
                     <Text style={tw`font-bold text-white`}>Workout Time</Text>
                   </View>
                 </TouchableOpacity>
               </View>
-            </ScrollView>
-
+            </View>
+  
+            {/* User Ranking Card */}
             <LinearGradient
               colors={["rgba(249,115,22,0.4)", "rgba(234,88,12,0.1)"]}
-              style={[
-                tw`border border-orange-500 self-center mt-8 rounded-3xl`,
-                {},
-              ]}
+              style={tw`border border-orange-500 rounded-3xl mb-6 overflow-hidden`}
             >
-              <View
-                style={[tw``, { width: width * 0.93, height: height * 0.19 }]}
-              >
-                <View style={tw`flex-row justify-between`}>
-                  <Text style={tw`ml-7 mt-7 font-bold text-orange-400 text-xl`}>
+              <View style={tw`p-5`}>
+                <View style={tw`flex-row justify-between items-center mb-4`}>
+                  <Text style={tw`font-bold text-orange-400 text-xl`}>
                     Your Ranking
                   </Text>
-                  <Ionicons
-                    style={tw`mt-7 mr-4`}
-                    name="trophy-outline"
-                    size={30}
-                    color="orange"
-                  />
+                  <View style={tw`bg-orange-500/20 p-2 rounded-full`}>
+                    <Ionicons
+                      name="trophy-outline"
+                      size={24}
+                      color="#f97316"
+                    />
+                  </View>
                 </View>
-                <View style={tw`flex-row`}>
+                
+                <View style={tw`flex-row items-center`}>
                   <Image
                     source={blackDefaultProfilePic}
-                    style={tw`w-18 mt-3 ml-6 h-18 rounded-full border-4 border-orange-500`}
+                    style={tw`w-16 h-16 rounded-full border-2 border-orange-500`}
                   />
-                  <View style={tw``}>
-                    <Text style={tw`font-bold text-white text-xl ml-5 mt-3`}>
+                  <View style={tw`ml-4 flex-1`}>
+                    <Text style={tw`font-bold text-white text-xl mb-1`}>
                       {username}
                     </Text>
-                    <View style={tw`flex-row`}>
-                      <Text style={tw`ml-5 mt-3 text-gray-200`}>
-                        Rank #{selectedTab === "Tab1" 
-                          ? currentUserEntry?.rank || "N/A" 
-                          : currentTimeUserEntry?.rank || "N/A"}
-                      </Text>
-                      <Text style={tw`mt-3 text-gray-200 ml-3`}>
-                        {selectedTab === "Tab1"
-                          ? `${currentUserEntry?.count || 0} Workouts`
-                          : currentTimeUserEntry?.formattedTime || "00:00:00"}
-                      </Text>
+                    <View style={tw`flex-row justify-between items-center`}>
+                      <View style={tw`bg-zinc-900/80 py-1 px-3 rounded-full`}>
+                        <Text style={tw`text-gray-200 font-bold`}>
+                          Rank #{selectedTab === "Tab1" 
+                            ? currentUserEntry?.rank || "N/A" 
+                            : currentTimeUserEntry?.rank || "N/A"}
+                        </Text>
+                      </View>
+                      <View style={tw`bg-orange-500/20 py-1 px-3 rounded-full`}>
+                        <Text style={tw`text-orange-300 font-bold`}>
+                          {selectedTab === "Tab1"
+                            ? `${currentUserEntry?.count || 0} Workouts`
+                            : currentTimeUserEntry?.formattedTime || "00:00:00"}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                 </View>
               </View>
             </LinearGradient>
-
-            <View style={tw`flex-row justify-between`}>
-              <Text style={tw`text-white font-bold text-xl mt-6 ml-5`}>
-                Top Rankings
-              </Text>
-              <View style={tw`flex-row gap-3`}>
-                <Ionicons
-                  style={tw`mt-7`}
-                  name="people-outline"
-                  size={22}
-                  color="gray"
-                />
-                <Text style={tw`text-gray-500 mt-8 mr-4`}>
+  
+            <View style={tw`flex-row justify-between items-center mb-2`}>
+              <View style={tw`flex-row items-center`}>
+       
+                <Text style={tw`text-white font-bold text-xl`}>
+                  Top Rankings
+                </Text>
+              
+              </View>
+             
+              <View style={tw`flex-row items-center bg-zinc-900 py-1 px-3 rounded-full`}>
+                <Ionicons name="people-outline" size={18} color="#f97316" />
+                <Text style={tw`text-gray-300 ml-2`}>
                   {selectedTab === "Tab1" 
                     ? rankedEntries.length 
                     : rankedTimeEntries.length} participants
                 </Text>
               </View>
+              
             </View>
-
+            <View style={tw`bg-orange-500 h-1 rounded-xl mb-10 w-full self-center`}></View>
+  
+            {/* Leaderboard List */}
             {selectedTab === "Tab1" ? (
-              Array.isArray(rankedEntries) && rankedEntries.length > 0 ? (
-                rankedEntries.map((entry) => (
-                  <LeaderboardCard
-                    key={entry.username}
-                    username={entry.username}
-                    workouts={entry.count}
-                    rank={entry.rank}
-                  />
-                ))
+              rankedEntries.length > 0 ? (
+                <View style={tw`bg-zinc-900/60 rounded-3xl overflow-hidden border border-zinc-800`}>
+                  {rankedEntries.map((entry, index) => (
+                    <View key={entry.username} style={tw`${
+                      index !== rankedEntries.length - 1 ? "border-b border-zinc-800" : ""
+                    }`}>
+                      <LeaderboardCard
+                        username={entry.username}
+                        workouts={entry.count}
+                        rank={entry.rank}
+                      />
+                    </View>
+                  ))}
+                </View>
               ) : (
-                <Text style={tw`text-white text-xl`}>
-                  No leaderboard entries available.
-                </Text>
+                <View style={tw`bg-zinc-900/60 p-8 rounded-3xl items-center justify-center border border-zinc-800`}>
+                  <Ionicons name="fitness-outline" size={40} color="#f97316" style={tw`mb-3 opacity-50`} />
+                  <Text style={tw`text-white text-xl text-center font-bold`}>
+                    No workout entries yet
+                  </Text>
+                  <Text style={tw`text-gray-400 text-center mt-2`}>
+                    Complete workouts to appear on the leaderboard
+                  </Text>
+                </View>
               )
+            ) : rankedTimeEntries.length > 0 ? (
+              <View style={tw`bg-zinc-900/60 rounded-3xl overflow-hidden border border-zinc-800`}>
+                {rankedTimeEntries.map((entry, index) => (
+                  <View key={entry.username} style={tw`${
+                    index !== rankedTimeEntries.length - 1 ? "border-b border-zinc-800" : ""
+                  }`}>
+                    <LeaderboardCard
+                      username={entry.username}
+                      metric={entry.formattedTime}
+                      rank={entry.rank}
+                    />
+                  </View>
+                ))}
+              </View>
             ) : (
-              Array.isArray(rankedTimeEntries) && rankedTimeEntries.length > 0 ? (
-                rankedTimeEntries.map((entry) => (
-                  <LeaderboardCard
-                    key={entry.username}
-                    username={entry.username}
-                    metric={entry.formattedTime}
-                    rank={entry.rank}
-                  />
-                ))
-              ) : (
-                <Text style={tw`text-white text-xl`}>
-                  No time entries available.
+              <View style={tw`bg-zinc-900/60 p-8 rounded-3xl items-center justify-center border border-zinc-800`}>
+                <Ionicons name="stopwatch-outline" size={40} color="#f97316" style={tw`mb-3 opacity-50`} />
+                <Text style={tw`text-white text-xl text-center font-bold`}>
+                  No time entries yet
                 </Text>
-              )
+                <Text style={tw`text-gray-400 text-center mt-2`}>
+                  Complete workouts to appear on the leaderboard
+                </Text>
+              </View>
             )}
           </View>
-        </SafeAreaView>
-      </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
     </LinearGradient>
   );
 };

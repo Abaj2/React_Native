@@ -12,7 +12,6 @@ import {
 import tw from "twrnc";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 const GET_WORKOUTS_URL = Platform.select({
@@ -20,24 +19,40 @@ const GET_WORKOUTS_URL = Platform.select({
   ios: "http://192.168.1.155:4005/getworkouts",
 });
 
-const HistoryCard = ({
-  isDarkMode,
-  onDataChange,
-  filteredWorkouts,
-  isCustom,
-}) => {
+const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber }) => {
   const [workoutsData, setWorkoutsData] = useState([]);
   const [exercisesData, setExercisesData] = useState([]);
   const [setsData, setSetsData] = useState([]);
   const [expandedWorkouts, setExpandedWorkouts] = useState([]);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchWorkouts = async () => {
+    const fetchUserDataAndWorkouts = async () => {
       try {
+        setLoading(true);
+
         const jwtToken = await AsyncStorage.getItem("jwtToken");
-        const response = await axios.get(GET_WORKOUTS_URL, {
+        let finalUserId = user_id; 
+
+        if (!finalUserId) {
+          const storedUserData = await AsyncStorage.getItem("userData");
+          if (storedUserData) {
+            const parsedUserData = JSON.parse(storedUserData);
+            setUserData(parsedUserData);
+            finalUserId = parsedUserData.user_id;
+          }
+        }
+
+        if (!finalUserId) {
+          console.error("No user ID available");
+          return;
+        }
+
+        const response = await axios.get(`${GET_WORKOUTS_URL}?user_id=${finalUserId}`, {
           headers: { Authorization: `Bearer ${jwtToken}` },
         });
+
         if (response.status === 200) {
           setWorkoutsData(response.data.workouts);
           setExercisesData(response.data.exercises);
@@ -46,10 +61,14 @@ const HistoryCard = ({
         }
       } catch (error) {
         console.error("Error fetching workouts:", error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchWorkouts();
-  }, []);
+
+    fetchUserDataAndWorkouts();
+  }, [user_id]); 
+
 
   const toggleExpandWorkout = (workoutId) => {
     setExpandedWorkouts((prev) =>
@@ -98,27 +117,21 @@ const HistoryCard = ({
     };
   };
 
-  const displayedWorkouts = (filteredWorkouts || workoutsData).filter(
-    (workout) => (isCustom ? workout.custom : !workout.custom)
-  );
-
   return (
-    <SafeAreaView style={tw`flex-1`}>
-      <ScrollView style={tw``} showsVerticalScrollIndicator={false}>
-        {displayedWorkouts.map((workout) => {
+    <SafeAreaView style={tw`flex-1 w-full`}>
+      <ScrollView style={tw`w-full`} showsVerticalScrollIndicator={false}>
+        {workoutsData.map((workout) => {
           const stats = getWorkoutStats(workout.workout_id);
           const isExpanded = expandedWorkouts.includes(workout.workout_id);
 
           return (
             <View
               key={workout.workout_id}
-              style={[tw`mb-5 p-4 mx-4 self-center shadow-xl rounded-3xl overflow-hidden border-l-4 border-r-4 border-r-orange-500 border-l-orange-500`, {width: width * 0.9}]}
+              style={[
+                tw`mb-5 p-4 mx-4 self-center shadow-xl rounded-3xl overflow-hidden border-l-4 border-r-4 border-r-orange-500 border-l-orange-500`,
+                { width: width * widthNumber || 0.9 },
+              ]}
             >
-              {/*  <LinearGradient
-                colors={["#18181b", "#09090b"]}
-                style={tw`p-4`}
-              > */}
-
               <View style={tw`flex-row justify-between items-start mb-4`}>
                 <View style={tw`flex-1`}>
                   <View style={tw`flex-row items-center mb-2`}>
@@ -205,7 +218,6 @@ const HistoryCard = ({
                     .map((exercise) => (
                       <View key={exercise.exercise_id} style={tw`mb-6`}>
                         <View style={tw`flex-row items-center mb-4`}>
-                         
                           <Text style={tw`text-white font-semibold text-base`}>
                             {exercise.name}
                           </Text>
@@ -288,7 +300,6 @@ const HistoryCard = ({
                     ))}
                 </View>
               )}
-              {/*</LinearGradient>*/}
             </View>
           );
         })}

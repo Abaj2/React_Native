@@ -237,7 +237,23 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
             (_, index) => item.current[index]?.length > 1
           );
 
-          if (!hasValidProgressions) return null;
+          if (!hasValidProgressions) return (
+            <View key={item.id} style={tw`flex-1 items-center justify-center mt-20`}>
+            <Icon
+              name="package"
+              size={60}
+              color="#ffa500"
+              style={tw`opacity-50 mb-4`}
+            />
+            <Text style={tw`text-orange-500 text-xl font-bold mb-2`}>
+              No Progress Data Yet
+            </Text>
+            <Text style={tw`text-zinc-500 text-center px-10`}>
+              Edit a skill and make progress to see detailed progress reports and
+              analytics.
+            </Text>
+          </View>
+          );
 
           return (
             <View
@@ -425,7 +441,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
               No Progress Data Yet
             </Text>
             <Text style={tw`text-zinc-500 text-center px-10`}>
-              Start tracking your skills to see detailed progress reports and
+              Start creating skills to see detailed progress reports and
               analytics.
             </Text>
           </View>

@@ -797,7 +797,7 @@ const Workouts = ({ isDarkMode }) => {
           <Text style={tw`text-orange-400 font-semibold mt-1`}>Choose your challenge level</Text>
         </View>
         <TouchableOpacity
-          onPress={() => setIsModalVisible(false)}
+          onPress={() => setIsLevelModalVisible(false)}
           style={tw`p-2 bg-orange-500/20 rounded-full`}
         >
           <Ionicons name="close" size={20} color="#f97316" />

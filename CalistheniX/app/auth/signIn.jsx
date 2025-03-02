@@ -43,6 +43,7 @@ const SignIn = () => {
     try {
       const response = await axios.post(SERVER_URL, { email, password });
       if (response.status === 200) {
+        console.log(response.data.user.name)
         await AsyncStorage.setItem("jwtToken", response.data.token);
         await AsyncStorage.setItem(
           "userData",
@@ -50,12 +51,14 @@ const SignIn = () => {
             username: response.data.user.username,
             email: response.data.user.email,
             user_id: response.data.user.user_id,
+            name: response.data.user.name
           })
         );
         const username = response.data.user.username;
         const email = response.data.user.email;
         const user_id = response.data.user.user_id;
-        navigation.navigate("Home", { email, username, user_id });
+        const name = response.data.user.username;
+        navigation.navigate("Home", { email, username, user_id, name });
       }
     } catch (err) {
       handleError(err.response.status);

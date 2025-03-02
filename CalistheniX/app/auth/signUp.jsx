@@ -35,6 +35,7 @@ const SignUp = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -52,7 +53,7 @@ const SignUp = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!email || !username || !password || !confirmPassword) {
+    if (!email || !username || !password || !confirmPassword || !name) {
       Alert.alert("Enter all your details");
       return;
     }
@@ -79,6 +80,7 @@ const SignUp = () => {
         username,
         password,
         confirmPassword,
+        name
       });
 
       if (response.status === 201) {
@@ -90,12 +92,14 @@ const SignUp = () => {
             username: response.data.user.username,
             email: response.data.user.email,
             userId: response.data.user.user_id,
+            name: response.data.user.name
           })
         );
         const username = response.data.user.username;
         const email = response.data.user.email;
         const user_id = response.data.user.user_id;
-        navigation.navigate("Home", { email, username, user_id });
+        const name = response.data.user.name;
+        navigation.navigate("Home", { email, username, user_id, name });
       }
     } catch (err) {
       if (err.response) {
@@ -166,6 +170,25 @@ const SignUp = () => {
                   onChangeText={(text) => setEmail(text)}
                   style={tw`bg-zinc-800 rounded-xl pl-10 py-3 text-white border border-zinc-700`}
                   placeholder="your@email.com"
+                  placeholderTextColor="#71717a"
+                />
+              </View>
+
+              <Text style={tw`text-[15px] font-bold text-white mb-2`}>
+                Name
+              </Text>
+              <View style={tw`justify-center mb-4`}>
+                <MaterialIcons
+                  name="person"
+                  size={20}
+                  color="#f97316"
+                  style={tw`absolute ml-3 z-10`}
+                />
+                <TextInput
+                  value={name}
+                  onChangeText={(text) => setName(text)}
+                  style={tw`bg-zinc-800 rounded-xl pl-10 py-3 text-white border border-zinc-700`}
+                  placeholder="Enter your name"
                   placeholderTextColor="#71717a"
                 />
               </View>
