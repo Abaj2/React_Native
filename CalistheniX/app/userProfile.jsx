@@ -52,7 +52,7 @@ const UserProfile = ({ navigation, route }) => {
       case "workouts":
         return (
           <View style={tw`mt-5`}>
-            <HistoryCard user_id={users_id} widthNumber={0.98} />
+            <HistoryCard user_id={users_id} widthNumber={0.98} fullBorder={true} />
           </View>
         );
       case "skills":
@@ -85,10 +85,10 @@ const UserProfile = ({ navigation, route }) => {
                 style={tw`w-20 h-20 rounded-full border-2 border-orange-500`}
               />
               <View>
-                <Text style={tw`ml-6 text-2xl text-white font-bold`}>
+                <Text style={tw`ml-4 text-xl text-white font-bold`}>
                   {userDetails ? userDetails[0].name : "Loading name..."}
                 </Text>
-                <Text style={tw`ml-6 text-base text-gray-400`}>
+                <Text style={tw`ml-4 text-base text-gray-400`}>
                   @
                   {userDetails
                     ? userDetails[0].username

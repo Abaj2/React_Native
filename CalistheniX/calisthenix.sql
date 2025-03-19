@@ -5,6 +5,8 @@
 -- Dumped from database version 17.2
 -- Dumped by pg_dump version 17.2
 
+-- Started on 2025-03-08 21:01:28
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -17,12 +19,11 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-SET default_tablespace = '';
-
 SET default_table_access_method = heap;
 
 --
--- Name: exercises; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 217 (class 1259 OID 33425)
+-- Name: exercises; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.exercises (
@@ -35,10 +36,9 @@ CREATE TABLE public.exercises (
 );
 
 
-ALTER TABLE public.exercises OWNER TO postgres;
-
 --
--- Name: exercises_exercise_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- TOC entry 218 (class 1259 OID 33428)
+-- Name: exercises_exercise_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.exercises_exercise_id_seq
@@ -50,17 +50,18 @@ CREATE SEQUENCE public.exercises_exercise_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.exercises_exercise_id_seq OWNER TO postgres;
-
 --
--- Name: exercises_exercise_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- TOC entry 4862 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: exercises_exercise_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.exercises_exercise_id_seq OWNED BY public.exercises.exercise_id;
 
 
 --
--- Name: followers; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 227 (class 1259 OID 33641)
+-- Name: followers; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.followers (
@@ -71,10 +72,9 @@ CREATE TABLE public.followers (
 );
 
 
-ALTER TABLE public.followers OWNER TO postgres;
-
 --
--- Name: followers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- TOC entry 228 (class 1259 OID 33644)
+-- Name: followers_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.followers_id_seq
@@ -86,17 +86,18 @@ CREATE SEQUENCE public.followers_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.followers_id_seq OWNER TO postgres;
-
 --
--- Name: followers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- TOC entry 4863 (class 0 OID 0)
+-- Dependencies: 228
+-- Name: followers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.followers_id_seq OWNED BY public.followers.id;
 
 
 --
--- Name: sets; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 219 (class 1259 OID 33429)
+-- Name: sets; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.sets (
@@ -112,10 +113,9 @@ CREATE TABLE public.sets (
 );
 
 
-ALTER TABLE public.sets OWNER TO postgres;
-
 --
--- Name: sets_set_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- TOC entry 220 (class 1259 OID 33434)
+-- Name: sets_set_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.sets_set_id_seq
@@ -127,17 +127,18 @@ CREATE SEQUENCE public.sets_set_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.sets_set_id_seq OWNER TO postgres;
-
 --
--- Name: sets_set_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- TOC entry 4864 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: sets_set_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.sets_set_id_seq OWNED BY public.sets.set_id;
 
 
 --
--- Name: skills; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 221 (class 1259 OID 33435)
+-- Name: skills; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skills (
@@ -152,10 +153,9 @@ CREATE TABLE public.skills (
 );
 
 
-ALTER TABLE public.skills OWNER TO postgres;
-
 --
--- Name: skills_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- TOC entry 222 (class 1259 OID 33440)
+-- Name: skills_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.skills_id_seq
@@ -167,17 +167,18 @@ CREATE SEQUENCE public.skills_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.skills_id_seq OWNER TO postgres;
-
 --
--- Name: skills_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- TOC entry 4865 (class 0 OID 0)
+-- Dependencies: 222
+-- Name: skills_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.skills_id_seq OWNED BY public.skills.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 223 (class 1259 OID 33441)
+-- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.users (
@@ -185,15 +186,14 @@ CREATE TABLE public.users (
     email character varying(255),
     password_hash character varying(255),
     username character varying(255),
-    profile_pic bytea,
+    profile_pic text,
     name character varying(255)
 );
 
 
-ALTER TABLE public.users OWNER TO postgres;
-
 --
--- Name: users_user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- TOC entry 224 (class 1259 OID 33446)
+-- Name: users_user_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.users_user_id_seq
@@ -205,17 +205,18 @@ CREATE SEQUENCE public.users_user_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.users_user_id_seq OWNER TO postgres;
-
 --
--- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- TOC entry 4866 (class 0 OID 0)
+-- Dependencies: 224
+-- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.users_user_id_seq OWNED BY public.users.user_id;
 
 
 --
--- Name: workouts; Type: TABLE; Schema: public; Owner: postgres
+-- TOC entry 225 (class 1259 OID 33447)
+-- Name: workouts; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.workouts (
@@ -230,10 +231,9 @@ CREATE TABLE public.workouts (
 );
 
 
-ALTER TABLE public.workouts OWNER TO postgres;
-
 --
--- Name: workouts_workout_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- TOC entry 226 (class 1259 OID 33453)
+-- Name: workouts_workout_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.workouts_workout_id_seq
@@ -245,59 +245,67 @@ CREATE SEQUENCE public.workouts_workout_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.workouts_workout_id_seq OWNER TO postgres;
-
 --
--- Name: workouts_workout_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- TOC entry 4867 (class 0 OID 0)
+-- Dependencies: 226
+-- Name: workouts_workout_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.workouts_workout_id_seq OWNED BY public.workouts.workout_id;
 
 
 --
--- Name: exercises exercise_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- TOC entry 4666 (class 2604 OID 33454)
+-- Name: exercises exercise_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.exercises ALTER COLUMN exercise_id SET DEFAULT nextval('public.exercises_exercise_id_seq'::regclass);
 
 
 --
--- Name: followers id; Type: DEFAULT; Schema: public; Owner: postgres
+-- TOC entry 4678 (class 2604 OID 33645)
+-- Name: followers id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.followers ALTER COLUMN id SET DEFAULT nextval('public.followers_id_seq'::regclass);
 
 
 --
--- Name: sets set_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- TOC entry 4669 (class 2604 OID 33455)
+-- Name: sets set_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sets ALTER COLUMN set_id SET DEFAULT nextval('public.sets_set_id_seq'::regclass);
 
 
 --
--- Name: skills id; Type: DEFAULT; Schema: public; Owner: postgres
+-- TOC entry 4672 (class 2604 OID 33456)
+-- Name: skills id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skills ALTER COLUMN id SET DEFAULT nextval('public.skills_id_seq'::regclass);
 
 
 --
--- Name: users user_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- TOC entry 4673 (class 2604 OID 33457)
+-- Name: users user_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.users_user_id_seq'::regclass);
 
 
 --
--- Name: workouts workout_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- TOC entry 4674 (class 2604 OID 33458)
+-- Name: workouts workout_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.workouts ALTER COLUMN workout_id SET DEFAULT nextval('public.workouts_workout_id_seq'::regclass);
 
 
 --
--- Data for Name: exercises; Type: TABLE DATA; Schema: public; Owner: postgres
+-- TOC entry 4845 (class 0 OID 33425)
+-- Dependencies: 217
+-- Data for Name: exercises; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.exercises (exercise_id, workout_id, name, user_id, custom, routine) FROM stdin;
@@ -331,20 +339,26 @@ COPY public.exercises (exercise_id, workout_id, name, user_id, custom, routine) 
 113	86	One Leg Front Lever Pulls	\N	f	t
 114	87	Advanced Tuck Hold	17	f	t
 115	87	Single Leg Extensions	17	f	t
+116	88	Dips	17	t	t
 \.
 
 
 --
--- Data for Name: followers; Type: TABLE DATA; Schema: public; Owner: postgres
+-- TOC entry 4855 (class 0 OID 33641)
+-- Dependencies: 227
+-- Data for Name: followers; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.followers (id, follower_id, following_id, created_at) FROM stdin;
 2	16	15	2025-02-22 16:53:28.110614
+9	17	16	2025-03-08 20:47:54.468667
 \.
 
 
 --
--- Data for Name: sets; Type: TABLE DATA; Schema: public; Owner: postgres
+-- TOC entry 4847 (class 0 OID 33429)
+-- Dependencies: 219
+-- Data for Name: sets; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.sets (set_id, exercise_id, reps, duration, notes, workout_id, user_id, custom, routine) FROM stdin;
@@ -436,22 +450,29 @@ COPY public.sets (set_id, exercise_id, reps, duration, notes, workout_id, user_i
 271	115	\N	\N		87	17	f	t
 272	115	\N	\N		87	17	f	t
 273	115	\N	\N		87	17	f	t
+274	116	1	\N		88	17	t	t
+275	116	5	\N		88	17	t	t
 \.
 
 
 --
--- Data for Name: skills; Type: TABLE DATA; Schema: public; Owner: postgres
+-- TOC entry 4849 (class 0 OID 33435)
+-- Dependencies: 221
+-- Data for Name: skills; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skills (id, skill, progressions, user_id, current, goal, date, date_formatted) FROM stdin;
 50	Muscle Up	{Full}	16	[[3, 4]]	[[4]]	[[1738664503738, 1738996195544]]	[["04/02/25 21:21", "08/02/25 17:29"]]
-53	Planche	{Full}	17	[[2, 3]]	[[5]]	[[1740816134567, 1740880623999]]	[["01/03/25 19:02", "02/03/25 12:57"]]
 47	Front Lever	{"Advanced Tuck",Tuck,"Full FL"}	16	[[3, 4, 6, 13, 14, 16, 18, 19, 6, 2], [5, 7], [4]]	[[8, 20], [8], [5]]	[[1737336604471, 1737336616895, 1737348015519, 1737348059825, 1737349728465, 1737349756343, 1737349763407, 1737349775370, 1738206525716, 1738402074082], [1737336610879, 1737371470293], [1738391075397]]	[["20/01/25 12:30", "20/01/25 12:30", "20/01/25 15:40", "20/01/25 15:40", "20/01/25 16:08", "20/01/25 16:09", "20/01/25 16:09", "20/01/25 16:09", "30/01/25 14:08", "01/02/25 20:27"], ["20/01/25 12:30", "20/01/25 22:11"], ["01/02/25 17:24"]]
+53	Planche	{Full,Tuck,testingajajsjsjsjsjsk}	17	[[2, 3], [3, 6], [3]]	[[5], [7], [7]]	[[1740816134567, 1740880623999], [1741411789858, 1741414681570], [1741411843662]]	[["01/03/25 19:02", "02/03/25 12:57"], ["08/03/25 16:29", "08/03/25 17:18"], ["08/03/25 16:30"]]
+54	Front Lever	{"Advanced Tuck"}	17	[[7, 8]]	[[20]]	[[1741412597488, 1741415283171]]	[["08/03/25 16:43", "08/03/25 17:28"]]
 \.
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+-- TOC entry 4851 (class 0 OID 33441)
+-- Dependencies: 223
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.users (user_id, email, password_hash, username, profile_pic, name) FROM stdin;
@@ -463,7 +484,9 @@ COPY public.users (user_id, email, password_hash, username, profile_pic, name) F
 
 
 --
--- Data for Name: workouts; Type: TABLE DATA; Schema: public; Owner: postgres
+-- TOC entry 4853 (class 0 OID 33447)
+-- Dependencies: 225
+-- Data for Name: workouts; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.workouts (workout_id, user_id, title, level, date, custom, workout_time, routine) FROM stdin;
@@ -474,6 +497,7 @@ COPY public.workouts (workout_id, user_id, title, level, date, custom, workout_t
 85	\N	Front Lever	Intermediate	2025-03-01 18:21:07.360258	f	00:00:03	t
 86	\N	Front Lever	Advanced	2025-03-01 18:22:15.260459	f	00:00:05	t
 87	17	Front Lever	Intermediate	2025-03-01 18:32:04.177874	f	00:00:04	t
+88	17	Push	Custom	2025-03-08 20:41:11.866628	t	00:00:17	t
 70	16	Muscle Up	Advanced	2025-01-30 12:15:07.755993	f	00:00:11	t
 71	16	Front Lever	Intermediate	2025-01-30 12:54:18.450316	f	00:01:06	t
 77	16	k	Custom	2025-02-04 15:14:31.167652	t	00:00:24	t
@@ -488,49 +512,62 @@ COPY public.workouts (workout_id, user_id, title, level, date, custom, workout_t
 
 
 --
--- Name: exercises_exercise_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- TOC entry 4868 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: exercises_exercise_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.exercises_exercise_id_seq', 115, true);
-
-
---
--- Name: followers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.followers_id_seq', 8, true);
+SELECT pg_catalog.setval('public.exercises_exercise_id_seq', 116, true);
 
 
 --
--- Name: sets_set_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- TOC entry 4869 (class 0 OID 0)
+-- Dependencies: 228
+-- Name: followers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.sets_set_id_seq', 273, true);
-
-
---
--- Name: skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.skills_id_seq', 53, true);
+SELECT pg_catalog.setval('public.followers_id_seq', 9, true);
 
 
 --
--- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- TOC entry 4870 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: sets_set_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.sets_set_id_seq', 275, true);
+
+
+--
+-- TOC entry 4871 (class 0 OID 0)
+-- Dependencies: 222
+-- Name: skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.skills_id_seq', 54, true);
+
+
+--
+-- TOC entry 4872 (class 0 OID 0)
+-- Dependencies: 224
+-- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.users_user_id_seq', 17, true);
 
 
 --
--- Name: workouts_workout_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- TOC entry 4873 (class 0 OID 0)
+-- Dependencies: 226
+-- Name: workouts_workout_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.workouts_workout_id_seq', 87, true);
+SELECT pg_catalog.setval('public.workouts_workout_id_seq', 88, true);
 
 
 --
--- Name: exercises exercises_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4681 (class 2606 OID 33460)
+-- Name: exercises exercises_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.exercises
@@ -538,7 +575,8 @@ ALTER TABLE ONLY public.exercises
 
 
 --
--- Name: followers followers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4691 (class 2606 OID 33647)
+-- Name: followers followers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.followers
@@ -546,7 +584,8 @@ ALTER TABLE ONLY public.followers
 
 
 --
--- Name: sets sets_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4683 (class 2606 OID 33462)
+-- Name: sets sets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sets
@@ -554,7 +593,8 @@ ALTER TABLE ONLY public.sets
 
 
 --
--- Name: skills skills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4685 (class 2606 OID 33464)
+-- Name: skills skills_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skills
@@ -562,7 +602,8 @@ ALTER TABLE ONLY public.skills
 
 
 --
--- Name: followers unique_follow; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4693 (class 2606 OID 33664)
+-- Name: followers unique_follow; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.followers
@@ -570,7 +611,8 @@ ALTER TABLE ONLY public.followers
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4687 (class 2606 OID 33466)
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users
@@ -578,7 +620,8 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: workouts workouts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4689 (class 2606 OID 33468)
+-- Name: workouts workouts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.workouts
@@ -586,7 +629,8 @@ ALTER TABLE ONLY public.workouts
 
 
 --
--- Name: sets fk_exercise_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4695 (class 2606 OID 33469)
+-- Name: sets fk_exercise_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sets
@@ -594,7 +638,8 @@ ALTER TABLE ONLY public.sets
 
 
 --
--- Name: exercises fk_workout; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4694 (class 2606 OID 33474)
+-- Name: exercises fk_workout; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.exercises
@@ -602,7 +647,8 @@ ALTER TABLE ONLY public.exercises
 
 
 --
--- Name: sets fk_workout_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4696 (class 2606 OID 33479)
+-- Name: sets fk_workout_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.sets
@@ -610,7 +656,8 @@ ALTER TABLE ONLY public.sets
 
 
 --
--- Name: followers followers_follower_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4698 (class 2606 OID 33652)
+-- Name: followers followers_follower_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.followers
@@ -618,7 +665,8 @@ ALTER TABLE ONLY public.followers
 
 
 --
--- Name: followers followers_following_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4699 (class 2606 OID 33657)
+-- Name: followers followers_following_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.followers
@@ -626,12 +674,15 @@ ALTER TABLE ONLY public.followers
 
 
 --
--- Name: skills skills_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- TOC entry 4697 (class 2606 OID 33484)
+-- Name: skills skills_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skills
     ADD CONSTRAINT skills_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
+
+-- Completed on 2025-03-08 21:01:28
 
 --
 -- PostgreSQL database dump complete

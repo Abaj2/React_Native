@@ -9,6 +9,8 @@ import {
   Dimensions,
   Alert,
   Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import tw from "twrnc";
 import { Ionicons } from "@expo/vector-icons";
@@ -228,286 +230,281 @@ const WorkoutSession = () => {
     console.log("Exercise Data:", JSON.stringify(exerciseData));
   }, [exercises2, JSON.stringify(exerciseData)]);
   return (
-    <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
-      <SafeAreaView style={tw`flex-1`}>
-        <View style={tw`w-full bg-black/30 border-b border-orange-500`}>
-          <View style={tw`flex-row justify-between items-center px-4 py-6`}>
-            <TouchableOpacity
-              style={tw`h-11 w-11 bg-black/60 rounded-full items-center justify-center border border-gray-800`}
-              onPress={cancelWorkout}
-            >
-              <Ionicons name="close" size={20} color="white" />
-            </TouchableOpacity>
-            <View style={tw`items-center`}>
-              <Text style={tw`text-white font-bold text-xl mb-1`}>
-                {workout.title}
-              </Text>
-              {workout.level && (
-                <Text style={tw`text-orange-400 text-sm font-medium`}>
-                  {workout.level}
-                </Text>
-              )}
-            </View>
-            <TouchableOpacity
-              style={tw`h-9 px-3 bg-orange-500 rounded-full items-center justify-center`}
-              onPress={finishWorkout}
-            >
-              <Text style={tw`text-white font-semibold`}>Finish</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <ScrollView style={tw`flex-1`}>
-          <View style={tw`border-b border-gray-800/50`}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={tw`px-4 py-3`}
-            >
-              {exercises2.map((exercise, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={tw`py-3 px-5 mr-2 rounded-2xl ${
-                    currentExercise === index
-                      ? "bg-orange-500/10 border border-orange-500/30"
-                      : "bg-black/40 border border-gray-800/50"
-                  }`}
-                  onPress={() => setCurrentExercise(index)}
-                >
-                  <Text
-                    style={tw`${
-                      currentExercise === index
-                        ? "text-orange-400 font-bold"
-                        : "text-gray-400 font-medium"
-                    }`}
-                  >
-                    {exercise.name || exercise.title}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          <View style={tw`p-4`}>
-            {workout.level !== "Custom" && (
-              <View
-                style={tw`mb-6 rounded-3xl overflow-hidden border border-gray-800/50 bg-black/20`}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
+        <SafeAreaView style={tw`flex-1`}>
+          <View style={tw`w-full bg-black/30 border-b border-orange-500/30`}>
+            <View style={tw`flex-row justify-between items-center px-4 py-3`}>
+              <TouchableOpacity
+                style={tw`p-2`}
+                onPress={cancelWorkout}
               >
-                <LinearGradient 
-  colors={["#0f0f0f", "#000"]} 
-  style={tw`px-5 py-4 border-b border-gray-800/30`}
->
-                  <Text style={tw`text-white font-bold text-lg`}>
-                    Workout Target
+                <Ionicons name="close" size={24} color="white" />
+              </TouchableOpacity>
+              <View style={tw`items-center`}>
+                <Text style={tw`text-white font-semibold text-lg`}>
+                  {workout.title}
+                </Text>
+                {workout.level && (
+                  <Text style={tw`text-orange-400 text-sm font-medium`}>
+                    {workout.level}
                   </Text>
-                </LinearGradient>
-
-                <LinearGradient colors={["#000", "#0f0f0f"]} style={tw`p-5`}>
-                  <View style={tw`flex-row flex-wrap`}>
-                    {exercises2[currentExercise].sets && (
-                      <View style={tw`w-1/2 pr-2 mb-4`}>
-                        <LinearGradient
-                          colors={["#000", "#141414"]}
-                          style={tw`p-4 rounded-2xl border border-gray-800/30`}
-                        >
-                          <Text
-                            style={tw`text-orange-400 font-bold text-lg mb-1`}
+                )}
+              </View>
+              <TouchableOpacity
+                style={tw`px-4 py-2 bg-orange-500 rounded-lg`}
+                onPress={finishWorkout}
+              >
+                <Text style={tw`text-white font-semibold`}>Finish</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+  
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={tw`flex-grow`}
+          >
+            <View style={tw`border-b border-gray-800/50 bg-black/10`}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={tw`px-4 py-2`}
+              >
+                {exercises2.map((exercise, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={tw`px-4 py-2 mr-2 rounded-lg ${
+                      currentExercise === index
+                        ? "bg-orange-500/10 border border-orange-500/30"
+                        : "bg-black/20 border border-gray-800/50"
+                    }`}
+                    onPress={() => setCurrentExercise(index)}
+                  >
+                    <Text
+                      style={tw`${
+                        currentExercise === index
+                          ? "text-orange-400 font-semibold"
+                          : "text-gray-400 font-medium"
+                      }`}
+                    >
+                      {exercise.name || exercise.title}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+  
+            <View style={tw`p-4`}>
+              {workout.level !== "Custom" && (
+                <View
+                  style={tw`mb-4 rounded-lg overflow-hidden border border-gray-800/50 bg-black/20`}
+                >
+                  <View style={tw`px-4 py-3 border-b border-gray-800/50`}>
+                    <Text style={tw`text-white font-semibold`}>
+                      Workout Target
+                    </Text>
+                  </View>
+  
+                  <View style={tw`p-4`}>
+                    <View style={tw`flex-row flex-wrap`}>
+                      {exercises2[currentExercise].sets && (
+                        <View style={tw`w-1/2 pr-2 mb-4`}>
+                          <View
+                            style={tw`p-3 rounded-lg border border-gray-800/50 bg-black/30`}
                           >
-                            {exercises2[currentExercise].sets}
-                          </Text>
-                          <Text style={tw`text-gray-400 text-sm`}>Sets</Text>
-                        </LinearGradient>
+                            <Text
+                              style={tw`text-orange-400 font-semibold text-lg mb-1`}
+                            >
+                              {exercises2[currentExercise].sets}
+                            </Text>
+                            <Text style={tw`text-gray-400 text-sm`}>Sets</Text>
+                          </View>
+                        </View>
+                      )}
+                      {exercises2[currentExercise].reps && (
+                        <View style={tw`w-1/2 pl-2 mb-4`}>
+                          <View
+                            style={tw`p-3 rounded-lg border border-gray-800/50 bg-black/30`}
+                          >
+                            <Text
+                              style={tw`text-orange-400 font-semibold text-lg mb-1`}
+                            >
+                              {exercises2[currentExercise].reps}
+                            </Text>
+                            <Text style={tw`text-gray-400 text-sm`}>Reps</Text>
+                          </View>
+                        </View>
+                      )}
+                      {exercises2[currentExercise].duration && (
+                        <View style={tw`w-1/2 pr-2`}>
+                          <View
+                            style={tw`p-3 rounded-lg border border-gray-800/50 bg-black/30`}
+                          >
+                            <Text
+                              style={tw`text-orange-400 font-semibold text-lg mb-1`}
+                            >
+                              {exercises2[currentExercise].duration}
+                            </Text>
+                            <Text style={tw`text-gray-400 text-sm`}>
+                              Duration
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+                      {exercises2[currentExercise].rest && (
+                        <View style={tw`w-1/2 pl-2`}>
+                          <View
+                            style={tw`p-3 rounded-lg border border-gray-800/50 bg-black/30`}
+                          >
+                            <Text
+                              style={tw`text-orange-400 font-semibold text-lg mb-1`}
+                            >
+                              {exercises2[currentExercise].rest}
+                            </Text>
+                            <Text style={tw`text-gray-400 text-sm`}>Rest</Text>
+                          </View>
+                        </View>
+                      )}
+                    </View>
+  
+                    {exercises2[currentExercise].notes && (
+                      <View
+                        style={tw`mt-3 p-3 rounded-lg border border-gray-800/50 bg-black/30`}
+                      >
+                        <Text style={tw`text-gray-400 text-sm leading-5`}>
+                          {exercises2[currentExercise].notes}
+                        </Text>
                       </View>
                     )}
-                    {exercises2[currentExercise].reps && (
-                      <View style={tw`w-1/2 pl-2 mb-4`}>
-                        <LinearGradient
-                          colors={["#000", "#141414"]}
-                          style={tw`p-4 rounded-2xl border border-gray-800/30`}
-                        >
-                          <Text
-                            style={tw`text-orange-400 font-bold text-lg mb-1`}
-                          >
-                            {exercises2[currentExercise].reps}
+                  </View>
+                </View>
+              )}
+  
+              {exerciseData[currentExercise].sets.map((set, setIndex) => (
+                <View
+                  key={setIndex}
+                  style={tw`mb-4 bg-black/20 rounded-lg border border-gray-800/50`}
+                >
+                  <View style={tw`px-4 py-3 border-b border-gray-800/50`}>
+                    <View style={tw`flex-row justify-between items-center`}>
+                      <Text style={tw`text-white font-semibold`}>
+                        Set {setIndex + 1}
+                      </Text>
+                      <TouchableOpacity
+                        style={tw`flex-row items-center bg-orange-500/10 px-3 py-1 rounded-lg border border-orange-500/30`}
+                        onPress={() => {
+                          Alert.alert("Rest Timer", "Start 90s rest timer?");
+                        }}
+                      >
+                        <Ionicons
+                          name="timer-outline"
+                          size={16}
+                          color="#f97316"
+                          style={tw`mr-1`}
+                        />
+                        <Text style={tw`text-orange-400 font-medium`}>
+                          Rest
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+  
+                  <View style={tw`p-4`}>
+                    <View style={tw`flex-row flex-wrap -mx-2`}>
+                      {exercises2[currentExercise].reps && (
+                        <View style={tw`px-2 w-1/2 mb-4`}>
+                          <Text style={tw`text-gray-400 text-sm mb-1 ml-1`}>
+                            Reps
                           </Text>
-                          <Text style={tw`text-gray-400 text-sm`}>Reps</Text>
-                        </LinearGradient>
-                      </View>
-                    )}
-                    {exercises2[currentExercise].duration && (
-                      <View style={tw`w-1/2 pr-2`}>
-                        <LinearGradient
-                          colors={["#000", "#141414"]}
-                          style={tw`p-4 rounded-2xl border border-gray-800/30`}
-                        >
-                          <Text
-                            style={tw`text-orange-400 font-bold text-lg mb-1`}
-                          >
-                            {exercises2[currentExercise].duration}
-                          </Text>
-                          <Text style={tw`text-gray-400 text-sm`}>
+                          <TextInput
+                            style={tw`bg-black/30 text-white px-4 py-2 rounded-lg text-lg font-medium border border-gray-800/50`}
+                            keyboardType="number-pad"
+                            value={set.reps}
+                            onChangeText={(value) =>
+                              updateSetData(
+                                currentExercise,
+                                setIndex,
+                                "reps",
+                                value
+                              )
+                            }
+                            placeholder="0"
+                            placeholderTextColor="#6b7280"
+                          />
+                        </View>
+                      )}
+                      {exercises2[currentExercise].duration && (
+                        <View style={tw`px-2 w-1/2 mb-4`}>
+                          <Text style={tw`text-gray-400 text-sm mb-1 ml-1`}>
                             Duration
                           </Text>
-                        </LinearGradient>
-                      </View>
-                    )}
-                    {exercises2[currentExercise].rest && (
-                      <View style={tw`w-1/2 pl-2`}>
-                        <LinearGradient
-                          colors={["#000", "#141414"]}
-                          style={tw`p-4 rounded-2xl border border-gray-800/30`}
-                        >
-                          <Text
-                            style={tw`text-orange-400 font-bold text-lg mb-1`}
-                          >
-                            {exercises2[currentExercise].rest}
-                          </Text>
-                          <Text style={tw`text-gray-400 text-sm`}>Rest</Text>
-                        </LinearGradient>
-                      </View>
-                    )}
-                  </View>
-
-                  {exercises2[currentExercise].notes && (
-                    <LinearGradient
-                      colors={["#000", "#141414"]}
-                      style={tw`mt-4 p-4 rounded-2xl border border-gray-800/30`}
-                    >
-                      <Text style={tw`text-gray-400 text-sm leading-5`}>
-                        {exercises2[currentExercise].notes}
-                      </Text>
-                    </LinearGradient>
-                  )}
-                </LinearGradient>
-              </View>
-            )}
-
-            {exerciseData[currentExercise].sets.map((set, setIndex) => (
-              <View
-                key={setIndex}
-                style={tw`mb-5 rounded-3xl overflow-hidden border border-gray-800/50 bg-black/20`}
-              >
-                <LinearGradient
-                  colors={["#0f0f0f", "#000"]}
-                  style={tw`px-5 py-4 border-b border-gray-800/30`}
-                >
-                  <View style={tw`flex-row justify-between items-center`}>
-                    <Text style={tw`text-white font-bold text-lg`}>
-                      Set {setIndex + 1}
-                    </Text>
-                    <TouchableOpacity
-                      style={tw`flex-row items-center bg-orange-500/10 px-4 py-2 rounded-full border border-orange-500/20`}
-                      onPress={() => {
-                        Alert.alert("Rest Timer", "Start 90s rest timer?");
-                      }}
-                    >
-                      <Ionicons
-                        name="timer-outline"
-                        size={18}
-                        color="#f97316"
-                        style={tw`mr-2`}
+                          <TextInput
+                            style={tw`bg-black/30 text-white px-4 py-2 rounded-lg text-lg font-medium border border-gray-800/50`}
+                            keyboardType="number-pad"
+                            value={set.duration}
+                            onChangeText={(value) =>
+                              updateSetData(
+                                currentExercise,
+                                setIndex,
+                                "duration",
+                                value
+                              )
+                            }
+                            placeholder="0s"
+                            placeholderTextColor="#6b7280"
+                          />
+                        </View>
+                      )}
+                    </View>
+  
+                    <View>
+                      <Text style={tw`text-gray-400 text-sm mb-1`}>Notes</Text>
+                      <TextInput
+                        style={tw`bg-black/30 text-white px-4 py-2 rounded-lg border border-gray-800/50`}
+                        placeholder="Add notes for this set..."
+                        placeholderTextColor="#6b7280"
+                        value={set.notes}
+                        onChangeText={(value) =>
+                          updateSetData(currentExercise, setIndex, "notes", value)
+                        }
+                        multiline
                       />
-                      <Text style={tw`text-orange-500 font-semibold`}>
-                        Rest
-                      </Text>
-                    </TouchableOpacity>
+                    </View>
                   </View>
-                </LinearGradient>
-
-                <LinearGradient colors={["#000", "#0f0f0f"]} style={tw`p-5`}>
-                  <View style={tw`flex-row flex-wrap -mx-2`}>
-                    {exercises2[currentExercise].reps && (
-                      <View style={tw`px-2 w-1/2 mb-4`}>
-                        <Text style={tw`text-gray-400 text-sm mb-2 ml-1`}>
-                          Reps
-                        </Text>
-                        <TextInput
-                          style={tw`bg-black/80 text-white px-5 py-4 rounded-xl text-lg font-medium border border-gray-800/50`}
-                          keyboardType="number-pad"
-                          value={set.reps}
-                          onChangeText={(value) =>
-                            updateSetData(
-                              currentExercise,
-                              setIndex,
-                              "reps",
-                              value
-                            )
-                          }
-                          placeholder="0"
-                          placeholderTextColor="#6b7280"
-                        />
-                      </View>
-                    )}
-                    {exercises2[currentExercise].duration && (
-                      <View style={tw`px-2 w-1/2 mb-4`}>
-                        <Text style={tw`text-gray-400 text-sm mb-2 ml-1`}>
-                          Duration
-                        </Text>
-                        <TextInput
-                          style={tw`bg-black/80 text-white px-5 py-4 rounded-xl text-lg font-medium border border-gray-800/50`}
-                          keyboardType="number-pad"
-                          value={set.duration}
-                          onChangeText={(value) =>
-                            updateSetData(
-                              currentExercise,
-                              setIndex,
-                              "duration",
-                              value
-                            )
-                          }
-                          placeholder="0s"
-                          placeholderTextColor="#6b7280"
-                        />
-                      </View>
-                    )}
-                  </View>
-
-                  <TextInput
-                    style={tw`bg-black/80 text-white px-5 py-4 rounded-xl border border-gray-800/50`}
-                    placeholder="Add notes for this set..."
-                    placeholderTextColor="#6b7280"
-                    value={set.notes}
-                    onChangeText={(value) =>
-                      updateSetData(currentExercise, setIndex, "notes", value)
-                    }
-                    multiline
+                </View>
+              ))}
+  
+              <View style={tw`flex-row justify-between mt-4`}>
+                <TouchableOpacity
+                  style={tw`flex-1 mr-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-lg flex-row items-center justify-center`}
+                  onPress={() => removeSet(currentExercise)}
+                >
+                  <Ionicons
+                    name="remove-circle-outline"
+                    size={20}
+                    color="#ef4444"
+                    style={tw`mr-2`}
                   />
-                </LinearGradient>
+                  <Text style={tw`text-red-400 font-semibold`}>Remove Set</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={tw`flex-1 ml-2 px-4 py-2 bg-orange-500 rounded-lg flex-row items-center justify-center`}
+                  onPress={() => addSet(currentExercise)}
+                >
+                  <Ionicons
+                    name="add-circle-outline"
+                    size={20}
+                    color="white"
+                    style={tw`mr-2`}
+                  />
+                  <Text style={tw`text-white font-semibold`}>Add Set</Text>
+                </TouchableOpacity>
               </View>
-            ))}
-
-            <View style={tw`flex-row justify-between mb-6`}>
-              <TouchableOpacity
-                style={tw`flex-1 mr-2 px-6 py-4 rounded-2xl border border-gray-800/50 
-                         flex-row items-center justify-center bg-black/60`}
-                onPress={() => removeSet(currentExercise)}
-              >
-                <Ionicons
-                  name="remove-circle-outline"
-                  size={20}
-                  color="white"
-                  style={tw`mr-2`}
-                />
-                <Text style={tw`text-white font-semibold`}>Remove Set</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={tw`flex-1 ml-2 px-6 py-4 rounded-2xl bg-orange-500 
-                         flex-row items-center justify-center`}
-                onPress={() => addSet(currentExercise)}
-              >
-                <Ionicons
-                  name="add-circle-outline"
-                  size={20}
-                  color="white"
-                  style={tw`mr-2`}
-                />
-                <Text style={tw`text-white font-semibold`}>Add Set</Text>
-              </TouchableOpacity>
             </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </LinearGradient>
+          </ScrollView>
+        </SafeAreaView>
+      </LinearGradient>
+    </TouchableWithoutFeedback>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  StyleSheet,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -22,6 +23,7 @@ import {
   FontAwesome,
   Ionicons,
   FontAwesome5,
+  MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import Icon from "react-native-vector-icons/Feather";
 import RNPickerSelect from "react-native-picker-select";
@@ -34,6 +36,15 @@ import HistoryCard from "../components/historyCard.jsx";
 
 import axios from "axios";
 import Progress from "../components/progress.jsx";
+import { useFocusEffect } from "expo-router";
+import ProfileBarGraph from "../components/profileBarGraph.jsx";
+import {
+  Dumbbell,
+  Barbell,
+  ArmFlexed,
+  DumbbellIcon,
+  User,
+} from "lucide-react-native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -42,9 +53,19 @@ const GET_WORKOUTS_URL = Platform.select({
   ios: "http://192.168.1.155:4005/getcustomworkouts",
 });
 
+const GET_PROFILE_GRAPH = Platform.select({
+  android: "http://10.0.2.2:4005/getprofilegraph",
+  ios: "http://192.168.1.155:4005/getprofilegraph",
+});
+
 const WorkoutsMain = () => {
   const navigation = useNavigation();
   const [isDarkMode] = useState(true);
+
+  const [workoutDates, setWorkoutDates] = useState([]);
+  const [workoutTimes, setWorkoutTimes] = useState([]);
+
+  const [userData, setUserData] = useState();
 
   const [thisWeekDuration, setThisWeekDuration] = useState({
     total_duration_seconds: { seconds: 0 },
@@ -59,6 +80,67 @@ const WorkoutsMain = () => {
   const [sets, setSets] = useState([]);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
 
+  const styles = StyleSheet.create({
+    chartTitle: {
+      color: "#fff",
+      fontWeight: "bold",
+      textAlign: "center",
+      fontSize: 20,
+      marginBottom: 24,
+      letterSpacing: 0.5,
+    },
+    chartContainer: {
+      position: "relative",
+      direction: "ltr",
+      borderWidth: 2,
+      borderRadius: 16,
+      backgroundColor: "#0f0f0f",
+      overflow: "hidden",
+    },
+    gridLine: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      height: 250,
+      width: "100%",
+    },
+    tooltip: {
+      position: "absolute",
+      backgroundColor: "rgba(249, 115, 22, 0.95)",
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      zIndex: 1000,
+      elevation: 10,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+    },
+    tooltipText: {
+      color: "white",
+      fontWeight: "700",
+      fontSize: 14,
+      includeFontPadding: false,
+    },
+    tooltipArrow: {
+      position: "absolute",
+      bottom: -10,
+      left: 20,
+      width: 0,
+      height: 0,
+      borderStyle: "solid",
+      borderLeftWidth: 5,
+      borderRightWidth: 5,
+      borderTopWidth: 10,
+      borderLeftColor: "transparent",
+      borderRightColor: "transparent",
+      borderTopColor: "rgba(249, 115, 22, 0.95)",
+    },
+  });
+
   const GET_DURATION_URL = Platform.select({
     android: "http://10.0.2.2:4005/getduration",
     ios: "http://192.168.1.155:4005/getduration",
@@ -68,6 +150,51 @@ const WorkoutsMain = () => {
     android: "http://10.0.2.2:4005/deleteroutine",
     ios: "http://192.168.1.155:4005/deleteroutine",
   });
+
+  function calculateDailyStreak(workoutDates) {
+    if (workoutDates.length === 0) return 0;
+
+    const uniqueDates = [
+      ...new Set(
+        workoutDates.map((entry) => {
+          const date = new Date(entry.date);
+          return Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate()
+          );
+        })
+      ),
+    ].sort((a, b) => b - a);
+
+    if (uniqueDates.length === 0) return 0;
+
+    const today = new Date();
+    const todayUTC = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate()
+    );
+
+    const lastWorkoutUTC = uniqueDates[0];
+    const dayDifference = (todayUTC - lastWorkoutUTC) / (1000 * 3600 * 24);
+
+    if (dayDifference > 1) return 0;
+
+    let streak = 1;
+    for (let i = 1; i < uniqueDates.length; i++) {
+      const previousDay = uniqueDates[i - 1];
+      const currentDay = uniqueDates[i];
+
+      if (previousDay - currentDay === 1000 * 3600 * 24) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }
 
   const formatDuration = (workout_time) => {
     if (
@@ -198,8 +325,62 @@ const WorkoutsMain = () => {
     }
   };
 
+  const fetchUserData = useCallback(async () => {
+    try {
+      const storedUserData = await AsyncStorage.getItem("userData");
+      if (storedUserData) {
+        return JSON.parse(storedUserData);
+      }
+    } catch (error) {
+      console.error("Error getting user data:", error);
+    }
+    return null;
+  }, []);
+
+  const fetchProfileGraph = useCallback(async (userData) => {
+    if (!userData?.user_id) return;
+
+    try {
+      const token = await AsyncStorage.getItem("jwtToken");
+      const response = await axios.get(
+        `${GET_PROFILE_GRAPH}?user_id=${userData.user_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data?.workoutDates && response.data?.workoutTime) {
+        setWorkoutDates(response.data.workoutDates);
+        setWorkoutTimes(response.data.workoutTime);
+      }
+    } catch (error) {
+      console.error("Error getting stats:", error);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const initializeData = async () => {
+        const userData = await fetchUserData();
+        if (userData && isActive) {
+          await fetchProfileGraph(userData);
+        }
+      };
+
+      initializeData();
+
+      return () => {
+        isActive = false;
+      };
+    }, [fetchUserData, fetchProfileGraph])
+  );
+
   return (
-    <LinearGradient colors={["#09090b", "#18181b"]} style={tw`flex-1`}>
+    <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
       <SafeAreaView style={tw`flex-1`}>
         <StatusBar barStyle="light-content" />
 
@@ -207,86 +388,44 @@ const WorkoutsMain = () => {
           contentContainerStyle={tw`pb-20`}
           showsVerticalScrollIndicator={false}
         >
-          <View style={tw`px-5 pt-6 pb-4`}>
-            <View style={tw`flex-row justify-between items-center mb-6`}>
-              <Text style={tw`text-3xl font-black text-white`}>
-                CalistheniX
-                <Text style={tw`text-orange-500`}>.</Text>
-              </Text>
+          <View style={tw`px-2 pt-6 pb-4`}>
+            <View style={tw`flex-row justify-between items-center mb-6 ml-2`}>
+              <View>
+                <Text style={tw`text-3xl font-black text-white`}>
+                  CalistheniX
+                </Text>
+                <View style={tw`flex-row mt-3`}>
+                  <MaterialCommunityIcons
+                    name="fire"
+                    size={20}
+                    color="#f97316"
+                  />
+                  <Text
+                    style={tw`font-bold text-sm text-orange-500 ml-2`}
+                  >{`${calculateDailyStreak(workoutDates)} day streak`}</Text>
+                </View>
+              </View>
               <TouchableOpacity
                 style={tw`bg-orange-500/20 p-2 rounded-full`}
                 onPress={() => navigation.navigate("Profile")}
               >
-                <Ionicons name="person" size={24} color="#f97316" />
+                <User size={28} color="#f97316" strokeWidth={1.5} /> 
+               
               </TouchableOpacity>
             </View>
-
-            <View style={tw`flex-row justify-between mb-6`}>
-              <LinearGradient
-                colors={["rgba(249,115,22,0.4)", "rgba(234,88,12,0.1)"]}
-                end={{ x: 1, y: 1 }}
-                style={[
-                  tw`p-4 rounded-2xl w-[48%] border border-orange-500`,
-                  {},
-                ]}
-              >
-                <Text style={tw`text-white text-xs font-bold mb-1`}>
-                  Active
-                </Text>
-                <Text
-                  style={tw`text-white text-xl font-black`}
-                >{`${routineLength} Routine${
-                  routineLength > 1 ? "s" : ""
-                }`}</Text>
-                <FontAwesome5
-                  name="running"
-                  size={20}
-                  color="white"
-                  style={tw`mt-2`}
-                />
-              </LinearGradient>
-              <LinearGradient
-                colors={["#1a1a1a", "#000000"]}
-                style={tw`p-4 rounded-2xl w-[48%]`}
-              >
-                <View style={tw``}>
-                  <Text style={tw`text-orange-500 text-xs font-bold mb-1`}>
-                    This Week
-                  </Text>
-                  <Text style={tw`text-white text-xl font-black`}>
-                    {formatDuration(thisWeekDuration)}
-                  </Text>
-                  <View style={tw`flex-row items-center mt-2`}>
-                    {percentageChange !== 0 && (
-                      <>
-                        <Ionicons
-                          name={isPositive ? "trending-up" : "trending-down"}
-                          size={16}
-                          color={isPositive ? "#22c55e" : "#ef4444"}
-                        />
-                        <Text
-                          style={[
-                            tw`text-xs font-bold ml-1`,
-                            isPositive ? tw`text-green-500` : tw`text-red-500`,
-                          ]}
-                        >
-                          {Math.abs(percentageChange).toFixed(1)}%
-                        </Text>
-                      </>
-                    )}
-                    {percentageChange === 0 && (
-                      <Text style={tw`text-gray-400 text-xs`}>No change</Text>
-                    )}
-                  </View>
-                </View>
-              </LinearGradient>
-            </View>
           </View>
+          <ProfileBarGraph
+            percentageChange={percentageChange}
+            isPositive={isPositive}
+            workoutTimes={workoutTimes}
+            workoutDates={workoutDates}
+            styles={styles}
+          />
 
-          <View style={[tw`px-5 mb-6`, {}]}>
+          <View style={[tw`px-2 mt-2`, {}]}>
             <View style={tw`flex-row justify-between items-center mb-4`}>
-              <Text style={tw`text-xl font-black text-white`}>
-                Your Routines
+              <Text style={tw`text-xl ml-1 font-black text-white`}>
+                Your Workouts
               </Text>
               <TouchableOpacity>
                 {/*} <Text style={tw`text-orange-500 text-sm font-bold`}>
@@ -297,7 +436,7 @@ const WorkoutsMain = () => {
             <ScrollView style={[tw``, {}]}>
               {workouts.length === 0 ? (
                 <LinearGradient
-                  colors={["#1a1a1a", "#000000"]}
+                  colors={["#000", "#2a1a0a"]}
                   style={tw`rounded-3xl p-6`}
                 >
                   <Text style={tw`text-white text-center`}>
@@ -309,7 +448,7 @@ const WorkoutsMain = () => {
                   <LinearGradient
                     key={workout.workout_id}
                     colors={["#1a1a1a", "#000000"]}
-                    style={tw`border-2 border-orange-500 rounded-3xl p-6 mb-4`}
+                    style={tw`border border-zinc-700 rounded-3xl p-6 mb-4`}
                   >
                     <View
                       style={tw` flex-row justify-between items-start mb-4`}
@@ -341,16 +480,20 @@ const WorkoutsMain = () => {
                       </View>
                     </View>
                     <View style={tw`flex-row items-center mb-4`}>
-                      <Ionicons name="time" size={16} color="#f97316" />
+                      <Ionicons name="time-outline" size={16} color="#f97316" />
                       <Text style={tw`text-white text-sm ml-2`}>
                         {workout.workout_time}
                       </Text>
                       <Text style={tw`text-zinc-500 mx-2`}>•</Text>
-                      <FontAwesome5 name="dumbbell" size={14} color="#f97316" />
-                      <Text style={tw`text-white text-sm ml-2`}>
-                        {getExerciseCount(workout.workout_id)} Exercises
-                      </Text>
+
+                      <View style={tw`flex-row items-center`}>
+                        <DumbbellIcon size={14} color="#f97316" />
+                        <Text style={tw`text-white text-sm ml-2`}>
+                          {getExerciseCount(workout.workout_id)} Exercises
+                        </Text>
+                      </View>
                     </View>
+
                     <TouchableOpacity
                       style={tw`bg-orange-500 py-3 rounded-xl`}
                       onPress={() =>
@@ -358,7 +501,7 @@ const WorkoutsMain = () => {
                       }
                     >
                       <Text style={tw`text-white text-center font-bold`}>
-                        Start Routine
+                        Start Workout
                       </Text>
                     </TouchableOpacity>
                   </LinearGradient>
@@ -367,9 +510,9 @@ const WorkoutsMain = () => {
             </ScrollView>
           </View>
 
-          <View style={tw`px-5`}>
-            <View style={tw`flex-row justify-between items-center mb-4`}>
-              <Text style={tw`text-xl font-black text-white`}>
+          <View style={tw`px-2 mt-4`}>
+            <View style={tw`flex-row justify-between items-center`}>
+              <Text style={tw`ml-1 text-xl font-black text-white`}>
                 All Exercises
               </Text>
               <TouchableOpacity>

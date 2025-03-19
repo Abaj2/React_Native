@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Keyboard, TouchableWithoutFeedback } from "react-native";
 import {
   View,
   Text,
@@ -16,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 
@@ -180,7 +182,13 @@ const ProfileSettings = () => {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-black`}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <LinearGradient
+          colors={["#2a1a0a", "#000000"]}
+          style={tw`flex-1`}
+      >
+    <SafeAreaView style={tw`flex-1`}>
+    
       <StatusBar barStyle="light-content" />
       <View style={tw`flex-row items-center mt-6 mb-8 px-6`}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -194,7 +202,7 @@ const ProfileSettings = () => {
       <View style={tw`px-6`}>
         <Text style={tw`text-gray-300 text-base mb-3`}>Email</Text>
         <TextInput
-          style={tw`bg-gray-800 text-white p-4 rounded-full mb-6 border border-gray-700`}
+          style={tw`bg-zinc-800 text-white p-4 rounded-full mb-6 border border-gray-700`}
           placeholder="Enter your email"
           placeholderTextColor="#757575"
           keyboardType="email-address"
@@ -205,7 +213,7 @@ const ProfileSettings = () => {
 
         <Text style={tw`text-gray-300 text-base mb-3`}>Username</Text>
         <TextInput
-          style={tw`bg-gray-800 text-white p-4 rounded-full mb-8 border border-gray-700`}
+          style={tw`bg-zinc-800 text-white p-4 rounded-full mb-8 border border-gray-700`}
           placeholder="Enter your username"
           placeholderTextColor="#757575"
           autoCapitalize="none"
@@ -262,7 +270,10 @@ const ProfileSettings = () => {
           </View>
         </View>
       </Modal>
+      
     </SafeAreaView>
+    </LinearGradient>
+    </TouchableWithoutFeedback>
   );
 };
 

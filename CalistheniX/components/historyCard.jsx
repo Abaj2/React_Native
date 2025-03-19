@@ -19,7 +19,7 @@ const GET_WORKOUTS_URL = Platform.select({
   ios: "http://192.168.1.155:4005/getworkouts",
 });
 
-const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber }) => {
+const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber, fullBorder }) => {
   const [workoutsData, setWorkoutsData] = useState([]);
   const [exercisesData, setExercisesData] = useState([]);
   const [setsData, setSetsData] = useState([]);
@@ -128,7 +128,7 @@ const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber }) => {
             <View
               key={workout.workout_id}
               style={[
-                tw`mb-5 p-4 mx-4 self-center shadow-xl rounded-3xl overflow-hidden border-l-4 border-r-4 border-r-orange-500 border-l-orange-500`,
+                tw`mb-5 p-4 mx-4 self-center shadow-xl rounded-3xl overflow-hidden border border-zinc-700`,
                 { width: width * widthNumber || 0.9 },
               ]}
             >

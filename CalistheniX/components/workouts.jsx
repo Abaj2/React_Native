@@ -625,7 +625,7 @@ const Workouts = ({ isDarkMode }) => {
 
   return (
     <SafeAreaView style={tw`flex-1`}>
-      <ScrollView contentContainerStyle={tw`pb-20`}>
+      <ScrollView contentContainerStyle={tw``}>
         <View style={tw`pt-4`}>
      
           <TouchableOpacity
@@ -652,13 +652,13 @@ const Workouts = ({ isDarkMode }) => {
 
   
 <View style={tw`flex-row gap-3`}>
-  <ScrollView style={[tw`w-[90%]`, {}]} horizontal showsHorizontalScrollIndicator={false}>
+  <ScrollView style={[tw`w-full`, {}]} horizontal showsHorizontalScrollIndicator={false}>
   {workouts.map((workout) => (
     <TouchableOpacity
       key={workout.id}
       onPress={() => handleWorkoutPress(workout)}
       activeOpacity={0.9}
-      style={tw`w-[8%] mr-3 mb-4`}
+      style={tw`w-[40] mr-3 mb-4`}
     >
       <Animated.View style={[
         tw`rounded-3xl p-3 overflow-hidden`,

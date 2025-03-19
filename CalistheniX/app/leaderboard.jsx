@@ -18,11 +18,12 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import tw from "twrnc";
 import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import blackDefaultProfilePic from "../assets/images/blackDefaultProfilePic.png";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LeaderboardCard from "../components/leaderboardCard";
 import { useFocusEffect } from "@react-navigation/native";
+import { Trophy } from "lucide-react-native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -38,7 +39,7 @@ const timeStringToSeconds = (timeString) => {
 };
 
 // Helper function to format seconds to HH:MM:SS
-const formatDuration = (totalSeconds) => {
+const formatTime = (totalSeconds) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
@@ -240,188 +241,246 @@ const Leaderboard = () => {
 
   const [selectedTab, setSelectedTab] = useState("Tab1");
 
+  const getMedalColor = (index) => {
+    switch(index) {
+      case 0: return 'text-yellow-400';
+      case 1: return 'text-gray-300';
+      case 2: return 'text-amber-600';
+      default: return 'text-zinc-600';
+    }
+  };
+  
+
   return (
     <LinearGradient colors={["#000000", "#1a1a1a"]} style={tw`flex-1`}>
       <SafeAreaView style={tw`flex-1`}>
         <ScrollView showsVerticalScrollIndicator={false} style={tw`flex-1`}>
-          <View style={tw`px-4 pb-8`}>
-            {/* Header */}
-            <View style={tw`flex-row items-center justify-between mt-8 mb-6`}>
-              <Text style={tw`text-white font-bold text-3xl`}>
-                Leaderboards
-              </Text>
-              <Ionicons name="trophy-outline" size={28} color="#f97316" />
+          {/* Header */}
+          <View style={tw`flex-row items-center py-6`}>
+            <View style={tw`justify-between gap-30 flex-row items-center`}>
+              <Text style={tw`ml-4 font-extrabold text-3xl text-white`}>Leaderboard</Text>
+              <Trophy size={30} color="#f97316" style={tw`ml-2`} />
             </View>
-  
-            {/* Tabs */}
-            <View style={tw`mb-6`}>
-              <View style={tw`flex-row gap-3 justify-between`}>
-                <TouchableOpacity 
-                  style={tw`flex-1`} 
-                  onPress={() => setSelectedTab("Tab1")}
-                >
-                  <View
-                    style={tw`flex-row gap-2 rounded-2xl py-3 px-4 ${
-                      selectedTab === "Tab1"
-                        ? "bg-orange-500"
-                        : "bg-zinc-900 border border-zinc-800"
-                    } justify-center items-center`}
-                  >
-                    <Ionicons
-                      name="calendar-clear-outline"
-                      size={22}
-                      color="white"
-                    />
-                    <Text style={tw`font-bold text-white`}>
-                      Monthly Workouts
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={tw`flex-1`} 
-                  onPress={() => setSelectedTab("Tab2")}
-                >
-                  <View
-                    style={tw`flex-row gap-2 rounded-2xl py-3 px-4 ${
-                      selectedTab === "Tab2"
-                        ? "bg-orange-500"
-                        : "bg-zinc-900 border border-zinc-800"
-                    } justify-center items-center`}
-                  >
-                    <Ionicons
-                      name="stopwatch-outline"
-                      size={22}
-                      color="white"
-                    />
-                    <Text style={tw`font-bold text-white`}>Workout Time</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
+          </View>
+          
+          <View style={tw`mx-2 mb-6`}>
+            <View style={tw`flex-row rounded-xl bg-zinc-800/50 p-1`}>
+              <TouchableOpacity 
+                style={tw`flex-1 py-2 px-4 rounded-lg ${selectedTab === "Tab1" ? 'bg-orange-500' : ''}`}
+                onPress={() => setSelectedTab("Tab1")}
+              >
+                <Text style={tw`text-sm font-semibold text-center ${selectedTab === "Tab1" ? 'text-white' : 'text-zinc-400'}`}>
+                  Workout Count
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={tw`flex-1 py-2 px-4 rounded-lg ${selectedTab === "Tab2" ? 'bg-orange-500' : ''}`}
+                onPress={() => setSelectedTab("Tab2")}
+              >
+                <Text style={tw`text-sm font-semibold text-center ${selectedTab === "Tab2" ? 'text-white' : 'text-zinc-400'}`}>
+                  Workout Time
+                </Text>
+              </TouchableOpacity>
             </View>
-  
-            {/* User Ranking Card */}
+          </View>
+
+          <View style={tw`mx-1 mb-6`}>
             <LinearGradient
-              colors={["rgba(249,115,22,0.4)", "rgba(234,88,12,0.1)"]}
-              style={tw`border border-orange-500 rounded-3xl mb-6 overflow-hidden`}
+              colors={["rgba(249,115,22,0.2)", "rgba(234,88,12,0.05)"]}
+              style={tw`rounded-2xl p-5 border border-orange-500/30`}
             >
-              <View style={tw`p-5`}>
-                <View style={tw`flex-row justify-between items-center mb-4`}>
-                  <Text style={tw`font-bold text-orange-400 text-xl`}>
-                    Your Ranking
-                  </Text>
-                  <View style={tw`bg-orange-500/20 p-2 rounded-full`}>
-                    <Ionicons
-                      name="trophy-outline"
-                      size={24}
-                      color="#f97316"
-                    />
-                  </View>
-                </View>
-                
-                <View style={tw`flex-row items-center`}>
+              <View style={tw`flex-row items-center mb-4`}>
+                <View style={tw`relative`}>
                   <Image
                     source={blackDefaultProfilePic}
-                    style={tw`w-16 h-16 rounded-full border-2 border-orange-500`}
+                    style={tw`w-14 h-14 rounded-full bg-zinc-800`}
                   />
-                  <View style={tw`ml-4 flex-1`}>
-                    <Text style={tw`font-bold text-white text-xl mb-1`}>
-                      {username}
+                  <View style={tw`absolute -bottom-1 -right-1 bg-orange-500 rounded-full w-6 h-6 items-center justify-center`}>
+                    <Text style={tw`text-xs font-bold`}>
+                      {selectedTab === "Tab1" ? currentUserEntry?.rank || "-" : currentTimeUserEntry?.rank || "-"}
                     </Text>
-                    <View style={tw`flex-row justify-between items-center`}>
-                      <View style={tw`bg-zinc-900/80 py-1 px-3 rounded-full`}>
-                        <Text style={tw`text-gray-200 font-bold`}>
-                          Rank #{selectedTab === "Tab1" 
-                            ? currentUserEntry?.rank || "N/A" 
-                            : currentTimeUserEntry?.rank || "N/A"}
-                        </Text>
-                      </View>
-                      <View style={tw`bg-orange-500/20 py-1 px-3 rounded-full`}>
-                        <Text style={tw`text-orange-300 font-bold`}>
-                          {selectedTab === "Tab1"
-                            ? `${currentUserEntry?.count || 0} Workouts`
-                            : currentTimeUserEntry?.formattedTime || "00:00:00"}
-                        </Text>
-                      </View>
-                    </View>
                   </View>
+                </View>
+                <View style={tw`ml-4`}>
+                  <Text style={tw`font-bold text-lg text-white`}>{username}</Text>
+                  <View style={tw`flex-row items-center`}>
+                    <Ionicons name="trophy-outline" size={14} color="#f97316" style={tw`mr-1`} />
+                    <Text style={tw`text-sm text-orange-300`}>Your Monthly Rank</Text>
+                  </View>
+                </View>
+              </View>
+              
+              <View style={tw`flex-row justify-between mt-4`}>
+                <View style={tw`bg-black/30 rounded-xl p-3 flex-1 mr-3`}>
+                  <View style={tw`flex-row items-center mb-1`}>
+                    <Ionicons name="barbell-outline" size={14} color="#f97316" style={tw`mr-2`} />
+                    <Text style={tw`text-xs text-zinc-400`}>Total Workouts</Text>
+                  </View>
+                  <Text style={tw`text-xl font-bold text-white`}>
+                    {currentUserEntry?.count || 0}
+                  </Text>
+                </View>
+                <View style={tw`bg-black/30 rounded-xl p-3 flex-1`}>
+                  <View style={tw`flex-row items-center mb-1`}>
+                    <Ionicons name="time-outline" size={14} color="#f97316" style={tw`mr-2`} />
+                    <Text style={tw`text-xs text-zinc-400`}>Total Time</Text>
+                  </View>
+                  <Text style={tw`text-xl font-bold text-white`}>
+                    {currentTimeUserEntry?.formattedTime || "00:00:00"}
+                  </Text>
                 </View>
               </View>
             </LinearGradient>
-  
-            <View style={tw`flex-row justify-between items-center mb-2`}>
-              <View style={tw`flex-row items-center`}>
-       
-                <Text style={tw`text-white font-bold text-xl`}>
-                  Top Rankings
-                </Text>
-              
+          </View>
+          
+          {/* Tab navigation */}
+         
+          
+          {/* Leaderboard */}
+          <View style={tw`mx-2 mb-6`}>
+          <LinearGradient 
+      colors={["#000", "#1a1a1a"]} 
+      style={tw`bg-zinc-800/50 rounded-2xl p-4`}
+    >
+              <View style={tw`flex-row justify-between items-center mb-4`}>
+                <Text style={tw`font-bold text-lg text-white`}>Monthly Leaders</Text>
+                <View style={tw`bg-orange-500/20 px-2 py-1 rounded-full`}>
+                  <Text style={tw`text-orange-500 text-xs font-semibold`}>March 2025</Text>
+                </View>
               </View>
-             
-              <View style={tw`flex-row items-center bg-zinc-900 py-1 px-3 rounded-full`}>
-                <Ionicons name="people-outline" size={18} color="#f97316" />
-                <Text style={tw`text-gray-300 ml-2`}>
-                  {selectedTab === "Tab1" 
-                    ? rankedEntries.length 
-                    : rankedTimeEntries.length} participants
-                </Text>
-              </View>
               
-            </View>
-            <View style={tw`bg-orange-500 h-1 rounded-xl mb-10 w-full self-center`}></View>
-  
-            {/* Leaderboard List */}
-            {selectedTab === "Tab1" ? (
-              rankedEntries.length > 0 ? (
-                <View style={tw`bg-zinc-900/60 rounded-3xl overflow-hidden border border-zinc-800`}>
-                  {rankedEntries.map((entry, index) => (
-                    <View key={entry.username} style={tw`${
-                      index !== rankedEntries.length - 1 ? "border-b border-zinc-800" : ""
-                    }`}>
-                      <LeaderboardCard
-                        username={entry.username}
-                        workouts={entry.count}
-                        rank={entry.rank}
+              {/* Top 3 Winners */}
+              {(selectedTab === "Tab1" ? rankedEntries : rankedTimeEntries).length >= 3 ? (
+                <View style={tw`flex-row justify-between mb-6`}>
+                  {/* 2nd Place */}
+                  <View style={tw`items-center w-1/3`}>
+                    <View style={tw`relative`}>
+                      <Image
+                        source={blackDefaultProfilePic}
+                        style={tw`w-16 h-16 rounded-full bg-zinc-800 border-2 border-gray-300`}
                       />
+                      <View style={tw`absolute -bottom-1 -right-1 bg-gray-300 rounded-full w-6 h-6 items-center justify-center`}>
+                        <Text style={tw`text-xs font-bold text-black`}>2</Text>
+                      </View>
                     </View>
-                  ))}
+                    <Text style={tw`text-sm font-semibold mt-2 text-center text-white`} numberOfLines={1}>
+                      {selectedTab === "Tab1" 
+                        ? rankedEntries[1]?.username 
+                        : rankedTimeEntries[1]?.username}
+                    </Text>
+                    <Text style={tw`text-xs text-zinc-400 mt-1`}>
+                      {selectedTab === "Tab1" 
+                        ? `${rankedEntries[1]?.count} workouts` 
+                        : rankedTimeEntries[1]?.formattedTime}
+                    </Text>
+                  </View>
+                  
+                  {/* 1st Place */}
+                  <View style={tw`items-center w-1/3`}>
+                    <View style={tw`relative`}>
+                      <Image
+                        source={blackDefaultProfilePic}
+                        style={tw`w-20 h-20 rounded-full bg-zinc-800 border-2 border-yellow-400`}
+                      />
+                      <View style={tw`absolute -bottom-1 -right-1 bg-yellow-400 rounded-full w-7 h-7 items-center justify-center`}>
+                        <MaterialCommunityIcons name="crown-outline" size={14} color="black" />
+                      </View>
+                    </View>
+                    <Text style={tw`text-sm font-semibold mt-2 text-center text-white`} numberOfLines={1}>
+                      {selectedTab === "Tab1" 
+                        ? rankedEntries[0]?.username 
+                        : rankedTimeEntries[0]?.username}
+                    </Text>
+                    <Text style={tw`text-xs text-zinc-400 mt-1`}>
+                      {selectedTab === "Tab1" 
+                        ? `${rankedEntries[0]?.count} workouts` 
+                        : rankedTimeEntries[0]?.formattedTime}
+                    </Text>
+                  </View>
+                  
+                  {/* 3rd Place */}
+                  <View style={tw`items-center w-1/3`}>
+                    <View style={tw`relative`}>
+                      <Image
+                        source={blackDefaultProfilePic}
+                        style={tw`w-16 h-16 rounded-full bg-zinc-800 border-2 border-amber-600`}
+                      />
+                      <View style={tw`absolute -bottom-1 -right-1 bg-amber-600 rounded-full w-6 h-6 items-center justify-center`}>
+                        <Text style={tw`text-xs font-bold text-black`}>3</Text>
+                      </View>
+                    </View>
+                    <Text style={tw`text-sm font-semibold mt-2 text-center text-white`} numberOfLines={1}>
+                      {selectedTab === "Tab1" 
+                        ? rankedEntries[2]?.username 
+                        : rankedTimeEntries[2]?.username}
+                    </Text>
+                    <Text style={tw`text-xs text-zinc-400 mt-1`}>
+                      {selectedTab === "Tab1" 
+                        ? `${rankedEntries[2]?.count} workouts` 
+                        : rankedTimeEntries[2]?.formattedTime}
+                    </Text>
+                  </View>
                 </View>
               ) : (
-                <View style={tw`bg-zinc-900/60 p-8 rounded-3xl items-center justify-center border border-zinc-800`}>
-                  <Ionicons name="fitness-outline" size={40} color="#f97316" style={tw`mb-3 opacity-50`} />
-                  <Text style={tw`text-white text-xl text-center font-bold`}>
-                    No workout entries yet
-                  </Text>
-                  <Text style={tw`text-gray-400 text-center mt-2`}>
-                    Complete workouts to appear on the leaderboard
+                <View style={tw`items-center justify-center py-8 mb-4`}>
+                  <Ionicons name="trophy-outline" size={40} color="#f97316" style={tw`mb-3 opacity-50`} />
+                  <Text style={tw`text-white text-center font-bold`}>
+                    Not enough participants yet
                   </Text>
                 </View>
-              )
-            ) : rankedTimeEntries.length > 0 ? (
-              <View style={tw`bg-zinc-900/60 rounded-3xl overflow-hidden border border-zinc-800`}>
-                {rankedTimeEntries.map((entry, index) => (
-                  <View key={entry.username} style={tw`${
-                    index !== rankedTimeEntries.length - 1 ? "border-b border-zinc-800" : ""
-                  }`}>
-                    <LeaderboardCard
-                      username={entry.username}
-                      metric={entry.formattedTime}
-                      rank={entry.rank}
+              )}
+              
+              {/* Rest of the leaderboard */}
+              <View style={tw`space-y-3`}>
+                {(selectedTab === "Tab1" ? rankedEntries : rankedTimeEntries).slice(3).map((entry, index) => (
+                  <View key={entry.username} style={tw`flex-row items-center p-3 bg-zinc-800 rounded-xl`}>
+                    <View style={tw`w-8 h-8 items-center justify-center`}>
+                      <Text style={tw`text-sm font-bold text-zinc-400`}>{index + 4}</Text>
+                    </View>
+                    <Image
+                      source={blackDefaultProfilePic}
+                      style={tw`w-8 h-8 rounded-full bg-zinc-800 mr-3`}
                     />
+                    <View style={tw`flex-grow`}>
+                      <Text style={tw`text-sm font-semibold text-white`}>{entry.username}</Text>
+                    </View>
+                    <View style={tw`flex-row items-center`}>
+                      {selectedTab === "Tab1" ? (
+                        <View style={tw`flex-row items-center`}>
+                          <Ionicons name="barbell-outline" size={14} color="#f97316" style={tw`mr-2`} />
+                          <Text style={tw`text-sm font-semibold text-white`}>{entry.count}</Text>
+                        </View>
+                      ) : (
+                        <View style={tw`flex-row items-center`}>
+                          <Ionicons name="time-outline" size={14} color="#f97316" style={tw`mr-2`} />
+                          <Text style={tw`text-sm font-semibold text-white`}>{entry.formattedTime}</Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
                 ))}
+                
+                {(selectedTab === "Tab1" ? rankedEntries : rankedTimeEntries).length === 0 && (
+                  <View style={tw`py-6 items-center justify-center`}>
+                    <Ionicons 
+                      name={selectedTab === "Tab1" ? "fitness-outline" : "stopwatch-outline"} 
+                      size={30} 
+                      color="#f97316" 
+                      style={tw`mb-3 opacity-50`} 
+                    />
+                    <Text style={tw`text-white text-center font-bold`}>
+                      No entries yet
+                    </Text>
+                    <Text style={tw`text-gray-400 text-center mt-2`}>
+                      Complete workouts to appear on the leaderboard
+                    </Text>
+                  </View>
+                )}
               </View>
-            ) : (
-              <View style={tw`bg-zinc-900/60 p-8 rounded-3xl items-center justify-center border border-zinc-800`}>
-                <Ionicons name="stopwatch-outline" size={40} color="#f97316" style={tw`mb-3 opacity-50`} />
-                <Text style={tw`text-white text-xl text-center font-bold`}>
-                  No time entries yet
-                </Text>
-                <Text style={tw`text-gray-400 text-center mt-2`}>
-                  Complete workouts to appear on the leaderboard
-                </Text>
-              </View>
-            )}
+            </LinearGradient>
           </View>
+          
+         
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>

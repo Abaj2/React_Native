@@ -85,10 +85,6 @@ const Home = () => {
       const colourThemeAsyncStorage = await AsyncStorage.getItem("colourTheme");
       const colourTheme = colourThemeAsyncStorage || "Minimalistic";
 
-      console.log("Retrieved token:", token);
-      console.log("Retrieved storedUserData:", storedUserData);
-      console.log("Retrieved colourTheme:", colourThemeAsyncStorage);
-
       if (!token) {
         console.log("No JWT token found");
         navigation.navigate("Sign-in");
@@ -99,7 +95,7 @@ const Home = () => {
         try {
           const parsedUserData = JSON.parse(storedUserData);
           setUserData(parsedUserData);
-          console.log(parsedUserData);
+       
         } catch (error) {
           console.error("Error parsing userData:", error);
         }
@@ -364,53 +360,54 @@ const Home = () => {
             </View>
           </View>
 
-          <View style={tw`mx-2 mt-6 bg-transparent`}>
-            <View
-              style={tw`flex-row justify-between bg-transparent rounded-xl p-1 ${
-                isDarkMode ? "bg-gray-800/30" : "bg-gray-200/50"
-              }`}
-            >
-              {["Tab1", "Tab4"].map((tab) => (
-                <TouchableOpacity
-                  key={tab}
-                  onPress={() => setSelectedTab(tab)}
-                  style={[
-                    tw`flex-1 items-center py-3 rounded-lg`,
-                    selectedTab === tab &&
-                      (isDarkMode ? tw`bg-orange-500` : tw`bg-blue-500`),
-                  ]}
-                >
-                  <Text
-                    style={[
-                      tw`font-semibold`,
-                      selectedTab === tab
-                        ? tw`text-white`
-                        : isDarkMode
-                        ? tw`text-gray-400`
-                        : tw`text-gray-600`,
-                    ]}
-                  >
-                    {tab === "Tab1" ? "My Skills" : "Progress"}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
+          <View style={tw`mx-4 mt-6`}>
+  <View
+    style={tw`flex-row justify-between rounded-full p-1 ${
+      isDarkMode ? "bg-gray-800/50" : "bg-gray-200/70"
+    }`}
+  >
+    {["Tab1", "Tab4"].map((tab) => (
+      <TouchableOpacity
+        key={tab}
+        onPress={() => setSelectedTab(tab)}
+        style={[
+          tw`flex-1 items-center py-3 rounded-full`,
+          selectedTab === tab &&
+            (isDarkMode ? tw`bg-orange-500 shadow-lg` : tw`bg-blue-500 shadow-lg`),
+        ]}
+      >
+        <Text
+          style={[
+            tw`font-semibold`,
+            selectedTab === tab
+              ? tw`text-white`
+              : isDarkMode
+              ? tw`text-gray-400`
+              : tw`text-gray-600`,
+          ]}
+        >
+          {tab === "Tab1" ? "My Skills" : "Progress"}
+        </Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+</View>
+
 
           <View style={tw`mb-24`}>{renderContent()}</View>
 
           <Modal transparent visible={modalVisible} animationType="fade">
-            {/* Click outside to close */}
+      
             <TouchableWithoutFeedback onPress={handleModalClose}>
               <View
                 style={tw`flex-1 bg-black/95 justify-center items-center p-5`}
               >
-                {/* Modal Container with Linear Gradient */}
+             
                 <LinearGradient
                   colors={["#000", "#1a1a1a"]}
                   style={tw`w-full max-w-sm p-6 rounded-2xl border border-orange-500/40 shadow-lg`}
                 >
-                  {/* Close Button */}
+           
                   <TouchableOpacity
                     onPress={handleModalClose}
                     style={tw`absolute top-4 right-4 p-2`}
@@ -418,14 +415,14 @@ const Home = () => {
                     <Ionicons name="close" size={24} color="#f97316" />
                   </TouchableOpacity>
 
-                  {/* Title */}
+                
                   <Text
                     style={tw`text-center text-2xl font-bold text-orange-500 mb-6`}
                   >
                     Create a Skill
                   </Text>
 
-                  {/* Skill Name */}
+            
                   <View style={tw`mb-5`}>
                     <Text
                       style={tw`text-orange-400 text-sm font-semibold mb-2`}
@@ -441,7 +438,7 @@ const Home = () => {
                     />
                   </View>
 
-                  {/* Progression Name */}
+               
                   <View style={tw`mb-5`}>
                     <Text
                       style={tw`text-orange-400 text-sm font-semibold mb-2`}
@@ -457,7 +454,7 @@ const Home = () => {
                     />
                   </View>
 
-                  {/* Current & Goal - Now with Consistent Style */}
+          
                   <View style={tw`flex-row gap-4 mb-6`}>
                     <View style={tw`flex-1`}>
                       <Text
@@ -506,7 +503,7 @@ const Home = () => {
                     </View>
                   </View>
 
-                  {/* Submit Button */}
+          
                   <TouchableOpacity
                     onPress={submitSkill}
                     style={tw`bg-orange-500 py-5 rounded-xl shadow-lg shadow-orange-500/50`}

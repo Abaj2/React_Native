@@ -22,151 +22,133 @@ import * as FileSystem from "expo-file-system";
 import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Line } from "react-native-svg";
+import { ArrowUpRight, BarChart3 } from "lucide-react-native";
 
 const { width, height } = Dimensions.get("window");
 
-const ProfileBarGraph = ({ workoutDates, styles }) => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const sunday = new Date(today);
-    sunday.setDate(today.getDate() - dayOfWeek);
-    sunday.setHours(0, 0, 0, 0);
-    const saturday = new Date(sunday);
-    saturday.setDate(sunday.getDate() + 6);
-    saturday.setHours(23, 59, 59, 999);
+const ProfileBarGraph = ({ workoutDates, styles, workoutTimes, percentageChange, isPositive }) => {
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() - dayOfWeek);
+  sunday.setHours(0, 0, 0, 0);
+  const saturday = new Date(sunday);
+  saturday.setDate(sunday.getDate() + 6);
+  saturday.setHours(23, 59, 59, 999);
 
-    const groupedData = {};
-    const originalValues = {};
-    for (let i = 0; i < workoutDates.length; i++) {
-      const dateObj = new Date(workoutDates[i].date);
-      if (dateObj >= sunday && dateObj <= saturday) {
-        const dateKey = dateObj.toISOString().split("T")[0];
-        const [hh, mm, ss] = workoutTimes[i].workout_time
-          .split(":")
-          .map(Number);
-        const minutes = (hh * 3600 + mm * 60 + ss) / 60;
-        groupedData[dateKey] = (groupedData[dateKey] || 0) + minutes;
-        originalValues[dateKey] = minutes;
-      }
+  const groupedData = {};
+  const originalValues = {};
+  for (let i = 0; i < workoutDates.length; i++) {
+    const dateObj = new Date(workoutDates[i].date);
+    if (dateObj >= sunday && dateObj <= saturday) {
+      const dateKey = dateObj.toISOString().split("T")[0];
+      const [hh, mm, ss] = workoutTimes[i].workout_time
+        .split(":")
+        .map(Number);
+      const minutes = (hh * 60) + mm + (ss / 60);
+      groupedData[dateKey] = (groupedData[dateKey] || 0) + minutes;
+      originalValues[dateKey] = minutes;
     }
+  }
 
-    const weekDates = [];
-    let current = new Date(sunday);
-    while (current <= saturday) {
-      weekDates.push(current.toISOString().split("T")[0]);
-      current.setDate(current.getDate() + 1);
-    }
+  const weekDates = [];
+  let current = new Date(sunday);
+  while (current <= saturday) {
+    weekDates.push(current.toISOString().split("T")[0]);
+    current.setDate(current.getDate() + 1);
+  }
 
-    const { dataValues, originalValuesArray } = weekDates.reduce(
-      (acc, date) => {
-        const value = groupedData[date] || 0;
-        acc.dataValues.push(value > 60 ? 60 : Math.round(value));
-        acc.originalValuesArray.push(originalValues[date] || 0);
-        return acc;
-      },
-      { dataValues: [], originalValuesArray: [] }
-    );
+  const dayData = weekDates.map(date => {
+    const dayObj = new Date(date);
+    return {
+      day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayObj.getDay()],
+      value: Math.round(groupedData[date] || 0),
+      date: date
+    };
+  });
 
-    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const labels = weekDates.map((date) => dayNames[new Date(date).getDay()]);
+  const maxValue = Math.max(...dayData.map(d => d.value), 60);
+  
 
-    const screenWidth = Dimensions.get("window").width;
-    const chartWidth = screenWidth - 40;
-    const [tooltipPos, setTooltipPos] = useState({
-      visible: false,
-      x: 0,
-      y: 0,
-      value: 0,
-      index: null,
-    });
+  const totalMinutes = dayData.reduce((sum, day) => sum + day.value, 0);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  
 
-    return (
-      <View style={{ paddingHorizontal: 20, paddingTop: 40 }}>
-        <Text style={styles.chartTitle}>Daily Workout Duration</Text>
 
-        <View style={[styles.chartContainer, { borderColor: "#f97316" }]}>
-          <BarChart
-            data={{
-              labels: labels,
-              datasets: [{ data: dataValues }],
-            }}
-            width={chartWidth}
-            height={250}
-            fromZero
-            chartConfig={{
-              backgroundColor: "#000",
-              backgroundGradientFrom: "#0f0f0f",
-              backgroundGradientTo: "#000",
-              decimalPlaces: 0,
-              color: () => `rgba(249, 115, 22, 1)`,
-              labelColor: () => `rgba(255, 255, 255, 0.8)`,
-              style: { borderRadius: 16 },
-              formatYLabel: (value) => `${value}m`,
-              propsForVerticalLabels: { fill: "#fff", fontSize: 12 },
-              propsForHorizontalLabels: { fill: "#fff", fontSize: 12 },
-              maxValue: 60,
-              segments: 4,
-              propsForBackgroundLines: {
-                stroke: "rgba(255, 255, 255, 0.1)",
-                strokeWidth: 1,
-              },
-              fillShadowGradient: "#fb923c",
-              fillShadowGradientOpacity: 1,
-              barPercentage: 0.5,
-              useShadowColorFromDataset: false,
-            }}
-            style={{
-              marginVertical: 8,
-              borderRadius: 16,
-              overflow: "visible",
-            }}
-            verticalLabelRotation={0}
-            showValuesOnTopOfBars={false}
-            onDataPointClick={(data) => {
-              const isSamePoint =
-                tooltipPos.x === data.x && tooltipPos.y === data.y;
-              setTooltipPos({
-                x: data.x,
-                y: data.y - 50,
-                value: originalValuesArray[data.index],
-                index: data.index,
-                visible: !isSamePoint || !tooltipPos.visible,
-              });
-            }}
-          />
 
-          <Svg style={styles.gridLine}>
-            <Line
-              x1="70"
-              y1="0"
-              x2="70"
-              y2="250"
-              stroke="rgba(255, 255, 255, 0.1)"
-              strokeWidth="1"
-            />
-          </Svg>
-
-          {tooltipPos.visible && (
-            <View
-              style={[
-                styles.tooltip,
-                {
-                  left:
-                    tooltipPos.x > chartWidth - 70
-                      ? chartWidth - 70
-                      : tooltipPos.x - 25,
-                  top: tooltipPos.y < 0 ? 0 : tooltipPos.y,
-                },
-              ]}
-            >
-              <Text style={styles.tooltipText}>
-                {Math.round(tooltipPos.value)}m
-              </Text>
-              <View style={styles.tooltipArrow} />
-            </View>
-          )}
+  return (
+    <View style={tw`mx-2 mb-6`}>
+      <LinearGradient
+        colors={["#18181b", "#09090b"]}
+        style={tw`rounded-2xl p-5`}
+      >
+        <View style={tw`flex-row justify-between items-center mb-4`}>
+          <Text style={tw`font-bold text-lg text-white`}>Weekly Progress</Text>
+          <View style={tw`bg-orange-500/20 p-1 rounded-full`}>
+            <BarChart3 size={18} color="#f97316" />
+          </View>
         </View>
-      </View>
-    );
-  };
+        
+        <View style={tw`flex-row justify-between items-end h-32 mb-4`}>
+          {dayData.map((day, index) => (
+            <TouchableOpacity 
+              key={day.day}
+              onPress={() => {
+                // Show tooltip logic here
+              }}
+              style={tw`flex-col items-center`}
+            >
+              <View style={tw`flex-grow flex items-end h-full justify-end`}>
+                <View 
+                  style={[
+                    tw`w-8 rounded-t-sm`,
+                    day.value > 0 ? tw`bg-orange-500` : tw`bg-zinc-700`,
+                    {
+                      height: `${(day.value / maxValue) * 100}%`,
+                      minHeight: day.value > 0 ? 4 : 2
+                    }
+                  ]}
+                />
+              </View>
+              <Text style={tw`text-xs text-zinc-400 mt-2`}>{day.day}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        
+        <View style={tw`flex-row justify-between mt-6 border-t border-zinc-700 pt-4`}>
+          <View>
+            <Text style={tw`text-xs text-zinc-400`}>This Week</Text>
+            <Text style={tw`text-xl font-bold text-white`}>{`${hours}h ${minutes}m`}</Text>
+          </View>
+          <View style={tw`flex-row items-center`}>
+            
+            <View style={tw`flex-row items-center mt-2`}>
+                    {percentageChange !== 0 && (
+                      <>
+                        <Ionicons
+                          name={isPositive ? "trending-up" : "trending-down"}
+                          size={20}
+                          color={isPositive ? "#22c55e" : "#ef4444"}
+                        />
+                        <Text
+                          style={[
+                            tw`text-sm font-bold ml-2`,
+                            isPositive ? tw`text-green-500` : tw`text-red-500`,
+                          ]}
+                        >
+                          {Math.abs(percentageChange).toFixed(1)}%
+                        </Text>
+                      </>
+                    )}
+                    {percentageChange === 0 && (
+                      <Text style={tw`text-gray-400 text-sm`}>No change</Text>
+                    )}
+                  </View>
+          </View>
+        </View>
+      </LinearGradient>
+    </View>
+  );
+};
 export default ProfileBarGraph;

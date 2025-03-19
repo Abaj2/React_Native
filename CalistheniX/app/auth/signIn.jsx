@@ -51,14 +51,16 @@ const SignIn = () => {
             username: response.data.user.username,
             email: response.data.user.email,
             user_id: response.data.user.user_id,
-            name: response.data.user.name
+            name: response.data.user.name,
+            profile_pic: response.data.user.profile_pic,
           })
         );
         const username = response.data.user.username;
         const email = response.data.user.email;
         const user_id = response.data.user.user_id;
         const name = response.data.user.username;
-        navigation.navigate("Home", { email, username, user_id, name });
+        const profile_pic = response.data.user.profile_pic;
+        navigation.navigate("Home", { email, username, user_id, name, profile_pic });
       }
     } catch (err) {
       handleError(err.response.status);

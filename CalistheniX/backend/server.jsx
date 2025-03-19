@@ -18,11 +18,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(cors());
 
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "calisthenix",
-  password: postgresPassword,
-  port: 5432,
+  connectionString: process.env.CONNECTIONSTRING,
 });
 
 const transporter = nodemailer.createTransport({
@@ -163,6 +159,10 @@ app.post("/signin", async (req, res) => {
     }
 
     const token = generateJWT(user);
+
+    if (user.profile_pic) {
+      console.log(user.profile_pic[0, 10]);
+    }
     
 
     res.status(200).json({
@@ -171,7 +171,8 @@ app.post("/signin", async (req, res) => {
         username: user.username,
         email: user.email,
         user_id: user.user_id,
-        name: user.name
+        name: user.name,
+        profile_pic: user.profile_pic
 
       },
       token,
@@ -542,22 +543,20 @@ app.post("/profilepicture", async (req, res) => {
   const { profile_pic, username } = req.body;
 
   if (!profile_pic) {
-    return res.status(400).send({ message: "No file uploaded." });
+    return res.status(400).json({ message: "No image data received." });
   }
-
-  const imageBuffer = Buffer.from(profile_pic, "base64");
 
   try {
     const query = `UPDATE users SET profile_pic = $1 WHERE username = $2`;
-    const values = [imageBuffer, username];
+    await pool.query(query, [profile_pic, username]); 
 
-    await pool.query(query, values);
-    res.send({ message: "Profile picture uploaded successfully" });
+    res.json({ message: "Profile picture uploaded successfully" });
   } catch (error) {
     console.error("Error uploading image:", error);
-    res.status(500).send({ message: "Failed to upload profile picture. " });
+    res.status(500).json({ message: "Failed to upload profile picture." });
   }
 });
+
 
 app.get("/getstats", verifyToken, async (req, res) => {
   const { user_id } = req.query;
@@ -591,12 +590,19 @@ app.get("/getstats", verifyToken, async (req, res) => {
     [user_id]
   )
 
+  const workoutDates = await pool.query(
+    `SELECT date FROM workouts WHERE user_id = $1`,
+    [user_id]
+  );
+  console.log(workoutDates.rows)
+
     const stats = {
       totalWorkouts: totalWorkouts.rows.length,
       totalSkills: totalSkills.rows.length,
       totalDuration: totalDuration.rows,
       following: following.rows,
       followers: followers.rows,
+      workoutDates: workoutDates.rows,
     };
 
     res.status(200).json({ stats });
@@ -892,7 +898,39 @@ app.get('/userdetails', async (req, res) => {
   }
 })
 
+app.post("/changepassword", verifyToken, async (req, res) => {
+  const { user_id, currentPassword, newPassword } = req.body;
 
+  const passwordHash = await pool.query('SELECT password_hash FROM users WHERE user_id = $1',
+    [user_id]
+  )
+
+  const isMatch = await bcrypt.compare(currentPassword.trim(), passwordHash.rows[0].password_hash.trim())
+
+  console.log(passwordHash.rows[0].password_hash.trim())
+  console.log(isMatch)
+
+  if (!isMatch) {
+    return res.status(401).json({ error: "Invalid password" });
+  }
+
+  if (currentPassword.trim() === newPassword.trim()) {
+    return res.status(402).json({ error: "New password cannot be the same as the current password" });
+  }
+
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10)
+
+  const insertHashedNewPassword = await pool.query('UPDATE users SET password_hash = $1 WHERE user_id = $2',
+    [hashedNewPassword, user_id]
+  )
+
+  res.status(200).json({ message: "Password changed successfully" })
+  console.log(insertHashedNewPassword)
+
+
+
+
+})
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

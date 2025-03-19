@@ -32,6 +32,7 @@ import Leaderboard from "./leaderboard.jsx";
 import SearchUser, { searchScreenOptions } from "../components/searchUser.jsx";
 import userProfile from "./userProfile.jsx";
 import UserProfile from "./userProfile.jsx";
+import ChangePassword from "./settingsPages/changePassword.jsx";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -197,32 +198,32 @@ export default function RootLayout() {
       <Stack.Screen
         name="User-Profile"
         options={{ headerShown: false }}
-        component={UserProfile} />
-    
-        <Stack.Screen
-          name="Search-User"
-          component={SearchUser}
-          options={{
-            headerShown: true,
-            headerTitle: 'Find Friends',
-            headerStyle: {
-              backgroundColor: '#000',
-              borderBottomWidth: 1,
-              borderBottomColor: '#27272a',
-            },
-            headerTitleStyle: {
-              color: '#fff',
-              fontSize: 18,
-              fontWeight: 'bold',
-            },
-            headerTintColor: '#f97316',
-            headerShadowVisible: false,
-            headerBackTitleVisible: false,
-            headerTitleAlign: 'center',
-            presentation: 'modal'
-          }}
-        />
+        component={UserProfile}
+      />
 
+      <Stack.Screen
+        name="Search-User"
+        component={SearchUser}
+        options={{
+          headerShown: true,
+          headerTitle: "Find Friends",
+          headerStyle: {
+            backgroundColor: "#000",
+            borderBottomWidth: 1,
+            borderBottomColor: "#27272a",
+          },
+          headerTitleStyle: {
+            color: "#fff",
+            fontSize: 18,
+            fontWeight: "bold",
+          },
+          headerTintColor: "#f97316",
+          headerShadowVisible: false,
+          headerBackTitleVisible: false,
+          headerTitleAlign: "center",
+          presentation: "modal",
+        }}
+      />
 
       {/* <Stack.Screen
         name="History-Main"
@@ -244,6 +245,12 @@ export default function RootLayout() {
         name="ProfileSettings"
         options={{ headerShown: false }}
         component={ProfileSettings}
+      />
+
+      <Stack.Screen
+        name="ChangePassword"
+        options={{ headerShown: false }}
+        component={ChangePassword}
       />
     </Stack.Navigator>
   );

@@ -9,25 +9,41 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { initializeApp, getApps, getApp } from 'firebase/app'; 
+import firebase from "firebase/app";
+import Constants from 'expo-constants';
+import AWS from 'aws-sdk';
 import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
 import Icon from "react-native-vector-icons/Feather";
 import { BarChart } from "react-native-chart-kit";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import Config from 'react-native-config';
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 import axios from "axios";
 import blackDefaultProfilePic from "../assets/images/blackDefaultProfilePic.png";
+import cow from "../assets/images/cow.png";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Line } from "react-native-svg";
 import HistoryCard from "../components/historyCard";
 import HistoryMain from "./historyMain";
 import ProfileBarGraph from "../components/profileBarGraph";
+import { BarChart3 } from "lucide-react-native";
+
+const awsAccessKey = Constants.expoConfig.extra.awsAccessKey;
+const awsSecretKey = Constants.expoConfig.extra.awsSecretKey;
+const awsRegion = Constants.expoConfig.extra.awsRegion;
+const awsBucket = Constants.expoConfig.extra.awsBucket;
+
 
 const { width, height } = Dimensions.get("window");
+
 
 const PROFILE_PIC_URL = Platform.select({
   android: "http://10.0.2.2:4005/profilepicture",
@@ -45,9 +61,16 @@ const GET_PROFILE_GRAPH = Platform.select({
 });
 
 const ProfileScreen = () => {
+
+ 
+
+
   const navigation = useNavigation();
   const [username, setUsername] = useState();
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const [profilePicUrl, setProfilePicUrl] = useState(null);
 
   const [workoutDates, setWorkoutDates] = useState([]);
   const [workoutTimes, setWorkoutTimes] = useState([]);
@@ -69,7 +92,7 @@ const ProfileScreen = () => {
         const parsedUserData = JSON.parse(storedUserData);
         setUserData(parsedUserData);
         setUsername(parsedUserData.username);
-        console.log(parsedUserData);
+       
         return parsedUserData;
       }
       return null;
@@ -102,8 +125,8 @@ const ProfileScreen = () => {
 
         setFollowers(response.data.stats.followers);
         setFollowing(response.data.stats.following);
-        console.log(response.data.stats.followers);
-        console.log(response.data.stats.following);
+        setWorkoutDates(response.data.stats.workoutDates)
+        console.log(response.data.stats.workoutDates)
       }
     } catch (error) {
       console.error("Error getting stats:", error);
@@ -120,17 +143,104 @@ const ProfileScreen = () => {
         const userData = await fetchUserData();
         if (userData) {
           await fetchStats(userData);
-          await fetchProfileGraph(userData);
+          
         } else {
           setIsLoading(false);
         }
       };
 
       initializeData();
+      console.log(awsAccessKey, awsSecretKey, awsRegion, awsBucket, )
+      console.log("Image URI:", cow);
 
       return () => {};
-    }, [fetchUserData, fetchStats, fetchProfileGraph])
+    }, [fetchUserData, fetchStats])
   );
+
+
+
+
+
+  AWS.config.update({
+    region: awsRegion,  
+    accessKeyId: awsAccessKey,
+    secretAccessKey: awsSecretKey,
+  });
+ 
+  const s3 = new AWS.S3();
+
+  const handleChangeProfilePicture = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Permission Denied', 'Allow permission to change profile picture');
+      return;
+    }
+  
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+  
+    if (!pickerResult.canceled) {
+      const uri = pickerResult.assets[0].uri;
+      await uploadProfilePicture(uri);
+    }
+  };
+  
+  const uploadProfilePicture = async (uri) => {
+    if (userData.user_id) {
+    try {
+      const fileExtension = uri.split('.').pop();
+      const fileName = `${userData.user_id}profilePic.${fileExtension}`;  // Removed the date part
+      const filePath = `profile_pics/${fileName}`;
+      const response = await fetch(uri);
+      const blob = await response.blob();
+  
+      const params = {
+        Bucket: awsBucket,
+        Key: filePath,
+        Body: blob,
+        ContentType: 'image/jpeg', // or match the image type
+      };
+  
+      // Upload the image to S3
+      s3.upload(params, (err, data) => {
+        if (err) {
+          console.error('Error uploading profile picture:', err);
+          Alert.alert('Error', 'Failed to upload profile picture');
+        } else {
+          console.log('Profile picture uploaded successfully:', data.Location);
+          Alert.alert('Success', 'Profile picture uploaded');
+          // You can save the URL to your database here
+        }
+      });
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      Alert.alert('Error', 'Failed to upload profile picture');
+    }
+  }
+  };
+
+  const getProfilePictureUrl = async () => {
+    if (userData?.user_id) {
+      try {
+        // Construct the public URL using the bucket name and file path
+        const filePath = `profile_pics/${userData.user_id}profilePic.jpg`; // Adjust if your file path format changes
+        const publicUrl = `https://calisthenix.s3.ap-southeast-2.amazonaws.com/${filePath}`;
+        
+        console.log(publicUrl); // Log the public URL to check if it's correct
+        return publicUrl;
+      } catch (error) {
+        console.error("Error retrieving profile picture URL:", error);
+      }
+    }
+  };
+
+
+
+
 
   const handleLogout = async () => {
     Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
@@ -160,99 +270,13 @@ const ProfileScreen = () => {
     ]);
   };
 
-  const handleChangeProfilePicture = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert(
-        "Permission Denied",
-        "Allow permission to change profile picture"
-      );
-      return;
-    }
-
-    const pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!pickerResult.canceled) {
-      try {
-        const newProfilePicUri = pickerResult.assets[0].uri;
-        setProfilePic(newProfilePicUri);
-        Alert.alert("Success", "Profile picture updated");
-
-        await AsyncStorage.setItem("profile_pic", newProfilePicUri);
-
-        uploadProfilePicture(newProfilePicUri);
-      } catch (error) {
-        console.error("Error saving profile picture:", error);
-        Alert.alert("Error", "Failed to update profile picture.");
-      }
-    }
-  };
-
-  const uploadProfilePicture = async (uri) => {
-    const base64Image = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    const jwtToken = await AsyncStorage.getItem("jwtToken");
-
-    try {
-      const response = await axios.post(PROFILE_PIC_URL, {
-        username: userData.username,
-        profile_pic: base64Image,
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("Profile picture uploaded to backend:", response.data);
-    } catch (error) {
-      console.error("Error uploading profile picture:", error);
-      Alert.alert("Error", "Failed to upload profile picture.");
-    }
-  };
-
-  const fetchProfileGraph = useCallback(async (userData) => {
-    if (!userData?.user_id) return;
-
-    try {
-      const token = await AsyncStorage.getItem("jwtToken");
-      const response = await axios.get(
-        `${GET_PROFILE_GRAPH}?user_id=${userData.user_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (
-        response.status === 200 &&
-        response.data.workoutDates &&
-        response.data.workoutTime
-      ) {
-        setWorkoutDates(response.data.workoutDates);
-        setWorkoutTimes(response.data.workoutTime);
-        console.log(response.data.workoutDates);
-        console.log(response.data.workoutTime);
-      }
-    } catch (error) {
-      console.error("Error getting stats:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   function calculateDailyStreak(workoutDates) {
     if (workoutDates.length === 0) return 0;
 
     const uniqueDates = [
       ...new Set(
-        workoutDates.map((entry) => {
+        workoutDates?.map((entry) => {
           const date = new Date(entry.date);
           return Date.UTC(
             date.getUTCFullYear(),
@@ -301,7 +325,7 @@ const ProfileScreen = () => {
     const saturday = new Date(sunday);
     saturday.setDate(sunday.getDate() + 6);
     saturday.setHours(23, 59, 59, 999);
-
+  
     const groupedData = {};
     const originalValues = {};
     for (let i = 0; i < workoutDates.length; i++) {
@@ -311,192 +335,97 @@ const ProfileScreen = () => {
         const [hh, mm, ss] = workoutTimes[i].workout_time
           .split(":")
           .map(Number);
-        const minutes = (hh * 3600 + mm * 60 + ss) / 60;
+        const minutes = (hh * 60) + mm + (ss / 60);
         groupedData[dateKey] = (groupedData[dateKey] || 0) + minutes;
         originalValues[dateKey] = minutes;
       }
     }
-
+  
     const weekDates = [];
     let current = new Date(sunday);
     while (current <= saturday) {
       weekDates.push(current.toISOString().split("T")[0]);
       current.setDate(current.getDate() + 1);
     }
-
-    const { dataValues, originalValuesArray } = weekDates.reduce(
-      (acc, date) => {
-        const value = groupedData[date] || 0;
-        acc.dataValues.push(value > 60 ? 60 : Math.round(value));
-        acc.originalValuesArray.push(originalValues[date] || 0);
-        return acc;
-      },
-      { dataValues: [], originalValuesArray: [] }
-    );
-
-    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const labels = weekDates.map((date) => dayNames[new Date(date).getDay()]);
-
-    const screenWidth = Dimensions.get("window").width;
-    const chartWidth = screenWidth - 40;
-    const [tooltipPos, setTooltipPos] = useState({
-      visible: false,
-      x: 0,
-      y: 0,
-      value: 0,
-      index: null,
+  
+    const dayData = weekDates.map(date => {
+      const dayObj = new Date(date);
+      return {
+        day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayObj.getDay()],
+        value: Math.round(groupedData[date] || 0),
+        date: date
+      };
     });
-
+  
+    const maxValue = Math.max(...dayData.map(d => d.value), 60);
+    
+    // Calculate total for the week
+    const totalMinutes = dayData.reduce((sum, day) => sum + day.value, 0);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    // Check if the current week has more minutes than previous week (sample calculation)
+    // You'd need to implement logic to compare with previous week
+    const percentageChange = 15; // Sample value
+    const isPositive = percentageChange > 0;
+  
     return (
-      <View style={{ paddingHorizontal: 20, paddingTop: 40 }}>
-        <Text style={styles.chartTitle}>Daily Workout Duration</Text>
-
-        <View style={[styles.chartContainer, { borderColor: "#f97316" }]}>
-          <BarChart
-            data={{
-              labels: labels,
-              datasets: [{ data: dataValues }],
-            }}
-            width={chartWidth}
-            height={250}
-            fromZero
-            chartConfig={{
-              backgroundColor: "#000",
-              backgroundGradientFrom: "#0f0f0f",
-              backgroundGradientTo: "#000",
-              decimalPlaces: 0,
-              color: () => `rgba(249, 115, 22, 1)`,
-              labelColor: () => `rgba(255, 255, 255, 0.8)`,
-              style: { borderRadius: 16 },
-              formatYLabel: (value) => `${value}m`,
-              propsForVerticalLabels: { fill: "#fff", fontSize: 12 },
-              propsForHorizontalLabels: { fill: "#fff", fontSize: 12 },
-              maxValue: 60,
-              segments: 4,
-              propsForBackgroundLines: {
-                stroke: "rgba(255, 255, 255, 0.1)",
-                strokeWidth: 1,
-              },
-              fillShadowGradient: "#fb923c",
-              fillShadowGradientOpacity: 1,
-              barPercentage: 0.5,
-              useShadowColorFromDataset: false,
-            }}
-            style={{
-              marginVertical: 8,
-              borderRadius: 16,
-              overflow: "visible",
-            }}
-            verticalLabelRotation={0}
-            showValuesOnTopOfBars={false}
-            onDataPointClick={(data) => {
-              const isSamePoint =
-                tooltipPos.x === data.x && tooltipPos.y === data.y;
-              setTooltipPos({
-                x: data.x,
-                y: data.y - 50,
-                value: originalValuesArray[data.index],
-                index: data.index,
-                visible: !isSamePoint || !tooltipPos.visible,
-              });
-            }}
-          />
-
-          <Svg style={styles.gridLine}>
-            <Line
-              x1="70"
-              y1="0"
-              x2="70"
-              y2="250"
-              stroke="rgba(255, 255, 255, 0.1)"
-              strokeWidth="1"
-            />
-          </Svg>
-
-          {tooltipPos.visible && (
-            <View
-              style={[
-                styles.tooltip,
-                {
-                  left:
-                    tooltipPos.x > chartWidth - 70
-                      ? chartWidth - 70
-                      : tooltipPos.x - 25,
-                  top: tooltipPos.y < 0 ? 0 : tooltipPos.y,
-                },
-              ]}
-            >
-              <Text style={styles.tooltipText}>
-                {Math.round(tooltipPos.value)}m
-              </Text>
-              <View style={styles.tooltipArrow} />
+      <View style={tw`mx-2 mb-6`}>
+        <LinearGradient
+          colors={["#18181b", "#09090b"]}
+          style={tw`rounded-2xl p-5`}
+        >
+          <View style={tw`flex-row justify-between items-center mb-4`}>
+            <Text style={tw`font-bold text-lg text-white`}>Weekly Progress</Text>
+            <View style={tw`bg-orange-500/20 p-1 rounded-full`}>
+              <BarChart3 size={18} color="#f97316" />
             </View>
-          )}
-        </View>
+          </View>
+          
+          <View style={tw`flex-row justify-between items-end h-32 mb-4`}>
+            {dayData.map((day, index) => (
+              <TouchableOpacity 
+                key={day.day}
+                onPress={() => {
+                  // Show tooltip logic here
+                }}
+                style={tw`flex-col items-center`}
+              >
+                <View style={tw`flex-grow flex items-end h-full justify-end`}>
+                  <View 
+                    style={[
+                      tw`w-8 rounded-t-sm`,
+                      day.value > 0 ? tw`bg-orange-500` : tw`bg-zinc-700`,
+                      {
+                        height: `${(day.value / maxValue) * 100}%`,
+                        minHeight: day.value > 0 ? 4 : 2
+                      }
+                    ]}
+                  />
+                </View>
+                <Text style={tw`text-xs text-zinc-400 mt-2`}>{day.day}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          
+          <View style={tw`flex-row justify-between mt-6 border-t border-zinc-700 pt-4`}>
+            <View>
+              <Text style={tw`text-xs text-zinc-400`}>This Week</Text>
+              <Text style={tw`text-xl font-bold text-white`}>{`${hours}h ${minutes}m`}</Text>
+            </View>
+            <View style={tw`flex-row items-center`}>
+              <View style={tw`bg-green-500/20 p-1 rounded-full mr-1`}>
+                <ArrowUpRight size={16} color="#22c55e" />
+              </View>
+              <Text style={tw`text-green-500 text-sm font-semibold`}>+15%</Text>
+            </View>
+          </View>
+        </LinearGradient>
       </View>
     );
   };
 
-  const styles = StyleSheet.create({
-    chartTitle: {
-      color: "#fff",
-      fontWeight: "bold",
-      textAlign: "center",
-      fontSize: 20,
-      marginBottom: 24,
-      letterSpacing: 0.5,
-    },
-    chartContainer: {
-      position: "relative",
-      direction: "ltr",
-      borderWidth: 2,
-      borderRadius: 16,
-      backgroundColor: "#0f0f0f",
-      overflow: "hidden",
-    },
-    gridLine: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      height: 250,
-      width: "100%",
-    },
-    tooltip: {
-      position: "absolute",
-      backgroundColor: "rgba(249, 115, 22, 0.95)",
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      borderRadius: 8,
-      flexDirection: "row",
-      alignItems: "center",
-      zIndex: 1000,
-      elevation: 10,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-    },
-    tooltipText: {
-      color: "white",
-      fontWeight: "700",
-      fontSize: 14,
-      includeFontPadding: false,
-    },
-    tooltipArrow: {
-      position: "absolute",
-      bottom: -10,
-      left: 20,
-      width: 0,
-      height: 0,
-      borderStyle: "solid",
-      borderLeftWidth: 5,
-      borderRightWidth: 5,
-      borderTopWidth: 10,
-      borderLeftColor: "transparent",
-      borderRightColor: "transparent",
-      borderTopColor: "rgba(249, 115, 22, 0.95)",
-    },
-  });
+ 
 
   const calculateTotalDuration = (durations) => {
     if (!durations || !Array.isArray(durations)) {
@@ -525,205 +454,283 @@ const ProfileScreen = () => {
   };
 
   const totalDuration = calculateTotalDuration(stats.totalDuration);
-  console.log(totalDuration);
+
+  const workoutCalender = (workoutDates) => {
+    const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+
+  const currentMonthWorkouts = workoutDates
+    .map(({ date }) => new Date(date))
+    .filter((d) => d.getFullYear() === year && d.getMonth() === month)
+    .map((d) => d.getUTCDate()); 
+
+  const workoutDays = new Set(currentMonthWorkouts); 
+
+ 
+  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Sunday
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Generate the calendar days
+  const calendarDays = [];
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    calendarDays.push(null); // Empty slots before the first day
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    calendarDays.push(day);
+  }
+
+  useEffect(() => {
+    if (userData?.user_id) {
+    
+      const fetchProfilePicture = async () => {
+        try {
+          const url = await getProfilePictureUrl(); 
+          setProfilePicUrl(url); 
+        } catch (error) {
+          console.error("Error fetching profile picture:", error);
+        } finally {
+          setLoading(false); 
+        }
+      };
+
+      fetchProfilePicture();
+    } else {
+      setLoading(false); 
+    }
+  }, [userData?.user_id]);
+  return (
+    <View style={tw`mb-6`}>
+      <View style={tw`flex-row items-center justify-between mb-4`}>
+        <Text style={tw`text-white text-xl font-bold`}>Workout Calendar</Text>
+        <View style={tw`flex-row items-center`}>
+          <Ionicons name="flame" size={16} color="#f97316" />
+          <Text style={tw`text-orange-500 text-xs font-bold ml-1`}>
+            {workoutDates ? calculateDailyStreak(workoutDates) : 0} Day Streak
+          </Text>
+        </View>
+      </View>
+
+      <View style={tw`bg-zinc-900 p-4 rounded-3xl border border-zinc-800/50`}>
+        {/* Weekday labels */}
+        <View style={tw`flex-row justify-between mb-3`}>
+          {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+            <Text key={index} style={tw`text-gray-400 text-center text-xs`}>
+              {day}
+            </Text>
+          ))}
+        </View>
+
+        {/* Calendar Grid */}
+        <View style={tw`flex-wrap flex-row justify-between`}>
+          {calendarDays.map((day, index) => (
+            <View key={index} style={tw`w-[13%] items-center mb-2`}>
+              {day ? (
+                <View
+                  style={tw`h-8 w-8 rounded-full items-center justify-center ${
+                    day === today.getDate()
+                      ? "bg-orange-500" // Highlight today
+                      : workoutDays.has(day)
+                      ? "bg-orange-500/20 border border-orange-500/50" // Highlight workout days
+                      : "bg-zinc-800"
+                  }`}
+                >
+                  <Text style={tw`text-white text-xs`}>{day}</Text>
+                </View>
+              ) : (
+                <View style={tw`h-8 w-8`} />
+              )}
+            </View>
+          ))}
+        </View>
+
+        {/* Legend */}
+        <View style={tw`flex-row justify-center mt-4`}>
+          <View style={tw`flex-row items-center mr-4`}>
+            <View style={tw`w-3 h-3 rounded-full bg-orange-500 mr-2`} />
+            <Text style={tw`text-gray-400 text-xs`}>Today</Text>
+          </View>
+          <View style={tw`flex-row items-center`}>
+            <View style={tw`w-3 h-3 rounded-full bg-orange-500/20 border border-orange-500/50 mr-2`} />
+            <Text style={tw`text-gray-400 text-xs`}>Workout Day</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+    );
+  }
+
+
 
   return (
     <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
+      <SafeAreaView style={tw`flex-1`}>
+        <StatusBar barStyle="light-content" />
       <ScrollView
         style={tw`flex-1`}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={tw`pb-30`}
       >
-        <LinearGradient
-          colors={["#000", "#1a1a1a"]}
-          style={tw`rounded-b-[40px] pb-6 shadow-xl`}
-        >
-          <View style={tw`pt-16 px-6`}>
-            <View style={tw`flex-row items-center justify-between`}>
-              <View style={tw`flex-row items-center`}>
-                <TouchableOpacity
-                  onPress={handleChangeProfilePicture}
-                  style={tw`shadow-lg`}
-                >
-                  <View style={tw`relative`}>
-                    <Image
-                      source={
-                        profilePic
-                          ? { uri: profilePic }
-                          : blackDefaultProfilePic
-                      }
-                      style={tw`w-24 h-24 rounded-full border-4 border-orange-500`}
-                    />
-                    <View
-                      style={tw`absolute bottom-0 right-0 bg-orange-500 p-2 rounded-full border-2 border-white`}
-                    >
-                      <Icon name="edit" size={16} color="white" />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-
-                <View style={tw`ml-4 flex-1`}>
-                  <Text style={tw`text-white text-2xl font-bold`}>
-                    {userData?.name || "Loading..."}
-                  </Text>
-                  <Text style={tw`text-gray-300 text-base mb-1`}>
-                    @{userData?.username || "Loading..."}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View
-              style={tw`flex-row justify-around mt-6 bg-zinc-900 rounded-2xl p-3`}
-            >
-              <View style={tw`items-center px-2`}>
-                <Text style={tw`text-white text-xl font-bold`}>
-                  {followers.length || 0}
-                </Text>
-                <Text style={tw`text-gray-400 text-sm`}>Followers</Text>
-              </View>
-              <View style={tw`h-full w-px bg-zinc-800`} />
-              <View style={tw`items-center px-2`}>
-                <Text style={tw`text-white text-xl font-bold`}>
-                  {following.length || 0}
-                </Text>
-                <Text style={tw`text-gray-400 text-sm`}>Following</Text>
-              </View>
-              <View style={tw`h-full w-px bg-zinc-800`} />
-              <View style={tw`items-center px-2`}>
-                <Text style={tw`text-white text-xl font-bold`}>
-                  {calculateDailyStreak(workoutDates)}
-                </Text>
-                <Text style={tw`text-gray-400 text-sm`}>Streak</Text>
-              </View>
-            </View>
-          </View>
-        </LinearGradient>
-        <ProfileBarGraph workoutDates={workoutDates} styles={styles}/>
-
-        <View style={tw`px-5 mt-6`}>
-          <View style={tw`flex-row items-center justify-between mb-3`}>
-            <Text style={tw`text-white text-xl font-bold`}>
-              Progress Summary
-            </Text>
-          </View>
-
-          <LinearGradient
-            colors={["#1a1a1a", "#222"]}
-            style={tw`p-4 rounded-3xl shadow-lg mb-4`}
-          >
-            <View style={tw`flex-row justify-between items-center mb-4`}>
-              <View style={tw`flex-row items-center`}>
-                <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
-                  <Ionicons name="barbell" size={24} color="white" />
-                </View>
-                <View style={tw`ml-3`}>
-                  <Text style={tw`text-white font-bold text-lg`}>
-                    Total Workouts
-                  </Text>
-                  <Text style={tw`text-gray-400 text-sm`}>This month</Text>
-                </View>
-              </View>
-              <Text style={tw`text-white text-2xl font-bold`}>
-                {stats?.totalWorkouts || 0}
-              </Text>
-            </View>
-
-            <View style={tw`flex-row justify-between items-center mb-4`}>
-              <View style={tw`flex-row items-center`}>
-                <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
-                  <Ionicons name="time" size={24} color="white" />
-                </View>
-                <View style={tw`ml-3`}>
-                  <Text style={tw`text-white font-bold text-lg`}>
-                    Training Time
-                  </Text>
-                  <Text style={tw`text-gray-400 text-sm`}>Total hours</Text>
-                </View>
-              </View>
-              <Text style={tw`text-white text-2xl font-bold`}>
-                {totalDuration}
-              </Text>
-            </View>
-
-            <View style={tw`flex-row justify-between items-center`}>
-              <View style={tw`flex-row items-center`}>
-                <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
-                  <Ionicons name="trophy" size={24} color="white" />
-                </View>
-                <View style={tw`ml-3`}>
-                  <Text style={tw`text-white font-bold text-lg`}>Skills</Text>
-                  <Text style={tw`text-gray-400 text-sm`}>Total skills</Text>
-                </View>
-              </View>
-              <Text style={tw`text-white text-2xl font-bold`}>
-                {stats?.totalSkills || 0}
-              </Text>
-            </View>
-          </LinearGradient>
-        </View>
-
-        {/* Quick Actions */}
-        <View style={tw`px-5 mt-4 mb-6`}>
-          <Text style={tw`text-white text-xl font-bold mb-4`}>
-            Quick Actions
-          </Text>
-
-          <View style={tw`flex-row justify-between gap-3 mb-3`}>
+        {/* Profile Header Section */}
+        <View style={tw`px-2 mt-5 pb-8 rounded-b-[40px]`}>
+          {/* User Info Row */}
+          <View style={tw`flex-row items-center mb-6`}>
             <TouchableOpacity
-              style={tw`flex-1 bg-zinc-900 p-4 rounded-2xl shadow-lg items-center`}
-              onPress={() => navigation.navigate("Settings-Main")}
+              onPress={handleChangeProfilePicture}
+              style={tw`shadow-lg`}
             >
-              <View style={tw`bg-zinc-800 p-3 rounded-full mb-2`}>
-                <Ionicons name="settings-outline" size={24} color="#f97316" />
-              </View>
-              <Text style={tw`text-white text-sm font-medium`}>Settings</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={tw`flex-1 bg-zinc-900 p-4 rounded-2xl shadow-lg items-center`}
-              onPress={handleLogout}
-            >
-              <View style={tw`bg-zinc-800 p-3 rounded-full mb-2`}>
-                <Ionicons name="exit-outline" size={24} color="#f97316" />
-              </View>
-              <Text style={tw`text-white text-sm font-medium`}>Logout</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Workout History */}
-        <View style={tw`mb-4`}>
-          <View style={tw`flex-row items-center justify-between mb-3`}>
-            <Text style={tw`ml-5 text-white mb-2 text-xl font-bold`}>
-              Recent Workouts
-            </Text>
-          </View>
-
-          <View style={tw`px-5 mb-4`}>
-            <View style={tw`flex-row items-center justify-between mb-3`}></View>
-
-            {stats.totalWorkouts > 0 ? (
-              <HistoryCard user_id={userData.user_id} widthNumber={0.9} />
-            ) : (
-              <View style={tw`flex-1 items-center justify-center mt-10`}>
-                <Icon
-                  name="package"
-                  size={60}
-                  color="#ffa500"
-                  style={tw`opacity-50 mb-4`}
+              <View style={tw`relative`}>
+              <Image
+                  source={{
+                    uri: profilePicUrl,
+                  }}
+                  style={tw`w-24 h-24 rounded-full border-4 border-orange-500`}
                 />
-                <Text style={tw`text-orange-500 text-xl font-bold mb-2`}>
-                  No Workout Data Yet
-                </Text>
-                <Text style={tw`text-zinc-500 text-center px-10`}>
-                  Finish a workout for your history to display here.
+
+                <View
+                  style={tw`absolute bottom-0 right-0 bg-orange-500 p-2 rounded-full border-2 border-black`}
+                >
+                  <Icon name="edit" size={16} color="white" />
+                </View>
+              </View>
+            </TouchableOpacity>
+  
+            <View style={tw`ml-5 flex-1`}>
+              <Text style={tw`text-white text-2xl font-bold mb-1`}>
+                {userData?.name || "Loading..."}
+              </Text>
+              <Text style={tw`text-orange-400 text-base`}>
+                @{userData?.username || "Loading..."}
+              </Text>
+            </View>
+          </View>
+          
+          {/* Stats Cards Row */}
+          <View style={tw`flex-row justify-between gap-3`}>
+            <View style={tw`flex-1 bg-zinc-900/80 rounded-2xl p-4 border border-zinc-800`}>
+              <Text style={tw`text-white text-xl font-bold text-center`}>
+                {followers.length || 0}
+              </Text>
+              <Text style={tw`text-gray-400 text-sm text-center`}>Followers</Text>
+            </View>
+            
+            <View style={tw`flex-1 bg-zinc-900/80 rounded-2xl p-4 border border-zinc-800`}>
+              <Text style={tw`text-white text-xl font-bold text-center`}>
+                {following.length || 0}
+              </Text>
+              <Text style={tw`text-gray-400 text-sm text-center`}>Following</Text>
+            </View>
+       
+          </View>
+       </View>
+  
+        {/* Main Content Area */}
+        <View style={tw`px-2`}>
+          {/* Progress Summary Section */}
+          <View style={tw`mb-6`}>
+            <View style={tw`flex-row items-center justify-between mb-4`}>
+              <Text style={tw`text-white text-xl font-bold`}>Progress Summary</Text>
+              <View style={tw`bg-orange-500/20 px-3 py-1 rounded-full`}>
+                <Text style={tw`text-orange-500 text-xs font-bold`}>March 2025</Text>
+              </View>
+            </View>
+  
+            <LinearGradient
+              colors={["#000", "#1a1a1a"]}
+              style={tw`rounded-3xl overflow-hidden shadow-lg border border-zinc-800/50`}
+            >
+              {/* Workouts */}
+              <View style={tw`flex-row justify-between items-center p-4 border-b border-zinc-800/50`}>
+                <View style={tw`flex-row items-center`}>
+                  <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
+                    <Ionicons name="barbell" size={24} color="white" />
+                  </View>
+                  <View style={tw`ml-3`}>
+                    <Text style={tw`text-white font-bold text-lg`}>Workouts</Text>
+                    <Text style={tw`text-gray-400 text-xs`}>Total Workouts</Text>
+                  </View>
+                </View>
+                <Text style={tw`text-white text-2xl font-bold`}>
+                  {stats?.totalWorkouts || 0}
                 </Text>
               </View>
-            )}
+  
+              {/* Training Time */}
+              <View style={tw`flex-row justify-between items-center p-4 border-b border-zinc-800/50`}>
+                <View style={tw`flex-row items-center`}>
+                  <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
+                    <Ionicons name="time" size={24} color="white" />
+                  </View>
+                  <View style={tw`ml-3`}>
+                    <Text style={tw`text-white font-bold text-lg`}>Training Time</Text>
+                    <Text style={tw`text-gray-400 text-xs`}>Total hours</Text>
+                  </View>
+                </View>
+                <Text style={tw`text-white text-2xl font-bold`}>
+                  {totalDuration}
+                </Text>
+              </View>
+  
+              {/* Skills */}
+              <View style={tw`flex-row justify-between items-center p-4`}>
+                <View style={tw`flex-row items-center`}>
+                  <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
+                    <Ionicons name="trophy" size={24} color="white" />
+                  </View>
+                  <View style={tw`ml-3`}>
+                    <Text style={tw`text-white font-bold text-lg`}>Skills Mastered</Text>
+                    <Text style={tw`text-gray-400 text-xs`}>Total skills</Text>
+                  </View>
+                </View>
+                <Text style={tw`text-white text-2xl font-bold`}>
+                  {stats?.totalSkills || 0}
+                </Text>
+              </View>
+            </LinearGradient>
+          </View>
+  
+          {/* Workout Calendar - NEW */}
+          {workoutCalender(workoutDates)}
+  
+          {/* Quick Actions Section */}
+          <View style={tw`mb-6 px-2`}>
+            <Text style={tw`text-white text-xl font-bold mb-4`}>Quick Actions</Text>
+  
+            <View style={tw`flex-row justify-between gap-4 mb-3`}>
+              <TouchableOpacity
+                style={tw`flex-1 bg-zinc-900 p-4 rounded-2xl border border-zinc-800/50 items-center`}
+                onPress={() => navigation.navigate("Settings-Main")}
+              >
+                <View style={tw`bg-zinc-800 p-3 rounded-full mb-2`}>
+                  <Ionicons name="settings-outline" size={24} color="#f97316" />
+                </View>
+                <Text style={tw`text-white text-sm font-medium`}>Settings</Text>
+              </TouchableOpacity>
+  
+              <TouchableOpacity
+                style={tw`flex-1 bg-zinc-900 p-4 rounded-2xl border border-zinc-800/50 items-center`}
+                onPress={handleLogout}
+              >
+                <View style={tw`bg-zinc-800 p-3 rounded-full mb-2`}>
+                  <Ionicons name="exit-outline" size={24} color="#f97316" />
+                </View>
+                <Text style={tw`text-white text-sm font-medium`}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+  
+          {/* Recent Workouts Section */}
+          <View style={tw`mb-8`}>
+            <View style={tw`flex-row items-center justify-between mb-4`}>
+              <Text style={tw`text-white text-xl font-bold`}>Recent Workouts</Text>
+            </View>
+  
+           <HistoryCard user_id={userData?.user_id} widthNumber={0.95} />
           </View>
         </View>
       </ScrollView>
+      </SafeAreaView>
     </LinearGradient>
   );
 };

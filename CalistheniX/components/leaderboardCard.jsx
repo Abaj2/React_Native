@@ -29,6 +29,13 @@ const LeaderboardCard = ({ username, workouts, rank, user_id, metric }) => {
     fetchData();
   }, []);
 
+  const getMedalColor = (rank) => {
+    if (rank === 1) return "text-yellow-400";
+    if (rank === 2) return "text-gray-300";
+    if (rank === 3) return "text-amber-600";
+    return "text-gray-400";
+  };
+
   return (
     <View style={tw`px-4 py-3`}>
       <View

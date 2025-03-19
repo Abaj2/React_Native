@@ -60,6 +60,7 @@ const CustomWorkout = () => {
     }
     return [];
   });
+  
 
   useEffect(() => {
     let intervalId;
@@ -159,7 +160,12 @@ const CustomWorkout = () => {
       const parsedUserData = JSON.parse(storedUserData);
       const user_id = parsedUserData.user_id;
 
-      if (!title) {
+      if (exercisesArray) {
+        console.log(exercisesArray)
+        setTitle(workoutName);
+      }
+
+      if (!workoutName) {
         Alert.alert("Enter a title");
         return;
       }
@@ -170,7 +176,7 @@ const CustomWorkout = () => {
         SERVER_URL,
         {
           workoutSummary,
-          title,
+          title: workoutName || title,
           user_id,
           duration: formatTimer(timer),
         },

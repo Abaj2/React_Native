@@ -69,28 +69,17 @@ const SettingsMain = () => {
         </View>
 
     
-        <View style={tw`px-5 mb-5`}>
-          <Text style={tw`text-gray-400 text-lg mb-2`}>Appearance</Text>
-          <TouchableOpacity onPress={() => setIsAppearanceModalVisible(true)}>
-            <SettingsCard iconName={"color-palette-outline"} cardName={"Theme"} />
-          </TouchableOpacity>
-        </View>
-
+       
     
         <View style={tw`px-5 mb-5`}>
           <Text style={tw`text-gray-400 text-lg mb-2`}>Account</Text>
           <TouchableOpacity onPress={() => navigation.navigate("ProfileSettings")}>
             <SettingsCard iconName={"person-outline"} cardName={"Profile"} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("PasswordSettings")}>
+          <TouchableOpacity onPress={() => navigation.navigate("ChangePassword")}>
             <SettingsCard iconName={"lock-closed-outline"} cardName={"Change Password"} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("LinkedAccounts")}>
-            <SettingsCard iconName={"link-outline"} cardName={"Linked Accounts"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("SubscriptionSettings")}>
-            <SettingsCard iconName={"card-outline"} cardName={"Subscription"} />
-          </TouchableOpacity>
+       
         </View>
 
     
@@ -176,10 +165,7 @@ const SettingsMain = () => {
             ]}
           >
             <View style={tw`flex-row justify-between items-center mb-4`}>
-              <Text style={tw`text-white text-xl font-bold`}>Select Theme</Text>
-              <TouchableOpacity onPress={() => setIsAppearanceModalVisible(false)}>
-                <Ionicons name="close" size={30} color="gray" />
-              </TouchableOpacity>
+             
             </View>
             <Dropdown
               onChange={(item) => setColourTheme(item.value)}
