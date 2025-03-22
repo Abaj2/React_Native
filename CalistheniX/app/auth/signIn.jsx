@@ -12,6 +12,7 @@ import {
   Alert,
   Dimensions,
   Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Ionicons } from "react-native-vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -81,126 +82,96 @@ const SignIn = () => {
   };
 
   return (
-    <LinearGradient
-        colors={["#000", "#1a1a1a"]}
-        style={tw`flex-1`}
-      >
-    <SafeAreaView style={tw`flex-1`}>
-      <LinearGradient
-        colors={["#000", "#1a1a1a"]}
-        style={tw`flex-1`}
-      >
+    <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>  
+      <SafeAreaView style={tw`flex-1`}>  
         <StatusBar barStyle="light-content" />
-        <ScrollView style={tw`w-full`}>
-          <View style={tw`text-center justify-center items-center mb-8 mt-16`}>
-            <Text style={tw`text-4xl font-black text-orange-500`}>CalistheniX</Text>
-            <Text style={tw`text-sm text-zinc-400`}>
-              Track your calisthenics progress
-            </Text>
-          </View>
-  
-          <View
-            style={[
-              tw`mx-4 rounded-3xl overflow-hidden bg-zinc-900 border border-zinc-800`,
-              { height: height * 0.55 },
-            ]}
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={tw`flex-1`}
+        >
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={tw`flex-grow px-5 justify-center py-6`}
           >
-            <View style={tw`p-6`}>
-              <Text style={tw`text-2xl font-black text-white`}>
-                Welcome back
-              </Text>
-              <Text style={tw`text-zinc-400 mt-1 text-sm`}>
-                Enter your details to access your account
-              </Text>
+            {/* Logo and App Name */}
+            <View style={tw`items-center mb-8`}>
+              
+              <Text style={tw`text-4xl font-black text-white`}>
+                Calistheni<Text style={tw`text-orange-500`}>X</Text>
+              </Text>  
+              <Text style={tw`text-sm text-zinc-400 mt-1`}>Track your calisthenics progress</Text>
             </View>
-  
-            <View style={tw`px-6`}>
-              <Text style={tw`text-[15px] font-bold text-white mb-2`}>
-                Email
-              </Text>
-              <View style={tw`justify-center mb-4`}>
-                <MaterialIcons
-                  name="mail-outline"
-                  size={20}
-                  color="#f97316"
-                  style={tw`absolute ml-3 z-10`}
-                />
-                <TextInput
+            
+            {/* Login Card */}
+            <View style={tw`bg-zinc-900 rounded-2xl p-5 border border-zinc-800 shadow-lg`}> 
+              <Text style={tw`text-2xl font-bold text-white mb-5`}>Welcome Back</Text> 
+              
+              {/* Email Input */}
+              <Text style={tw`text-sm font-bold text-zinc-400 mb-1 ml-1`}>Email</Text>
+              <View style={tw`flex-row items-center bg-zinc-800 rounded-lg p-3 mb-4 border border-zinc-700`}> 
+                <MaterialIcons name="mail-outline" size={20} color="#f97316" style={tw`mr-3`} /> 
+                <TextInput 
                   value={email}
-                  onChangeText={setEmail}
-                  style={tw`bg-zinc-800 rounded-xl pl-10 py-3 text-white border border-zinc-700`}
+                  onChangeText={(text) => setEmail(text)}
                   placeholder="your@email.com"
                   placeholderTextColor="#71717a"
-                />
-              </View>
-  
-              <View style={tw`flex-row justify-between items-center`}>
-                <Text style={tw`text-[15px] font-bold text-white mb-2`}>
-                  Password
-                </Text>
-                <Text style={tw`text-orange-500 text-sm font-semibold`}>
-                  Forgot Password?
-                </Text>
-              </View>
-              <View style={tw`justify-center mb-6`}>
-                <MaterialIcons
-                  name="lock-outline"
-                  size={20}
-                  color="#f97316"
-                  style={tw`absolute ml-3 z-10`}
-                />
-                <TextInput
-                  value={password}
-                  onChangeText={setPassword}
-                  style={tw`bg-zinc-800 rounded-xl pl-10 py-3 text-white border border-zinc-700`}
-                  secureTextEntry={true}
+                  style={tw`flex-1 text-white`}
                   autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
+              
+              {/* Password Input */}
+              <Text style={tw`text-sm font-bold text-zinc-400 mb-1 ml-1`}>Password</Text>
+              <View style={tw`flex-row items-center bg-zinc-800 rounded-lg p-3 mb-2 border border-zinc-700`}> 
+                <MaterialIcons name="lock-outline" size={20} color="#f97316" style={tw`mr-3`} /> 
+                <TextInput 
+                  value={password}
+                  onChangeText={(text) => setPassword(text)}
                   placeholder="Enter password"
                   placeholderTextColor="#71717a"
+                  secureTextEntry={true}
+                  style={tw`flex-1 text-white`}
                 />
-              </View>
-  
-              <TouchableOpacity
-                onPress={handleSubmit}
-                style={tw`mb-6`}
-              >
-                <LinearGradient
-                  colors={["#f97316", "#ea580c"]}
-                  style={tw`rounded-xl py-3`}
-                >
-                  <View style={tw`flex-row justify-center items-center`}>
-                    <Text style={tw`text-white font-bold text-base`}>
-                      Sign in
-                    </Text>
-                    <Ionicons
-                      style={tw`ml-2`}
-                      name="arrow-forward"
-                      size={20}
-                      color="white"
-                    />
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
-  
-              <View style={tw`flex-row items-center justify-center mb-6`}>
-                <View style={tw`flex-1 border-t border-zinc-800`} />
-                <Text style={tw`mx-4 text-zinc-500 text-sm`}>or</Text>
-                <View style={tw`flex-1 border-t border-zinc-800`} />
-              </View>
-  
-              <View style={tw`flex-row justify-center items-center`}>
-                <Text style={tw`text-zinc-400 text-sm`}>Don't have an account?</Text>
-                <TouchableOpacity onPress={() => navigation.navigate("Sign-up")}>
-                  <Text style={tw`ml-2 font-bold text-orange-500`}>Sign Up</Text>
+                <TouchableOpacity>
+                  <MaterialIcons name="visibility-off" size={20} color="#71717a" />
                 </TouchableOpacity>
               </View>
+              
+              {/* Forgot Password */}
+              <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")} style={tw`mb-5`}> 
+                <Text style={tw`text-orange-500 text-sm font-semibold text-right`}>Forgot Password?</Text> 
+              </TouchableOpacity>
+              
+              {/* Sign In Button */}
+              <TouchableOpacity activeOpacity={0.8} onPress={handleSubmit}> 
+                <LinearGradient 
+                  colors={["#f97316", "#ea580c"]} 
+                  start={{x: 0, y: 0}} 
+                  end={{x: 1, y: 0}}
+                  style={tw`rounded-lg py-3 flex-row justify-center items-center`}
+                > 
+                  <Text style={tw`text-white font-bold text-lg`}>Sign In</Text> 
+                  <Ionicons name="arrow-forward" size={20} color="white" style={tw`ml-2`} /> 
+                </LinearGradient> 
+              </TouchableOpacity>
             </View>
-          </View>
-        </ScrollView>
-      </LinearGradient>
-    </SafeAreaView>
+            
+            {/* Sign Up Link */}
+            <View style={tw`flex-row justify-center items-center mt-6`}> 
+              <Text style={tw`text-zinc-400 text-base`}>Don't have an account?</Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Sign-up")}>
+                <Text style={tw`ml-2 font-bold text-orange-500 text-base`}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={tw`self-center mt-5 w-16 h-16 bg-zinc-900 rounded-full items-center justify-center mb-3 border-2 border-orange-500`}>
+                <MaterialIcons name="fitness-center" size={32} color="#f97316" />
+              </View>  
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </LinearGradient>
-  );
+  )
 };
 
 export default SignIn;

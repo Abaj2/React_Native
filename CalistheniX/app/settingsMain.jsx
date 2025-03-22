@@ -59,13 +59,19 @@ const SettingsMain = () => {
       <StatusBar barStyle="light-content" />
       <ScrollView contentContainerStyle={tw`pb-10`}>
   
-        <View style={tw`flex-row items-center mt-5 mb-5 px-5`}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={28} color="white" />
-          </TouchableOpacity>
-          <Text style={tw`flex-1 text-center text-white text-2xl font-bold`}>
-            Settings
-          </Text>
+      <View style={tw`w-full bg-black mb-5 border-b border-zinc-700`}>
+          <SafeAreaView>
+            <View style={tw`flex-row items-center px-4 py-3`}>
+              <TouchableOpacity 
+                style={tw`p-2`} 
+                onPress={() => navigation.goBack()}
+              >
+                <Ionicons name="arrow-back" size={24} color="white" />
+              </TouchableOpacity>
+              <Text style={tw`flex-1 text-center text-white text-xl font-bold`}>Settings</Text>
+              <View style={tw`w-10`}></View> 
+            </View>
+          </SafeAreaView>
         </View>
 
     

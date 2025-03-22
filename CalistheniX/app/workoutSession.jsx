@@ -262,7 +262,7 @@ const WorkoutSession = () => {
   
           <ScrollView 
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={tw`flex-grow`}
+            contentContainerStyle={tw``}
           >
             <View style={tw`border-b border-gray-800/50 bg-black/10`}>
               <ScrollView

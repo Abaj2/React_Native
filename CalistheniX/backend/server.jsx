@@ -126,7 +126,7 @@ app.post("/signup", async (req, res) => {
         username: user.username,
         email: user.email,
         user_id: user.user_id,
-        name: user.name
+        name: user.name,
       },
       token,
     });
@@ -161,9 +161,8 @@ app.post("/signin", async (req, res) => {
     const token = generateJWT(user);
 
     if (user.profile_pic) {
-      console.log(user.profile_pic[0, 10]);
+      console.log(user.profile_pic[(0, 10)]);
     }
-    
 
     res.status(200).json({
       message: "Login successful",
@@ -172,8 +171,7 @@ app.post("/signin", async (req, res) => {
         email: user.email,
         user_id: user.user_id,
         name: user.name,
-        profile_pic: user.profile_pic
-
+        profile_pic: user.profile_pic,
       },
       token,
     });
@@ -224,20 +222,18 @@ app.post("/skills", verifyToken, async (req, res) => {
 
 app.get("/fetchskills", verifyToken, async (req, res) => {
   try {
-    const userId = req.user.user_id;
+    const userId = req.query.user_id || req.user.user_id;
 
     const result = await pool.query("SELECT * FROM skills WHERE user_id = $1", [
       userId,
     ]);
 
-   
     res.status(200).json({ skills: result.rows || [] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 });
-
 
 app.post("/addprogression", verifyToken, async (req, res) => {
   try {
@@ -413,7 +409,7 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
     const { workoutSummary, user_id } = req.body;
     //console.log("Workout Summary:", JSON.stringify(workoutSummary, null, 2));
     console.log(JSON.stringify(workoutSummary, null, 2));
-    console.log(user_id);
+
     console.log(workoutSummary.title);
     console.log(workoutSummary.level);
     console.log(workoutSummary.date);
@@ -452,7 +448,7 @@ app.post("/submitworkout", verifyToken, async (req, res) => {
   }
 });
 app.get("/getworkouts", verifyToken, async (req, res) => {
-  const userId = req.query.user_id
+  const userId = req.query.user_id;
 
   const userWorkouts = await pool.query(
     "SELECT * FROM workouts WHERE user_id = $1",
@@ -540,23 +536,57 @@ app.post("/postcustomworkout", verifyToken, async (req, res) => {
 });
 
 app.post("/profilepicture", async (req, res) => {
-  const { profile_pic, username } = req.body;
+  const { profile_pic, user_id } = req.body;
 
   if (!profile_pic) {
     return res.status(400).json({ message: "No image data received." });
   }
 
   try {
-    const query = `UPDATE users SET profile_pic = $1 WHERE username = $2`;
-    await pool.query(query, [profile_pic, username]); 
+    const checkQuery = "SELECT profile_pic FROM users WHERE user_id = $1";
+    const checkResult = await pool.query(checkQuery, [user_id]);
 
-    res.json({ message: "Profile picture uploaded successfully" });
+    if (checkResult.rows.length > 0 && checkResult.rows[0].profile_pic) {
+      const updateQuery =
+        "UPDATE users SET profile_pic = $1 WHERE user_id = $2";
+      await pool.query(updateQuery, [profile_pic, user_id]);
+      res.json({ message: "Profile picture updated successfully" });
+    } else {
+      const insertQuery =
+        "UPDATE users SET profile_pic = $1 WHERE user_id = $2";
+      await pool.query(insertQuery, [profile_pic, user_id]);
+      res.json({ message: "Profile picture inserted successfully" });
+    }
   } catch (error) {
     console.error("Error uploading image:", error);
     res.status(500).json({ message: "Failed to upload profile picture." });
   }
 });
 
+app.get("/getprofilepicture", async (req, res) => {
+  const { user_id } = req.query;
+
+  try {
+    const result = await pool.query(
+      "SELECT profile_pic FROM users WHERE user_id = $1",
+      [user_id]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the profile picture exists or is null
+    const profilePicUrl =
+      result.rows[0].profile_pic ||
+      "https://calisthenix.s3.ap-southeast-2.amazonaws.com/profile_pics/blackDefaultProfilePic.png"; // Default if none exists
+
+    res.status(200).json({ profile_pic: profilePicUrl });
+  } catch (error) {
+    console.error("Error fetching profile picture:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 app.get("/getstats", verifyToken, async (req, res) => {
   const { user_id } = req.query;
@@ -579,22 +609,23 @@ app.get("/getstats", verifyToken, async (req, res) => {
       `SELECT workout_time FROM workouts WHERE user_id = $1`,
       [user_id]
     );
-    
-    const following = await pool.query(`
+
+    const following = await pool.query(
+      `
       SELECT following_id FROM followers WHERE follower_id = $1`,
       [user_id]
-    )
+    );
 
-    const followers = await pool.query(`
+    const followers = await pool.query(
+      `
       SELECT follower_id FROM followers WHERE following_id = $1`,
-    [user_id]
-  )
+      [user_id]
+    );
 
-  const workoutDates = await pool.query(
-    `SELECT date FROM workouts WHERE user_id = $1`,
-    [user_id]
-  );
-  console.log(workoutDates.rows)
+    const workoutDates = await pool.query(
+      `SELECT date FROM workouts WHERE user_id = $1`,
+      [user_id]
+    );
 
     const stats = {
       totalWorkouts: totalWorkouts.rows.length,
@@ -683,7 +714,7 @@ app.get("/getcustomworkouts", verifyToken, async (req, res) => {
 });
 
 app.get("/getprofilegraph", verifyToken, async (req, res) => {
-  const userId = req.user.user_id;
+  const userId = req.query.user_id;
 
   const workoutDates = await pool.query(
     `SELECT date FROM workouts WHERE user_id = $1`,
@@ -693,9 +724,6 @@ app.get("/getprofilegraph", verifyToken, async (req, res) => {
     `SELECT workout_time FROM workouts WHERE user_id = $1`,
     [userId]
   );
-
-  console.log(workoutDates.rows);
-  console.log(workoutTime.rows);
 
   res.status(200).json({
     workoutDates: workoutDates.rows,
@@ -797,9 +825,6 @@ app.get("/leaderboardstats", verifyToken, async (req, res) => {
 
     const users = await pool.query(`SELECT user_id, username FROM users`);
 
-    console.log(workoutTime.rows);
-    console.log(users.rows);
-
     res.status(200).json({
       workoutStats: workoutStats.rows,
       users: users.rows,
@@ -811,10 +836,10 @@ app.get("/leaderboardstats", verifyToken, async (req, res) => {
 });
 
 app.get("/getusers", verifyToken, async (req, res) => {
-
   try {
     const { userId } = req.query;
-    const users = await pool.query(`SELECT user_id, username FROM users WHERE user_id != $1`, 
+    const users = await pool.query(
+      `SELECT user_id, username, profile_pic FROM users WHERE user_id != $1`,
       [userId]
     );
 
@@ -828,15 +853,13 @@ FROM followers;
 
 `
     );
-  
 
-    
     res.status(200).json({
       users: users.rows,
       workouts: workouts.rows,
       followers: followers.rows,
       current_user_id: userId,
-    })
+    });
   } catch (err) {
     console.error("Error getting data:", err);
   }
@@ -845,92 +868,96 @@ FROM followers;
 app.post("/followuser", verifyToken, async (req, res) => {
   const { follower_id, following_id } = req.body;
   try {
-    const insertFollower = await pool.query(`INSERT INTO followers(follower_id, following_id) VALUES($1, $2)`,
+    const insertFollower = await pool.query(
+      `INSERT INTO followers(follower_id, following_id) VALUES($1, $2)`,
       [follower_id, following_id]
-    )
+    );
 
-    console.log(insertFollower.rowCount)
-
+    console.log(insertFollower.rowCount);
   } catch (err) {
-    console.error("Error inserting follower", err)
+    console.error("Error inserting follower", err);
   }
-})
+});
 
 app.post("/unfollowuser", verifyToken, async (req, res) => {
   const { follower_id, following_id } = req.body;
   try {
-    const deleteFollower = await pool.query(`DELETE FROM followers WHERE follower_id = $1 AND following_id = $2`,
+    const deleteFollower = await pool.query(
+      `DELETE FROM followers WHERE follower_id = $1 AND following_id = $2`,
       [follower_id, following_id]
-    )
+    );
 
-    console.log(deleteFollower)
-
+    console.log(deleteFollower);
   } catch (err) {
-    console.error("Error inserting follower", err)
+    console.error("Error inserting follower", err);
   }
-})
+});
 
-app.get('/userdetails', async (req, res) => {
-  const { user_id } = req.query
-  console.log(user_id)
+app.get("/userdetails", async (req, res) => {
+  const { user_id } = req.query;
 
   try {
-    const userDetails = await pool.query(`SELECT username, name FROM users WHERE user_id = $1`,
+    const userDetails = await pool.query(
+      `SELECT username, name FROM users WHERE user_id = $1`,
       [user_id]
-    )
+    );
 
-    const followers = await pool.query(`SELECT follower_id FROM followers WHERE following_id = $1`,
+    const followers = await pool.query(
+      `SELECT follower_id FROM followers WHERE following_id = $1`,
       [user_id]
-    )
+    );
 
-    const following = await pool.query(`SELECT following_id FROM followers WHERE follower_id = $1`,
+    const following = await pool.query(
+      `SELECT following_id FROM followers WHERE follower_id = $1`,
       [user_id]
-    )
+    );
 
     res.status(200).json({
       userDetails: userDetails.rows,
       followers: followers.rows,
-      following: following.rows
-    })
-
+      following: following.rows,
+    });
   } catch (err) {
-    console.error('Error getting users profile details', err)
+    console.error("Error getting users profile details", err);
   }
-})
+});
 
 app.post("/changepassword", verifyToken, async (req, res) => {
   const { user_id, currentPassword, newPassword } = req.body;
 
-  const passwordHash = await pool.query('SELECT password_hash FROM users WHERE user_id = $1',
+  const passwordHash = await pool.query(
+    "SELECT password_hash FROM users WHERE user_id = $1",
     [user_id]
-  )
+  );
 
-  const isMatch = await bcrypt.compare(currentPassword.trim(), passwordHash.rows[0].password_hash.trim())
+  const isMatch = await bcrypt.compare(
+    currentPassword.trim(),
+    passwordHash.rows[0].password_hash.trim()
+  );
 
-  console.log(passwordHash.rows[0].password_hash.trim())
-  console.log(isMatch)
+  console.log(passwordHash.rows[0].password_hash.trim());
+  console.log(isMatch);
 
   if (!isMatch) {
     return res.status(401).json({ error: "Invalid password" });
   }
 
   if (currentPassword.trim() === newPassword.trim()) {
-    return res.status(402).json({ error: "New password cannot be the same as the current password" });
+    return res.status(402).json({
+      error: "New password cannot be the same as the current password",
+    });
   }
 
-  const hashedNewPassword = await bcrypt.hash(newPassword, 10)
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
-  const insertHashedNewPassword = await pool.query('UPDATE users SET password_hash = $1 WHERE user_id = $2',
+  const insertHashedNewPassword = await pool.query(
+    "UPDATE users SET password_hash = $1 WHERE user_id = $2",
     [hashedNewPassword, user_id]
-  )
+  );
 
-  res.status(200).json({ message: "Password changed successfully" })
-  console.log(insertHashedNewPassword)
-
-
-
-
-})
+  res.status(200).json({ message: "Password changed successfully" });
+  console.log(insertHashedNewPassword);
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

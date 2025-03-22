@@ -45,6 +45,7 @@ import {
   DumbbellIcon,
   User,
 } from "lucide-react-native";
+import UserProfileWorkoutGraph from "../components/userProfileWorkoutGraph.jsx";
 
 const { width, height } = Dimensions.get("window");
 
@@ -388,12 +389,14 @@ const WorkoutsMain = () => {
           contentContainerStyle={tw`pb-20`}
           showsVerticalScrollIndicator={false}
         >
-          <View style={tw`px-2 pt-6 pb-4`}>
-            <View style={tw`flex-row justify-between items-center mb-6 ml-2`}>
-              <View>
-                <Text style={tw`text-3xl font-black text-white`}>
-                  CalistheniX
+          <View style={tw`px-2 pt-6`}>
+            <View style={tw`flex-row justify-between items-center ml-2`}>
+              <View style={tw`flex-row gap-25`}>
+                <View>
+                <Text style={tw`text-3xl font-bold text-white`}>
+                  Workouts
                 </Text>
+                </View>
                 <View style={tw`flex-row mt-3`}>
                   <MaterialCommunityIcons
                     name="fire"
@@ -405,13 +408,7 @@ const WorkoutsMain = () => {
                   >{`${calculateDailyStreak(workoutDates)} day streak`}</Text>
                 </View>
               </View>
-              <TouchableOpacity
-                style={tw`bg-orange-500/20 p-2 rounded-full`}
-                onPress={() => navigation.navigate("Profile")}
-              >
-                <User size={28} color="#f97316" strokeWidth={1.5} /> 
-               
-              </TouchableOpacity>
+             
             </View>
           </View>
           <ProfileBarGraph
@@ -420,7 +417,8 @@ const WorkoutsMain = () => {
             workoutTimes={workoutTimes}
             workoutDates={workoutDates}
             styles={styles}
-          />
+          /> 
+           {/*<UserProfileWorkoutGraph workoutDates={workoutDates} workoutTimes={workoutTimes} /> */}
 
           <View style={[tw`px-2 mt-2`, {}]}>
             <View style={tw`flex-row justify-between items-center mb-4`}>
@@ -436,7 +434,7 @@ const WorkoutsMain = () => {
             <ScrollView style={[tw``, {}]}>
               {workouts.length === 0 ? (
                 <LinearGradient
-                  colors={["#000", "#2a1a0a"]}
+                  colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
                   style={tw`rounded-3xl p-6`}
                 >
                   <Text style={tw`text-white text-center`}>
@@ -447,7 +445,7 @@ const WorkoutsMain = () => {
                 workouts.map((workout) => (
                   <LinearGradient
                     key={workout.workout_id}
-                    colors={["#1a1a1a", "#000000"]}
+                    colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
                     style={tw`border border-zinc-700 rounded-3xl p-6 mb-4`}
                   >
                     <View

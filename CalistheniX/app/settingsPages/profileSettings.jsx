@@ -51,7 +51,7 @@ const ProfileSettings = () => {
         if (!userDataUnparsed) return;
         const userDataVariable = JSON.parse(userDataUnparsed);
 
-        setUserData(userDataVariable)
+        setUserData(userDataVariable);
         setOldEmail(userDataVariable.email);
         setOldUsername(userDataVariable.username);
         setNewEmail(userDataVariable.email);
@@ -69,22 +69,20 @@ const ProfileSettings = () => {
   };
 
   const generateOTP = async () => {
-    
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    setOtp(otp)
+    setOtp(otp);
     setGeneratedOtp(otp);
     console.log(`Generated OTP: ${otp}`);
-  
+
     setTimeout(() => {
       setGeneratedOtp(null);
       console.log("OTP expired.");
     }, 15 * 60 * 1000);
 
-    
     const user_id = userData.user_id;
-    console.log("Test")
+    console.log("Test");
     const jwtToken = await AsyncStorage.getItem("jwtToken");
-    console.log("HELlo")
+    console.log("HELlo");
 
     try {
       const response = await axios.post(
@@ -104,9 +102,8 @@ const ProfileSettings = () => {
       );
 
       if (response.status === 200) {
-        console.log("Successfully sent OTP to backend.")
+        console.log("Successfully sent OTP to backend.");
       }
-
     } catch (err) {
       console.error("Error updating profile", err);
     }
@@ -114,10 +111,9 @@ const ProfileSettings = () => {
 
   const verifyOTP = async () => {
     if (userOtp === generatedOtp) {
-      console.log("verifying otp")
+      console.log("verifying otp");
       const user_id = userData.user_id;
       const jwtToken = await AsyncStorage.getItem("jwtToken");
-
 
       try {
         const response = await axios.post(
@@ -135,10 +131,10 @@ const ProfileSettings = () => {
             },
           }
         );
-  
+
         if (response.status === 200) {
           const storedUserData = await AsyncStorage.getItem("userData");
-  
+
           if (storedUserData) {
             const parsedUserData = JSON.parse(storedUserData);
 
@@ -148,8 +144,11 @@ const ProfileSettings = () => {
               username: newUsername,
             };
 
-            await AsyncStorage.setItem("userData", JSON.stringify(updatedUserData));
-  
+            await AsyncStorage.setItem(
+              "userData",
+              JSON.stringify(updatedUserData)
+            );
+
             console.log("Updated AsyncStorage userData:", updatedUserData);
 
             setUserData(updatedUserData);
@@ -158,7 +157,6 @@ const ProfileSettings = () => {
           navigation.goBack();
           Alert.alert("Successfully changed profile data");
         }
-  
       } catch (err) {
         console.error("Error sending OTP:", err);
       }
@@ -174,7 +172,7 @@ const ProfileSettings = () => {
     }
 
     if (oldEmail === newEmail && oldUsername === newUsername) {
-      alert("You haven't changed any profile details")
+      alert("You haven't changed any profile details");
       return;
     }
     generateOTP();
@@ -182,97 +180,89 @@ const ProfileSettings = () => {
   };
 
   return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <LinearGradient
-          colors={["#2a1a0a", "#000000"]}
-          style={tw`flex-1`}
-      >
-    <SafeAreaView style={tw`flex-1`}>
-    
-      <StatusBar barStyle="light-content" />
-      <View style={tw`flex-row items-center mt-6 mb-8 px-6`}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={28} color="white" />
-        </TouchableOpacity>
-        <Text style={tw`flex-1 text-center text-white text-2xl font-bold`}>
-          Profile Settings
-        </Text>
-      </View>
-
-      <View style={tw`px-6`}>
-        <Text style={tw`text-gray-300 text-base mb-3`}>Email</Text>
-        <TextInput
-          style={tw`bg-zinc-800 text-white p-4 rounded-full mb-6 border border-gray-700`}
-          placeholder="Enter your email"
-          placeholderTextColor="#757575"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={newEmail}
-          onChangeText={setNewEmail}
-        />
-
-        <Text style={tw`text-gray-300 text-base mb-3`}>Username</Text>
-        <TextInput
-          style={tw`bg-zinc-800 text-white p-4 rounded-full mb-8 border border-gray-700`}
-          placeholder="Enter your username"
-          placeholderTextColor="#757575"
-          autoCapitalize="none"
-          value={newUsername}
-          onChangeText={setNewUsername}
-        />
-
-        <TouchableOpacity onPress={handleSave} activeOpacity={0.8}>
-          <View
-            style={tw`bg-orange-500 rounded-full py-3 mt-5 items-center shadow-lg shadow-orange-600/50`}
-          >
-            <Text style={tw`text-white text-lg font-bold`}>
-              Send Verification Code
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={tw`flex-1 justify-center items-center bg-black/80`}>
-          <View style={tw`bg-zinc-900 p-6 rounded-3xl w-80`}>
-            <Text style={tw`text-lg text-white font-bold text-center mb-4`}>
-              Enter Verification Code From Email
-            </Text>
-            <TextInput
-              style={tw`border border-gray-400 rounded p-3 text-white rounded-xl mb-5 text-center text-lg`}
-              placeholder="Enter OTP"
-              keyboardType="number-pad"
-              value={userOtp}
-              onChangeText={setUserOtp}
-              maxLength={6}
-            />
-
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              activeOpacity={0.8}
-            >
-              <View style={tw`bg-gray-500 rounded-full py-3 mt-3 items-center`}>
-                <Text style={tw`text-white text-lg font-bold`}>Cancel</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={verifyOTP} activeOpacity={0.8}>
-              <View
-                style={tw`bg-orange-500 rounded-full py-3 mt-4 items-center`}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
+        <StatusBar barStyle="light-content" />
+        
+        {/* Header with proper SafeAreaView */}
+        <View style={tw`w-full bg-black border-b border-zinc-700`}>
+          <SafeAreaView>
+            <View style={tw`flex-row items-center px-4 py-3`}>
+              <TouchableOpacity 
+                style={tw`p-2`} 
+                onPress={() => navigation.goBack()}
               >
-                <Text style={tw`text-white text-lg font-bold`}>Confirm</Text>
+                <Ionicons name="arrow-back" size={24} color="white" />
+              </TouchableOpacity>
+              <Text style={tw`flex-1 text-center text-white text-xl font-bold`}>Profile Settings</Text>
+              <View style={tw`w-10`}></View> 
+            </View>
+          </SafeAreaView>
+        </View>
+  
+        <SafeAreaView style={tw`flex-1`} edges={['bottom', 'left', 'right']}>
+          {/* Form */}
+          <View style={tw`px-6 mt-8`}>
+            <Text style={tw`text-gray-300 text-base mb-3`}>Email</Text>
+            <TextInput
+              style={tw`bg-zinc-800 text-white p-4 rounded-full mb-6 border border-gray-700`}
+              placeholder="Enter your email"
+              placeholderTextColor="#757575"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={newEmail}
+              onChangeText={setNewEmail}
+            />
+  
+            <Text style={tw`text-gray-300 text-base mb-3`}>Username</Text>
+            <TextInput
+              style={tw`bg-zinc-800 text-white p-4 rounded-full mb-8 border border-gray-700`}
+              placeholder="Enter your username"
+              placeholderTextColor="#757575"
+              autoCapitalize="none"
+              value={newUsername}
+              onChangeText={setNewUsername}
+            />
+  
+            <TouchableOpacity onPress={handleSave} activeOpacity={0.8}>
+              <View style={tw`bg-orange-500 rounded-full py-3 mt-5 items-center shadow-lg shadow-orange-600/50`}>
+                <Text style={tw`text-white text-lg font-bold`}>Send Verification Code</Text>
               </View>
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
-      
-    </SafeAreaView>
-    </LinearGradient>
+  
+          {/* Modal */}
+          <Modal animationType="fade" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
+            <View style={tw`flex-1 justify-center items-center bg-black/80`}>
+              <View style={tw`bg-zinc-900 p-6 rounded-3xl w-80`}>
+                <Text style={tw`text-lg text-white font-bold text-center mb-4`}>
+                  Enter Verification Code From Email
+                </Text>
+                <TextInput
+                  style={tw`border border-gray-400 rounded p-3 text-white rounded-xl mb-5 text-center text-lg`}
+                  placeholder="Enter OTP"
+                  keyboardType="number-pad"
+                  value={userOtp}
+                  onChangeText={setUserOtp}
+                  maxLength={6}
+                />
+  
+                <TouchableOpacity onPress={() => setModalVisible(false)} activeOpacity={0.8}>
+                  <View style={tw`bg-gray-500 rounded-full py-3 mt-3 items-center`}>
+                    <Text style={tw`text-white text-lg font-bold`}>Cancel</Text>
+                  </View>
+                </TouchableOpacity>
+  
+                <TouchableOpacity onPress={verifyOTP} activeOpacity={0.8}>
+                  <View style={tw`bg-orange-500 rounded-full py-3 mt-4 items-center`}>
+                    <Text style={tw`text-white text-lg font-bold`}>Confirm</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </SafeAreaView>
+      </LinearGradient>
     </TouchableWithoutFeedback>
   );
 };

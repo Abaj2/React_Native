@@ -48,6 +48,9 @@ const Home = () => {
   const [selectedTab, setSelectedTab] = useState("Tab1");
 
   const [progressId, setProgressId] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   const handleProgressId = (id) => {
     setProgressId(id);
@@ -95,7 +98,6 @@ const Home = () => {
         try {
           const parsedUserData = JSON.parse(storedUserData);
           setUserData(parsedUserData);
-       
         } catch (error) {
           console.error("Error parsing userData:", error);
         }
@@ -289,143 +291,177 @@ const Home = () => {
 
   return (
     <LinearGradient
-      colors={isDarkMode ? ["#000", "#1a1a1a"] : ["#f9f9f9", "#e3e3e3"]}
+      colors={isDarkMode ? ["#000", "#1a1a1a"] : ["#FFFFFF", "#87CEEB"]}
       style={tw`flex-1`}
     >
+      <View style={tw`w-full ${isDarkMode ? "bg-zinc-900" : "bg-sky-100"} h-[30] justify-between flex-row relative`}>
+        <View style={tw`mt-15 ml-5 h-10 w-30 rounded-2xl items-start`}>
+          <TouchableOpacity
+            onPress={() => setDropdownOpen(!dropdownOpen)}
+            style={[
+              tw`flex-row justify-between items-center rounded-full px-5 py-2.5`,
+              isDarkMode ? tw`bg-zinc-800` : tw`bg-sky-200`,
+              tw`shadow-sm`,
+            ]}
+          >
+            <Text
+              style={[
+                tw`text-sm font-semibold mr-2`,
+                isDarkMode ? tw`text-white` : tw`text-sky-900`,
+              ]}
+            >
+              {selectedTab === "Tab1" ? "My Skills" : "Progress"}
+            </Text>
+            <Icon
+              name={dropdownOpen ? "chevron-up" : "chevron-down"}
+              size={18}
+              color={isDarkMode ? "#FFA500" : "#87CEEB"}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={tw`flex-row gap-3`}>
+         {/* <TouchableOpacity
+            onPress={() => setIsDarkMode(!isDarkMode)}
+            style={tw`p-2 h-10 mt-15 rounded-full`}
+          >
+            <Icon
+              name={isDarkMode ? "sun" : "moon"}
+              size={24}
+              color={isDarkMode ? "#f97316" : "#87CEEB"}
+            />
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Search-User")}
+            style={tw`p-2 h-10 mt-15 rounded-full`}
+          >
+            <Icon
+              name="search"
+              size={24}
+              color={isDarkMode ? "white" : "#87CEEB"}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Settings-Main")}
+            style={tw`p-2 h-10 mt-15 rounded-full ${isDarkMode ? "bg-zinc-900" : "bg-sky-200"}`}
+          >
+            <Icon
+              name="settings"
+              size={24}
+              color={isDarkMode ? "white" : "#87CEEB"}
+            />
+          </TouchableOpacity>
+        </View>
+  
+        {/* Dropdown that extends from the main header */}
+        {dropdownOpen && (
+          <View
+            style={[
+              tw`absolute top-[30] left-0 w-full shadow-lg`,
+              isDarkMode ? tw`bg-zinc-900` : tw`bg-sky-100`,
+              { zIndex: 999 },
+            ]}
+          >
+            <View style={tw`py-2 px-4`}>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedTab("Tab1");
+                  setDropdownOpen(false);
+                }}
+                style={[
+                  tw`px-4 py-3 rounded-lg mb-1`,
+                  selectedTab === "Tab1"
+                    ? isDarkMode
+                      ? tw`bg-black`
+                      : tw`bg-sky-200`
+                    : isDarkMode
+                    ? tw``
+                    : tw``,
+                ]}
+              >
+                <Text
+                  style={[
+                    tw`font-medium`,
+                    selectedTab === "Tab1"
+                      ? tw`text-white`
+                      : isDarkMode
+                      ? tw`text-gray-300`
+                      : tw`text-sky-900`,
+                  ]}
+                >
+                  Skills
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedTab("Tab4");
+                  setDropdownOpen(false);
+                }}
+                style={[
+                  tw`px-4 py-3 rounded-lg`,
+                  selectedTab === "Tab4"
+                    ? isDarkMode
+                      ? tw`bg-black`
+                      : tw`bg-sky-200`
+                    : isDarkMode
+                    ? tw``
+                    : tw``,
+                ]}
+              >
+                <Text
+                  style={[
+                    tw`font-medium`,
+                    selectedTab === "Tab4"
+                      ? tw`text-white`
+                      : isDarkMode
+                      ? tw`text-gray-300`
+                      : tw`text-sky-900`,
+                  ]}
+                >
+                  Progress
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </View>
+  
       <SafeAreaView style={tw`flex-1`}>
         <ScrollView
           contentContainerStyle={tw`pb-20`}
           showsVerticalScrollIndicator={false}
           style={tw`w-full`}
         >
-          <View style={tw`flex-row justify-between items-center px-5 pt-4`}>
-            <View>
-              <Text
-                style={[
-                  tw`text-3xl font-extrabold`,
-                  isDarkMode ? tw`text-white` : tw`text-black`,
-                  { fontFamily: "Inter_900Black" },
-                ]}
-              >
-                CalistheniX
-              </Text>
-              <Text
-                style={[
-                  tw`text-sm -mt-1`,
-                  isDarkMode ? tw`text-orange-400/80` : tw`text-blue-500/80`,
-                ]}
-              >
-                {username}'s Training Hub
-              </Text>
-            </View>
-
-            <View style={tw`flex-row gap-3`}>
-              <TouchableOpacity
-                onPress={() => setIsDarkMode(!isDarkMode)}
-                style={tw`p-2 rounded-full ${
-                  isDarkMode ? "bg-orange-400/10" : "bg-blue-500/10"
-                }`}
-              >
-                <Icon
-                  name={isDarkMode ? "sun" : "moon"}
-                  size={24}
-                  color={isDarkMode ? "#f97316" : "lightskyblue"}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => navigation.navigate("Search-User")}
-                style={tw`p-2 rounded-full ${
-                  isDarkMode ? "bg-gray-800" : "bg-gray-200"
-                }`}
-              >
-                <Icon
-                  name="search"
-                  size={24}
-                  color={isDarkMode ? "white" : "black"}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => navigation.navigate("Settings-Main")}
-                style={tw`p-2 rounded-full ${
-                  isDarkMode ? "bg-gray-800" : "bg-gray-200"
-                }`}
-              >
-                <Icon
-                  name="settings"
-                  size={24}
-                  color={isDarkMode ? "white" : "black"}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={tw`mx-4 mt-6`}>
-  <View
-    style={tw`flex-row justify-between rounded-full p-1 ${
-      isDarkMode ? "bg-gray-800/50" : "bg-gray-200/70"
-    }`}
-  >
-    {["Tab1", "Tab4"].map((tab) => (
-      <TouchableOpacity
-        key={tab}
-        onPress={() => setSelectedTab(tab)}
-        style={[
-          tw`flex-1 items-center py-3 rounded-full`,
-          selectedTab === tab &&
-            (isDarkMode ? tw`bg-orange-500 shadow-lg` : tw`bg-blue-500 shadow-lg`),
-        ]}
-      >
-        <Text
-          style={[
-            tw`font-semibold`,
-            selectedTab === tab
-              ? tw`text-white`
-              : isDarkMode
-              ? tw`text-gray-400`
-              : tw`text-gray-600`,
-          ]}
-        >
-          {tab === "Tab1" ? "My Skills" : "Progress"}
-        </Text>
-      </TouchableOpacity>
-    ))}
-  </View>
-</View>
-
-
-          <View style={tw`mb-24`}>{renderContent()}</View>
-
+          <View style={tw`mb-10`}>{renderContent()}</View>
+  
           <Modal transparent visible={modalVisible} animationType="fade">
-      
             <TouchableWithoutFeedback onPress={handleModalClose}>
               <View
-                style={tw`flex-1 bg-black/95 justify-center items-center p-5`}
+                style={tw`flex-1 ${isDarkMode ? "bg-black/95" : "bg-sky-100/95"} justify-center items-center p-5`}
               >
-             
                 <LinearGradient
-                  colors={["#000", "#1a1a1a"]}
-                  style={tw`w-full max-w-sm p-6 rounded-2xl border border-orange-500/40 shadow-lg`}
+                  colors={isDarkMode ? ["#000", "#1a1a1a"] : ["#FFFFFF", "#87CEEB"]}
+                  style={tw`w-full max-w-sm p-6 rounded-2xl border ${isDarkMode ? "border-orange-500/40" : "border-sky-500/40"} shadow-lg`}
                 >
-           
                   <TouchableOpacity
                     onPress={handleModalClose}
                     style={tw`absolute top-4 right-4 p-2`}
                   >
-                    <Ionicons name="close" size={24} color="#f97316" />
+                    <Ionicons
+                      name="close"
+                      size={24}
+                      color={isDarkMode ? "#f97316" : "#87CEEB"}
+                    />
                   </TouchableOpacity>
-
-                
+  
                   <Text
-                    style={tw`text-center text-2xl font-bold text-orange-500 mb-6`}
+                    style={tw`text-center text-2xl font-bold ${isDarkMode ? "text-orange-500" : "text-sky-500"} mb-6`}
                   >
                     Create a Skill
                   </Text>
-
-            
+  
                   <View style={tw`mb-5`}>
                     <Text
-                      style={tw`text-orange-400 text-sm font-semibold mb-2`}
+                      style={tw`${isDarkMode ? "text-orange-400" : "text-sky-400"} text-sm font-semibold mb-2`}
                     >
                       Skill Name
                     </Text>
@@ -434,14 +470,13 @@ const Home = () => {
                       onChangeText={setSkill}
                       placeholder="e.g. Front Lever"
                       placeholderTextColor="#888"
-                      style={tw`bg-zinc-800 text-white p-4 rounded-xl border border-orange-500/50 text-base`}
+                      style={tw`${isDarkMode ? "bg-zinc-800 text-white" : "bg-sky-200 text-sky-900"} p-4 rounded-xl border ${isDarkMode ? "border-orange-500/50" : "border-sky-500/50"} text-base`}
                     />
                   </View>
-
-               
+  
                   <View style={tw`mb-5`}>
                     <Text
-                      style={tw`text-orange-400 text-sm font-semibold mb-2`}
+                      style={tw`${isDarkMode ? "text-orange-400" : "text-sky-400"} text-sm font-semibold mb-2`}
                     >
                       Progression
                     </Text>
@@ -450,15 +485,14 @@ const Home = () => {
                       onChangeText={setProgression}
                       placeholder="e.g. Tuck Front Lever"
                       placeholderTextColor="#888"
-                      style={tw`bg-zinc-800 text-white p-4 rounded-xl border border-orange-500/50 text-base`}
+                      style={tw`${isDarkMode ? "bg-zinc-800 text-white" : "bg-sky-200 text-sky-900"} p-4 rounded-xl border ${isDarkMode ? "border-orange-500/50" : "border-sky-500/50"} text-base`}
                     />
                   </View>
-
-          
+  
                   <View style={tw`flex-row gap-4 mb-6`}>
                     <View style={tw`flex-1`}>
                       <Text
-                        style={tw`text-orange-400 text-sm font-semibold mb-2`}
+                        style={tw`${isDarkMode ? "text-orange-400" : "text-sky-400"} text-sm font-semibold mb-2`}
                       >
                         Current
                       </Text>
@@ -470,18 +504,18 @@ const Home = () => {
                         value={current}
                         onChange={(item) => setCurrent(item.value)}
                         placeholderStyle={tw`text-gray-500`}
-                        selectedTextStyle={tw`text-white font-medium`}
-                        itemTextStyle={tw`text-gray-200`}
-                        style={tw`bg-zinc-800 text-white p-4 rounded-xl border border-orange-500/50`}
-                        containerStyle={tw`bg-zinc-800 border border-orange-500/50 rounded-xl mt-2`}
-                        activeColor="#f97316"
+                        selectedTextStyle={tw`${isDarkMode ? "text-white" : "text-sky-900"} font-medium`}
+                        itemTextStyle={tw`${isDarkMode ? "text-gray-200" : "text-sky-900"}`}
+                        style={tw`${isDarkMode ? "bg-zinc-800 text-white" : "bg-sky-200 text-sky-900"} p-4 rounded-xl border ${isDarkMode ? "border-orange-500/50" : "border-sky-500/50"}`}
+                        containerStyle={tw`${isDarkMode ? "bg-zinc-800" : "bg-sky-200"} border ${isDarkMode ? "border-orange-500/50" : "border-sky-500/50"} rounded-xl mt-2`}
+                        activeColor={isDarkMode ? "#f97316" : "#87CEEB"}
                         itemContainerStyle={tw`py-4`}
                       />
                     </View>
-
+  
                     <View style={tw`flex-1`}>
                       <Text
-                        style={tw`text-orange-400 text-sm font-semibold mb-2`}
+                        style={tw`${isDarkMode ? "text-orange-400" : "text-sky-400"} text-sm font-semibold mb-2`}
                       >
                         Goal
                       </Text>
@@ -493,20 +527,19 @@ const Home = () => {
                         value={goal}
                         onChange={(item) => setGoal(item.value)}
                         placeholderStyle={tw`text-gray-500`}
-                        selectedTextStyle={tw`text-white font-medium`}
-                        itemTextStyle={tw`text-gray-200`}
-                        style={tw`bg-zinc-800 text-white p-4 rounded-xl border border-orange-500/50`}
-                        containerStyle={tw`bg-zinc-800 border border-orange-500/50 rounded-xl mt-2`}
-                        activeColor="#f97316"
+                        selectedTextStyle={tw`${isDarkMode ? "text-white" : "text-sky-900"} font-medium`}
+                        itemTextStyle={tw`${isDarkMode ? "text-gray-200" : "text-sky-900"}`}
+                        style={tw`${isDarkMode ? "bg-zinc-800 text-white" : "bg-sky-200 text-sky-900"} p-4 rounded-xl border ${isDarkMode ? "border-orange-500/50" : "border-sky-500/50"}`}
+                        containerStyle={tw`${isDarkMode ? "bg-zinc-800" : "bg-sky-200"} border ${isDarkMode ? "border-orange-500/50" : "border-sky-500/50"} rounded-xl mt-2`}
+                        activeColor={isDarkMode ? "#f97316" : "#87CEEB"}
                         itemContainerStyle={tw`py-4`}
                       />
                     </View>
                   </View>
-
-          
+  
                   <TouchableOpacity
                     onPress={submitSkill}
-                    style={tw`bg-orange-500 py-5 rounded-xl shadow-lg shadow-orange-500/50`}
+                    style={tw`${isDarkMode ? "bg-orange-500" : "bg-sky-500"} py-5 rounded-xl shadow-lg ${isDarkMode ? "shadow-orange-500/50" : "shadow-sky-500/50"}`}
                   >
                     <Text
                       style={tw`text-center font-bold text-white uppercase tracking-wide`}
@@ -519,16 +552,16 @@ const Home = () => {
             </TouchableWithoutFeedback>
           </Modal>
         </ScrollView>
-
+  
         {selectedTab === "Tab1" && (
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
             style={[
               tw`absolute self-center w-14 h-14 rounded-full items-center justify-center`,
-              isDarkMode ? tw`bg-orange-500` : tw`bg-blue-500`,
+              isDarkMode ? tw`bg-orange-500` : tw`bg-sky-500`,
               {
                 top: height - 180,
-                shadowColor: "white",
+                shadowColor: isDarkMode ? "white" : "skyblue",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
                 shadowRadius: 6,

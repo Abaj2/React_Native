@@ -33,6 +33,8 @@ import SearchUser, { searchScreenOptions } from "../components/searchUser.jsx";
 import userProfile from "./userProfile.jsx";
 import UserProfile from "./userProfile.jsx";
 import ChangePassword from "./settingsPages/changePassword.jsx";
+import Following from "./following.jsx";
+import Followers from "./followers.jsx";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -108,7 +110,7 @@ function TabNavigator() {
           ),
         }}
       /> */}
-      <Tab.Screen
+    {/*  <Tab.Screen
         name="Leaderboard"
         component={Leaderboard}
         options={{
@@ -122,7 +124,7 @@ function TabNavigator() {
             />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
@@ -200,6 +202,16 @@ export default function RootLayout() {
         options={{ headerShown: false }}
         component={UserProfile}
       />
+      <Stack.Screen
+        name="Following"
+        options={{ headerShown: false }}
+        component={Following}
+        />
+      <Stack.Screen
+        name="Followers"
+        options={{ headerShown: false }}
+        component={Followers}
+        />
 
       <Stack.Screen
         name="Search-User"
@@ -224,6 +236,7 @@ export default function RootLayout() {
           presentation: "modal",
         }}
       />
+      
 
       {/* <Stack.Screen
         name="History-Main"

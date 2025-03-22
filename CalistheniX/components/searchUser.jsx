@@ -31,6 +31,7 @@ const UNFOLLOW_USER_URL = Platform.select({
   ios: "http://192.168.1.155:4005/unfollowuser",
 });
 
+
 const { width, height } = Dimensions.get('window')
 
 const SearchUser = ({ navigation }) => {
@@ -80,10 +81,11 @@ const SearchUser = ({ navigation }) => {
               followers: response.data.followers.filter(
                 (f) => f.following_id === user.user_id
               ).length,
-              image: null,
+              image: user.profile_pic,
               isFollowing,
             };
           });
+          console.log(transformed)
           setUsers(transformed);
         }
       } catch (err) {
@@ -168,6 +170,7 @@ const SearchUser = ({ navigation }) => {
     }
   };
 
+
   return (
     <View style={tw`flex-1`}>
       <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
@@ -201,7 +204,11 @@ const SearchUser = ({ navigation }) => {
               activeOpacity={0.7}
             >
               <Image
-                source={blackDefaultProfilePic}
+                 source={{
+                  uri:
+                  user.image ? user.image
+                      : `https://calisthenix.s3.ap-southeast-2.amazonaws.com/profile_pics/blackDefaultProfilePic.png`,
+                }}
                 style={tw`w-14 h-14 rounded-full border-2 border-orange-500`}
               />
 

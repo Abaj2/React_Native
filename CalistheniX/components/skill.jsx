@@ -442,12 +442,12 @@ const Skill = ({
       >*/}
       <View
         style={[
-          tw`rounded-3xl mt-10 mx-2 self-center`,
+          tw`rounded-3xl mt-6 mx-2 self-center`,
           { width: width * 0.94 },
         ]}
       >
         <LinearGradient
-          colors={["#000", "#2a1a0a"]}
+          colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
           style={tw`rounded-3xl border border-zinc-700`}
         >
           <View style={tw`p-4 rounded-3xl`}>
@@ -535,7 +535,7 @@ const Skill = ({
             ))}
             <TouchableOpacity
               onPress={openProgressionModal}
-              style={tw`h-[42px] w-[42px] items-center justify-center rounded-full bg-gray-800 border-2 border-dashed border-orange-500/50 mr-2`}
+              style={tw`h-[42px] w-[42px] items-center justify-center rounded-full bg-zinc-800 border-2 border border-orange-500/50 mr-2`}
             >
               <Ionicons name="add" size={24} color="#f97316" />
             </TouchableOpacity>
@@ -578,7 +578,7 @@ const Skill = ({
               </LinearGradient>
             </View>
           </View>
-          <LinearGradient colors={["#f97316", "#d1580f"]} style={tw`p-4`}>
+          <LinearGradient colors={["#f97316", "#d1580f"]} style={tw`w-[80] self-center mb-4 rounded-3xl p-4 `}>
             <TouchableOpacity onPress={() => setEditModalVisible(true)}>
             <Text
               style={[

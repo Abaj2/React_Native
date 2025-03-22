@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from "axios";
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -550,22 +550,19 @@ const Workouts = ({ isDarkMode }) => {
 
   const selectLevel = (level) => {
     setIsLevelModalVisible(false);
-    
 
     const selectedWorkoutData = workouts.find(
       (workout) => workout.title === selectedWorkout.title
     );
-  
 
     const selectedLevelData = selectedWorkoutData?.levels.find(
       (l) => l.level === level.level
     );
- 
+
     const exercises = selectedLevelData?.exercises || [];
-    console.log(exercises)
-  
+    console.log(exercises);
+
     navigation.navigate("Workout-Session", {
-      
       title: selectedWorkout.title,
       level: level.level,
       exercises2: exercises,
@@ -621,13 +618,10 @@ const Workouts = ({ isDarkMode }) => {
     </View>
   );
 
-
-
   return (
     <SafeAreaView style={tw`flex-1`}>
       <ScrollView contentContainerStyle={tw``}>
         <View style={tw`pt-4`}>
-     
           <TouchableOpacity
             onPress={() => navigation.navigate("custom-workout")}
             style={tw`mb-6 rounded-3xl overflow-hidden`}
@@ -650,77 +644,88 @@ const Workouts = ({ isDarkMode }) => {
             </LinearGradient>
           </TouchableOpacity>
 
-  
-<View style={tw`flex-row gap-3`}>
-  <ScrollView style={[tw`w-full`, {}]} horizontal showsHorizontalScrollIndicator={false}>
-  {workouts.map((workout) => (
-    <TouchableOpacity
-      key={workout.id}
-      onPress={() => handleWorkoutPress(workout)}
-      activeOpacity={0.9}
-      style={tw`w-[40] mr-3 mb-4`}
-    >
-      <Animated.View style={[
-        tw`rounded-3xl p-3 overflow-hidden`,
-        { 
-          transform: [{ scale: scaleValue }],
-          height: height * 0.22,
-        }
-      ]}>
-        <LinearGradient
-          colors={['#18181b', '#09090b']}
-          style={tw`absolute top-0 left-0 right-0 bottom-0`}
-        />
-        
-        <View style={tw`relative z-10 h-full justify-between`}>
-      
-          <View>
-            <Text 
-              style={tw`text-[15px] font-extrabold text-white mb-1 pr-4`}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              adjustsFontSizeToFit
-              minimumFontScale={0.85}
+          <View style={tw`flex-row gap-3`}>
+            <ScrollView
+              style={tw`w-full`}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={tw``}
             >
-              {workout.title}
-            </Text>
-            
-            <View style={tw` bg-orange-500/20 px-2 py-1 rounded-full self-start`}>
-              <Text style={tw`text-orange-500 text-[10px] font-bold`}>
-                {workout.totallevels} LEVELS
-              </Text>
-            </View>
-          </View>
+              {workouts.map((workout) => (
+                <TouchableOpacity
+                  key={workout.id}
+                  onPress={() => handleWorkoutPress(workout)}
+                  activeOpacity={0.7}
+                  style={tw`w-32 mr-3 mb-2`}
+                >
+                  <Animated.View
+                    style={[
+                      tw`overflow-hidden`,
+                      {
+                        transform: [{ scale: scaleValue }],
+                        height: height * 0.18,
+                      },
+                    ]}
+                  >
+                    <LinearGradient
+                      colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
+                      style={tw`rounded-2xl absolute top-0 left-0 right-0 bottom-0 border border-zinc-800`}
+                    />
 
-          <Text 
-            style={tw`text-zinc-400 text-xs leading-[14px] mb-5`}
-            numberOfLines={3}
-            ellipsizeMode="tail"
-          >
-            {workout.description}
-          </Text>
+                    <View style={tw`p-4 relative z-10 h-full justify-between`}>
+                      <View>
+                        <Text
+                          style={tw`text-base font-extrabold text-white mb-2`}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {workout.title}
+                        </Text>
 
-          <View style={tw`flex-row justify-between items-center`}>
-            <View style={tw`flex-row items-center`}>
-              <Ionicons name="time" size={14} color="#f97316" />
-              <Text style={tw`text-white text-xs font-semibold ml-1`}>
-                {workout.totaltime}m
-              </Text>
-            </View>
-            
-            <View style={tw`flex-row items-center`}>
-              <FontAwesome5 name="dumbbell" size={12} color="#f97316" />
-              <Text style={tw`text-white text-xs font-semibold ml-1`}>
-                {workout.totalsets}
-              </Text>
-            </View>
+                        <View
+                          style={tw`bg-orange-500/20 px-2 py-1 rounded-full self-start`}
+                        >
+                          <Text style={tw`text-orange-500 text-xs font-bold`}>
+                            {workout.totallevels} LEVELS
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View
+                        style={tw`flex-row justify-between items-center mt-2`}
+                      >
+                        <View
+                          style={tw`flex-row items-center px-2 py-1 rounded-lg`}
+                        >
+                          <Ionicons name="time" size={14} color="#f97316" />
+                          <Text
+                            style={tw`text-white text-xs font-semibold ml-1`}
+                          >
+                            {workout.totaltime}m
+                          </Text>
+                        </View>
+
+                        <View
+                          style={tw`flex-row items-center px-2 py-1 rounded-lg`}
+                        >
+                          <FontAwesome5
+                            name="dumbbell"
+                            size={12}
+                            color="#f97316"
+                          />
+                          <Text
+                            style={tw`text-white text-xs font-semibold ml-1`}
+                          >
+                            {workout.totalsets}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </Animated.View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-        </View>
-      </Animated.View>
-    </TouchableOpacity>
-  ))}
-  </ScrollView>
-</View>
         </View>
       </ScrollView>
 
@@ -728,28 +733,31 @@ const Workouts = ({ isDarkMode }) => {
         <SafeAreaView style={tw`flex-1 bg-black/90`}>
           <View
             style={[
-              tw`flex-1 bg-black border border-orange-500 rounded-t-3xl mt-20`,
+              tw`flex-1 self-center bg-black border border-orange-500 rounded-t-3xl mt-20`,
               { width: width * 0.95 },
             ]}
           >
             <LinearGradient
-      colors={["#18181b", "#09090b"]}
-      style={tw`border-b border-orange-800 p-6 rounded-t-3xl`}
-    >
-      <View style={tw`flex-row justify-between items-center`}>
-        <View>
-          <Text style={tw`text-2xl font-black text-white`}>{selectedWorkout?.title}</Text>
-          <Text style={tw`text-orange-400 font-semibold mt-1`}>{"SkillLevels"}</Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => setIsModalVisible(false)}
-          style={tw`p-2 bg-orange-500/20 rounded-full`}
-        >
-          <Ionicons name="close" size={20} color="#f97316" />
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
-       
+              colors={["#18181b", "#09090b"]}
+              style={tw`border-b border-orange-800 p-6 rounded-t-3xl`}
+            >
+              <View style={tw`flex-row justify-between items-center`}>
+                <View>
+                  <Text style={tw`text-2xl font-black text-white`}>
+                    {selectedWorkout?.title}
+                  </Text>
+                  <Text style={tw`text-orange-400 font-semibold mt-1`}>
+                    {"SkillLevels"}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setIsModalVisible(false)}
+                  style={tw`p-2 bg-orange-500/20 rounded-full`}
+                >
+                  <Ionicons name="close" size={20} color="#f97316" />
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
 
             <ScrollView style={tw`flex-1 p-4`}>
               {selectedWorkout?.levels.map((level, levelIndex) => (
@@ -788,23 +796,26 @@ const Workouts = ({ isDarkMode }) => {
               ]}
             >
               <LinearGradient
-      colors={["#18181b", "#09090b"]}
-      style={tw`border-b border-orange-800 p-6 rounded-t-3xl`}
-    >
-      <View style={tw`flex-row justify-between items-center`}>
-        <View>
-          <Text style={tw`text-2xl font-black text-white`}>Select Difficulty</Text>
-          <Text style={tw`text-orange-400 font-semibold mt-1`}>Choose your challenge level</Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => setIsLevelModalVisible(false)}
-          style={tw`p-2 bg-orange-500/20 rounded-full`}
-        >
-          <Ionicons name="close" size={20} color="#f97316" />
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
-           
+                colors={["#18181b", "#09090b"]}
+                style={tw`border-b border-orange-800 p-6 rounded-t-3xl`}
+              >
+                <View style={tw`flex-row justify-between items-center`}>
+                  <View>
+                    <Text style={tw`text-2xl font-black text-white`}>
+                      Select Difficulty
+                    </Text>
+                    <Text style={tw`text-orange-400 font-semibold mt-1`}>
+                      Choose your challenge level
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setIsLevelModalVisible(false)}
+                    style={tw`p-2 bg-orange-500/20 rounded-full`}
+                  >
+                    <Ionicons name="close" size={20} color="#f97316" />
+                  </TouchableOpacity>
+                </View>
+              </LinearGradient>
 
               <View style={tw`mt-4`}>
                 {selectedWorkout?.levels.map((level, index) => (

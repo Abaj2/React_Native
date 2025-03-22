@@ -96,26 +96,32 @@ const ChangePassword = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <LinearGradient
-          colors={["#2a1a0a", "#000000"]}
+          colors={["#000", "#1a1a1a"]}
           style={tw`flex-1`}
       >
     <SafeAreaView style={tw`flex-1`}>
     
       <StatusBar barStyle="light-content" />
-      <View style={tw`flex-row items-center mt-6 mb-8 px-6`}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={28} color="white" />
-        </TouchableOpacity>
-        <Text style={tw`flex-1 text-center text-white text-2xl font-bold`}>
-          Profile Settings
-        </Text>
-      </View>
+      <View style={tw`w-full bg-black mb-10 border-b border-zinc-700`}>
+          <SafeAreaView>
+            <View style={tw`flex-row items-center px-4 py-3`}>
+              <TouchableOpacity 
+                style={tw`p-2`} 
+                onPress={() => navigation.goBack()}
+              >
+                <Ionicons name="arrow-back" size={24} color="white" />
+              </TouchableOpacity>
+              <Text style={tw`flex-1 text-center text-white text-xl font-bold`}>Change Password</Text>
+              <View style={tw`w-10`}></View> 
+            </View>
+          </SafeAreaView>
+        </View>
 
       <View style={tw`px-6`}>
         <Text style={tw`text-gray-300 text-base mb-3`}>Current Password</Text>
         <TextInput
           style={tw`bg-zinc-800 text-white p-4 rounded-full mb-6 border border-gray-700`}
-          placeholder="Enter your current password"
+          placeholder="Enter current password"
           placeholderTextColor="#757575"
           keyboardType="email-address"
           autoCapitalize="none"
@@ -126,7 +132,7 @@ const ChangePassword = () => {
         <Text style={tw`text-gray-300 text-base mb-3`}>New Password</Text>
         <TextInput
           style={tw`bg-zinc-800 text-white p-4 rounded-full mb-8 border border-gray-700`}
-          placeholder="Enter your new password"
+          placeholder="Enter new password"
           placeholderTextColor="#757575"
           autoCapitalize="none"
           value={newPassword}
@@ -136,7 +142,7 @@ const ChangePassword = () => {
 <Text style={tw`text-gray-300 text-base mb-3`}>Confirm New Password</Text>
         <TextInput
           style={tw`bg-zinc-800 text-white p-4 rounded-full mb-8 border border-gray-700`}
-          placeholder="Confirm your new password"
+          placeholder="Confirm new password"
           placeholderTextColor="#757575"
           autoCapitalize="none"
           value={confirmNewPassword}

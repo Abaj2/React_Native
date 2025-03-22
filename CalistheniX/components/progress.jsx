@@ -197,25 +197,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
         contentContainerStyle={tw`py-6`}
         showsVerticalScrollIndicator={false}
       >
-        <View style={tw`px-5 mb-6`}>
-          <Text style={tw`text-2xl font-extrabold text-white mb-2`}>
-            Skills Dashboard
-          </Text>
-          <View style={tw`flex-row justify-between items-center`}>
-            <View style={tw`flex-row items-center bg-orange-500/20 px-3 py-2 rounded-full`}>
-              <Icon name="zap" size={20} color="#ffa500" />
-              <Text style={tw`text-orange-400 ml-2 font-medium`}>
-                {`${skillsData.length} Active Skill${skillsData.length > 1 ? 's' : ''}`}
-              </Text>
-            </View>
-            <View style={tw`bg-orange-500/20 px-3 py-2 rounded-full flex-row items-center`}>
-              <Icon name="calendar" size={16} color="#ffa500" />
-              <Text style={tw`text-orange-500 text-sm font-medium ml-2`}>
-                {new Date().toLocaleDateString()}
-              </Text>
-            </View>
-          </View>
-        </View>
+       
   
         {skillsData.length === 0 ? (
           <View style={tw`flex-1 items-center justify-center mt-20`}>
@@ -323,7 +305,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
                 ]}
               >
                 <LinearGradient 
-                  colors={openDropdownId === item.id ? ["#000", "#2a1a0a"] : ["#000", "#2a1a0a"]} 
+                  colors={openDropdownId === item.id ? ["#000", "#1a1a1a"] : ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]} 
                   style={tw`p-1`}
                 >
                   <TouchableOpacity
