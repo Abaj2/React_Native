@@ -22,7 +22,19 @@ const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 const Progress = ({ isDarkMode, skillsData, progressId }) => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [selectedDataPoint, setSelectedDataPoint] = useState(null);
- 
+
+  const skillsDataFormatted = skillsData
+    .map((skill) => ({
+      ...skill,
+      creationDate: Math.min(
+        ...skill.date.map((progressionDates) =>
+          progressionDates.length > 0 ? Math.min(...progressionDates) : 0
+        )
+      ),
+    }))
+    .sort((a, b) => a.creationDate - b.creationDate);
+
+  console.log("Skills formatted", skillsDataFormatted);
 
   const formatDate = (dateStr) => dateStr.split(" ")[0];
 
@@ -61,7 +73,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
     const chartConfig = {
       backgroundColor: "transaparent",
       backgroundGradientFrom: "",
-      backgroundGradientTo: "", 
+      backgroundGradientTo: "",
       decimalPlaces: 0,
       color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`,
       labelColor: (opacity = 1) => `rgba(161, 161, 170, ${opacity})`,
@@ -71,7 +83,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
       propsForDots: {
         r: "6",
         strokeWidth: "2",
-        stroke: "#ffa500",
+        stroke: "darkorange",
         fill: "#000000",
       },
       propsForLabels: {
@@ -92,9 +104,9 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
       return (
         <View
           style={[
-            tw`absolute items-center justify-center bg-black rounded-lg border-2 border-orange-500 px-4 py-3`,
+            tw`absolute items-center justify-center bg-black rounded-lg border-2 border-orange-400 px-4 py-3`,
             {
-              transform: [{ translateX: 20  }, { translateY: 40 }],
+              transform: [{ translateX: 20 }, { translateY: 40 }],
               shadowColor: "#ffa500",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.3,
@@ -103,11 +115,11 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
           ]}
           key="tooltip"
         >
-          <Text style={tw`text-orange-500 text-sm mr-1`}>
+          <Text style={tw`text-orange-400 text-sm mr-1`}>
             {selectedDataPoint.value}
-            <Text style={tw`text-orange-500 text-sm ml-1`}> / {goal}</Text>
+          
           </Text>
-          <Text style={tw`text-orange-500 text-xs text-center mt-1`}>
+          <Text style={tw`text-orange-400 text-xs text-center mt-1`}>
             {formatDate(dates[selectedDataPoint.index])}
           </Text>
         </View>
@@ -118,53 +130,51 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
       <View
         style={tw`mt-6 mr-10 rounded-2xl self-center items-center overflow-hidden`}
       >
-       { /* <LinearGradient
+        {/* <LinearGradient
           colors={["#1a1a1a", "#000000"]}
           style={tw`w-full rounded-2xl`}
         > */}
-          <LineChart
-            data={chartData}
-            width={width - 48}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={tw`rounded-2xl`}
-            withDots={true}
-            withShadow={false}
-            decorator={decorator}
-            onDataPointClick={({ value, x, y, index }) => {
-              setSelectedDataPoint({
-                value,
-                x,
-                y,
-                index,
-                progressionId,
-              });
-            }}
-          />
-       {/* </LinearGradient> */}
+        <LineChart
+          data={chartData}
+          width={width - 48}
+          height={220}
+          chartConfig={chartConfig}
+          bezier
+          style={tw`rounded-2xl`}
+          withDots={true}
+          withShadow={false}
+          decorator={decorator}
+          onDataPointClick={({ value, x, y, index }) => {
+            setSelectedDataPoint({
+              value,
+              x,
+              y,
+              index,
+              progressionId,
+            });
+          }}
+        />
+        {/* </LinearGradient> */}
       </View>
     );
   };
 
   const handleToggleDropdown = (id) => {
-    console.log(id)
+    console.log(id);
     if (openDropdownId === id) {
-    
       setOpenDropdownId(null);
     } else {
-      
       setOpenDropdownId(id);
     }
     setSelectedDataPoint(null);
   };
-  
+
   useEffect(() => {
-    console.log(progressId)
-    if(progressId) {
+    console.log(progressId);
+    if (progressId) {
       handleToggleDropdown(progressId);
     }
-  }, [progressId])
+  }, [progressId]);
 
   const getProgressColor = (progress) => {
     if (progress < 30) return "bg-red-500";
@@ -192,13 +202,11 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
   };
 
   return (
-    <SafeAreaView style={[tw`flex-1 self-center`, {width}]}>
+    <SafeAreaView style={[tw`flex-1 self-center`, { width: width }]}>
       <ScrollView
         contentContainerStyle={tw`py-6`}
         showsVerticalScrollIndicator={false}
       >
-       
-  
         {skillsData.length === 0 ? (
           <View style={tw`flex-1 items-center justify-center mt-20`}>
             <Icon
@@ -211,186 +219,243 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
               No Skills Added Yet
             </Text>
             <Text style={tw`text-zinc-500 text-center px-10 mb-4`}>
-              Start creating skills to see detailed progress reports and analytics.
+              Start creating skills to see detailed progress reports and
+              analytics.
             </Text>
           </View>
         ) : (
-          skillsData.map((item) => {
+          skillsDataFormatted.map((item) => {
             const hasValidProgressions = item.progressions.some(
               (_, index) => item.current[index]?.length > 1
             );
-  
-            if (!hasValidProgressions) return (
-              <View 
-                key={item.id} 
-                style={[
-                  tw`mb-4 border border-zinc-700 self-center mx-5 rounded-2xl overflow-hidden`,
-                  {
-                    width: width * 0.95,
-                    shadowColor: "#ffa500",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 8,
-                  },
-                ]}
-              >
-                <LinearGradient 
-                  colors={["#1a1a1a", "#000000"]} 
-                  style={tw`p-1`}
+
+            /*  if (!hasValidProgressions)
+              return (
+                <View
+                  key={item.id}
+                  style={[
+                    tw`mb-4 border border-zinc-700 self-center mx-5 rounded-2xl overflow-hidden`,
+                    {
+                      width: width * 0.95,
+                      shadowColor: "#ffa500",
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 8,
+                    },
+                  ]}
                 >
-                  <TouchableOpacity
-                    activeOpacity={0.9}
-                    onPress={() => handleToggleDropdown(item.id)}
-                    style={tw`p-5`}
+                  <LinearGradient
+                    colors={["#1a1a1a", "#000000"]}
+                    style={tw`p-1`}
                   >
-                    <View style={tw`flex-row justify-between items-center`}>
-                      <View style={tw`flex-1`}>
-                        <Text style={tw`text-white text-xl font-extrabold mb-1`}>
-                          {item.skill}
-                        </Text>
-                        <View style={tw`flex-row items-center`}>
-                          <Icon name="activity" size={16} color="#ffa500" />
-                          <Text style={tw`text-orange-400 text-sm ml-2`}>
-                            {`${item.progressions.length} Progression${
-                              item.progressions.length > 1 ? "s" : ""
-                            }`}
+                    <TouchableOpacity
+                      activeOpacity={0.9}
+                      onPress={() => handleToggleDropdown(item.id)}
+                      style={tw`p-5`}
+                    >
+                      <View style={tw`flex-row justify-between items-center`}>
+                        <View style={tw`flex-1`}>
+                          <Text
+                            style={tw`text-white text-xl font-extrabold mb-1`}
+                          >
+                            {item.skill}
                           </Text>
-                        </View>
-                      </View>
-                      
-                      <View style={tw`items-center`}>
-                        <AnimatedIcon
-                          name="chevron-down"
-                          size={24}
-                          color="#f97316"
-                       
-                        />
-                      </View>
-                    </View>
-                    
-                    <View style={tw`mt-4 flex-row justify-between items-center`}>
-                      <View style={tw`bg-orange-500/10 px-3 py-2 rounded-lg`}>
-                        <Text style={tw`text-orange-400 text-sm`}>No data yet</Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                </LinearGradient>
-              </View>
-            );
-  
-            // Calculate overall progress across all progressions
-            const progressions = item.progressions.filter((_, index) => 
-              item.current[index]?.length > 1
-            );
-            const overallProgress = progressions.length > 0 
-              ? Math.round(progressions.reduce((sum, _, index) => {
-                  const currentValue = item.current[index][item.current[index].length - 1];
-                  const currentGoal = item.goal[index][item.goal[index].length - 1];
-                  return sum + (currentValue / currentGoal * 100);
-                }, 0) / progressions.length)
-              : 0;
-  
-            return (
-              <View
-                key={item.id}
-                style={[
-                  tw`mb-4 border border-zinc-700 self-center mx-5 rounded-2xl overflow-hidden`,
-                  {
-                    width: width * 0.95,
-                    shadowColor: "#ffa500",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: openDropdownId === item.id ? 0.3 : 0.1,
-                    shadowRadius: 8,
-                  },
-                ]}
-              >
-                <LinearGradient 
-                  colors={openDropdownId === item.id ? ["#000", "#1a1a1a"] : ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]} 
-                  style={tw`p-1`}
-                >
-                  <TouchableOpacity
-                    activeOpacity={0.9}
-                    onPress={() => handleToggleDropdown(item.id)}
-                    style={tw`p-5`}
-                  >
-                    <View style={tw`flex-row justify-between items-center`}>
-                      <View style={tw`flex-1`}>
-                        <Text style={tw`text-white text-xl font-extrabold mb-1`}>
-                          {item.skill}
-                        </Text>
-                        <View style={tw`flex-row items-center`}>
-                          <Icon name="activity" size={16} color="#ffa500" />
-                          <Text style={tw`text-orange-400 text-sm ml-2`}>
-                            {`${progressions.length} Active Progression${
-                              progressions.length > 1 ? "s" : ""
-                            }`}
-                          </Text>
-                        </View>
-                      </View>
-                      
-                      <View style={tw`items-center bg-orange-500/15 p-3 rounded-full`}>
-                        <Text style={tw`text-orange-500 font-bold text-lg`}>
-                          {overallProgress}%
-                        </Text>
-                      </View>
-                    </View>
-  
-                    {/* This expanded section shows even when not toggled */}
-                    {openDropdownId !== item.id && (
-                      <View style={tw`mt-4`}>
-                        <View style={tw`flex-row justify-between items-center mb-4`}>
-                          <View style={tw`flex-1 mr-3`}>
-                            <View style={tw`w-full h-3 bg-zinc-800 rounded-full overflow-hidden`}>
-                              <LinearGradient
-                                colors={["#ff6b00", "#ffa500"]}
-                                style={[
-                                  tw`h-full rounded-full`,
-                                  { width: `${overallProgress}%` },
-                                ]}
-                                start={{ x: 0, y: 0.5 }}
-                                end={{ x: 1, y: 0.5 }}
-                              />
-                            </View>
+                          <View style={tw`flex-row items-center`}>
+                            <Icon name="activity" size={16} color="#ffa500" />
+                            <Text style={tw`text-orange-400 text-sm ml-2`}>
+                              {`${item.progressions.length} Progression${
+                                item.progressions.length > 1 ? "s" : ""
+                              }`}
+                            </Text>
                           </View>
+                        </View>
+
+                        <View style={tw`items-center`}>
                           <AnimatedIcon
                             name="chevron-down"
                             size={24}
                             color="#f97316"
-                        
                           />
                         </View>
-                        
-                        {/* Preview of first 2 progressions */}
-                        {progressions.slice(0, 2).map((progression, idx) => {
-                          const index = item.progressions.indexOf(progression);
-                          const currentGoal = item.goal[index][item.goal[index].length - 1];
-                          const currentValue = item.current[index][item.current[index].length - 1];
-                          
-                          return (
-                            <View key={idx} style={tw`flex-row justify-between items-center mb-2`}>
-                              <Text style={tw`text-zinc-300 flex-1 font-medium`} numberOfLines={1}>
-                                {progression}
-                              </Text>
-                              <Text style={tw`text-orange-500 mx-2`}>
-                                {currentValue}/{currentGoal}
-                              </Text>
-                            </View>
-                          );
-                        })}
-                        
-                        {progressions.length > 2 && (
-                          <Text style={tw`text-zinc-400 text-center mt-2`}>
-                            + {progressions.length - 2} more progression{progressions.length - 2 > 1 ? 's' : ''}
-                          </Text>
-                        )}
                       </View>
-                    )}
+
+                      <View
+                        style={tw`mt-4 flex-row justify-between items-center`}
+                      >
+                        <View style={tw`bg-orange-500/10 px-3 py-2 rounded-lg`}>
+                          <Text style={tw`text-orange-400 text-sm`}>
+                            No progress yet
+                          </Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  </LinearGradient>
+                </View>
+              ); */
+            if (!hasValidProgressions) return null;
+
+            // Calculate overall progress across all progressions
+            const progressions = item.progressions.filter(
+              (_, index) => item.current[index]?.length > 1
+            );
+            const overallProgress =
+              progressions.length > 0
+                ? Math.round(
+                    progressions.reduce((sum, _, index) => {
+                      const currentValue =
+                        item.current[index][item.current[index].length - 1];
+                      const currentGoal =
+                        item.goal[index][item.goal[index].length - 1];
+                      return sum + (currentValue / currentGoal) * 100;
+                    }, 0) / progressions.length
+                  )
+                : 0;
+
+            return (
+              <View
+                key={item.id}
+                style={[
+                  tw`mb-4 border border-zinc-800/50 self-center mx-5 rounded-2xl overflow-hidden`,
+                  {
+                    width: width * 0.95,
   
+                  },
+                ]}
+              >
+                <LinearGradient
+                  colors={
+                    openDropdownId === item.id
+                      ? ["#000", "#1a1a1a"]
+                      : ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]
+                  }
+                  style={tw`p-1`}
+                >
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => handleToggleDropdown(item.id)}
+                    style={tw`p-5`}
+                  >
+                    <View>
+                      {/* Header section with skill name */}
+                      <View
+                        style={tw`flex-row justify-between items-center mb-5`}
+                      >
+                        <View style={tw`flex-1`}>
+                          <Text
+                            style={tw`text-white text-xl font-extrabold mb-1`}
+                          >
+                            {item.skill}
+                          </Text>
+                          <View style={tw`flex-row items-center`}>
+                            <Icon name="zap" size={14} color="#ffa500" />
+                            <Text
+                              style={tw`text-orange-400 text-xs ml-1 font-medium`}
+                            >
+                              {`${progressions.length} Active Progression${
+                                progressions.length > 1 ? "s" : ""
+                              }`}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Simple percentage display */}
+                        <Text style={tw`text-orange-500 font-bold text-lg`}>
+                          {Math.round(overallProgress)}%
+                        </Text>
+                      </View>
+
+                      {/* Progress section */}
+                      {openDropdownId !== item.id && (
+                        <View style={tw`mt-2`}>
+                          {/* Overall progress bar with dropdown arrow */}
+                          <View
+                            style={tw`ml-1 flex-row justify-between items-center mb-4`}
+                          >
+                            <View style={tw`flex-1 mr-3`}>
+                              <View
+                                style={tw`w-full h-3 bg-zinc-800 rounded-full overflow-hidden`}
+                              >
+                                <LinearGradient
+                                  colors={["#ff6b00", "#ffa500"]}
+                                  style={[
+                                    tw`h-full rounded-full`,
+                                    { width: `${overallProgress}%` },
+                                  ]}
+                                  start={{ x: 0, y: 0.5 }}
+                                  end={{ x: 1, y: 0.5 }}
+                                />
+                              </View>
+                            </View>
+                            <AnimatedIcon
+                              name="chevron-down"
+                              size={24}
+                              color="#f97316"
+                            />
+                          </View>
+
+                          {/* Each progression shown with simplified styling */}
+                          {progressions.slice(0, 2).map((progression, idx) => {
+                            const index =
+                              item.progressions.indexOf(progression);
+                            const currentGoal =
+                              item.goal[index][item.goal[index].length - 1];
+                            const currentValue =
+                              item.current[index][
+                                item.current[index].length - 1
+                              ];
+                            const progressPercent =
+                              (currentValue / currentGoal) * 100;
+
+                            return (
+                              <View
+                                key={idx}
+                                style={tw`mb-4 bg-zinc-900/50 rounded-lg p-3`}
+                              >
+                                <View
+                                  style={tw`flex-row justify-between items-center mb-2`}
+                                >
+                                  <Text
+                                    style={tw`text-zinc-100 font-medium text-sm`}
+                                    numberOfLines={1}
+                                  >
+                                    {progression}
+                                  </Text>
+                                  <Text
+                                    style={tw`text-orange-400 text-xs font-bold`}
+                                  >
+                                    {currentValue}/{currentGoal}
+                                  </Text>
+                                </View>
+
+                                <View
+                                  style={tw`w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden`}
+                                >
+                                  <LinearGradient
+                                    colors={["#ff6b00", "#ffa500"]}
+                                    style={[
+                                      tw`h-full rounded-full`,
+                                      { width: `${progressPercent}%` },
+                                    ]}
+                                    start={{ x: 0, y: 0.5 }}
+                                    end={{ x: 1, y: 0.5 }}
+                                  />
+                                </View>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      )}
+                    </View>
+
                     {openDropdownId === item.id && (
                       <View style={tw`mt-4`}>
-                        <View style={tw`flex-row justify-between items-center mb-4`}>
-                          <View style={tw`flex-1 mr-3`}>
-                            <View style={tw`w-full h-3 bg-zinc-800 rounded-full overflow-hidden`}>
+                        <View
+                          style={tw`flex-row ml-1 justify-between items-center mb-6`}
+                        >
+                          <View style={tw`flex-1 mr-1`}>
+                            <View
+                              style={tw`w-full h-3 bg-zinc-900 rounded-full overflow-hidden`}
+                            >
                               <LinearGradient
                                 colors={["#ff6b00", "#ffa500"]}
                                 style={[
@@ -403,7 +468,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
                             </View>
                           </View>
                         </View>
-                        
+
                         {item.progressions.map((progression, index) => {
                           if (
                             !item.current[index] ||
@@ -411,7 +476,7 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
                           ) {
                             return null;
                           }
-  
+
                           const progressionId = `${item.id}-${index}`;
                           const currentGoal =
                             item.goal[index][item.goal[index].length - 1];
@@ -421,11 +486,11 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
                             (currentValue / currentGoal) * 100
                           );
                           const trending = getTrendingData(item.current[index]);
-  
+
                           return (
                             <View key={index} style={tw``}>
                               <View
-                                style={tw`flex-row justify-between items-center bg-orange-500/10 rounded-xl p-3 mb-3`}
+                                style={tw`flex-row justify-between items-center bg-zinc-900/50 rounded-xl p-3 mb-3`}
                               >
                                 <View style={tw`flex-1`}>
                                   <Text
@@ -452,34 +517,45 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
                                   </View>
                                 </View>
                               </View>
-  
+
                               <View style={tw`flex-row justify-between mb-3`}>
-                                <View style={tw`bg-orange-500/10 rounded-lg p-2 flex-1 mr-2`}>
+                                <View
+                                  style={tw`bg-zinc-900/50 rounded-lg p-2 flex-1 mr-2`}
+                                >
                                   <View style={tw`flex-row items-center`}>
-                                    <Icon name="target" size={14} color="#ffa500" />
-                                    <Text style={tw`text-orange-500 text-sm ml-2 font-medium`}>
+                                    
+                                    <Text
+                                      style={tw`text-orange-500 text-sm font-medium`}
+                                    >
                                       Current
                                     </Text>
                                   </View>
-                                  <Text style={tw`text-white text-xl font-bold mt-1`}>
+                                  <Text
+                                    style={tw`text-white text-xl font-bold mt-1`}
+                                  >
                                     {currentValue}
                                   </Text>
                                 </View>
-                                
-                                <View style={tw`bg-orange-500/10 rounded-lg p-2 flex-1 ml-2`}>
+
+                                <View
+                                  style={tw`bg-zinc-900/50 rounded-lg p-2 flex-1 ml-2`}
+                                >
                                   <View style={tw`flex-row items-center`}>
-                                    <Ionicons name="flag-outline" size={14} color="#ffa500" />
-                                    <Text style={tw`text-orange-500 text-sm ml-2 font-medium`}>
+                                    
+                                    <Text
+                                      style={tw`text-orange-500 text-sm font-medium`}
+                                    >
                                       Goal
                                     </Text>
                                   </View>
-                                  <Text style={tw`text-white text-xl font-bold mt-1`}>
+                                  <Text
+                                    style={tw`text-white text-xl font-bold mt-1`}
+                                  >
                                     {currentGoal}
                                   </Text>
                                 </View>
                               </View>
-  
-  
+
                               <ChartComponent
                                 progression={progression}
                                 dates={item.date_formatted[index]}
@@ -487,10 +563,8 @@ const Progress = ({ isDarkMode, skillsData, progressId }) => {
                                 goal={currentGoal}
                                 progressionId={progressionId}
                               />
-  
-                              <View
-                                style={tw`mb-5 flex-row items-center mt-6`}
-                              >
+
+                              <View style={tw`mb-5 flex-row items-center mt-6`}>
                                 <View
                                   style={tw`${trending.bgColor} p-2 rounded-full mr-2`}
                                 >

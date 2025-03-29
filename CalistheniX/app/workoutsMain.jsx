@@ -14,6 +14,7 @@ import {
   Keyboard,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -65,6 +66,7 @@ const WorkoutsMain = () => {
 
   const [workoutDates, setWorkoutDates] = useState([]);
   const [workoutTimes, setWorkoutTimes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [userData, setUserData] = useState();
 
@@ -234,6 +236,7 @@ const WorkoutsMain = () => {
   useEffect(() => {
     const getThisWeekDuration = async () => {
       try {
+        setIsLoading(true);
         const token = await AsyncStorage.getItem("jwtToken");
         const userData = JSON.parse(await AsyncStorage.getItem("userData"));
         const response = await axios.get(GET_DURATION_URL, {
@@ -249,6 +252,8 @@ const WorkoutsMain = () => {
         setRoutineLength(response.data.routineLength);
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
     getThisWeekDuration();
@@ -257,6 +262,7 @@ const WorkoutsMain = () => {
   useEffect(() => {
     const getWorkouts = async () => {
       try {
+        setIsLoading(true);
         const token = await AsyncStorage.getItem("jwtToken");
         const userData = JSON.parse(await AsyncStorage.getItem("userData"));
         const response = await axios.get(GET_WORKOUTS_URL, {
@@ -272,10 +278,12 @@ const WorkoutsMain = () => {
         setSets(response.data.sets);
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
     getWorkouts();
-  });
+  }, []);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -342,6 +350,7 @@ const WorkoutsMain = () => {
     if (!userData?.user_id) return;
 
     try {
+      setIsLoading(true);
       const token = await AsyncStorage.getItem("jwtToken");
       const response = await axios.get(
         `${GET_PROFILE_GRAPH}?user_id=${userData.user_id}`,
@@ -358,27 +367,38 @@ const WorkoutsMain = () => {
       }
     } catch (error) {
       console.error("Error getting stats:", error);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
+  useEffect(() => {
+    let isActive = true;
 
-      const initializeData = async () => {
-        const userData = await fetchUserData();
-        if (userData && isActive) {
-          await fetchProfileGraph(userData);
-        }
-      };
+    const initializeData = async () => {
+      const userData = await fetchUserData();
+      if (userData && isActive) {
+        await fetchProfileGraph(userData);
+      }
+    };
 
-      initializeData();
+    initializeData();
 
-      return () => {
-        isActive = false;
-      };
-    }, [fetchUserData, fetchProfileGraph])
-  );
+    return () => {
+      isActive = false;
+    };
+  }, [fetchUserData, fetchProfileGraph]);
+
+  if (isLoading) {
+    return (
+      <LinearGradient
+        colors={["#000", "#1a1a1a"]}
+        style={tw`flex-1 justify-center items-center`}
+      >
+        <ActivityIndicator size="large" color="gray" />
+      </LinearGradient>
+    );
+  }
 
   return (
     <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
@@ -393,9 +413,9 @@ const WorkoutsMain = () => {
             <View style={tw`flex-row justify-between items-center ml-2`}>
               <View style={tw`flex-row gap-25`}>
                 <View>
-                <Text style={tw`text-3xl font-bold text-white`}>
-                  Workouts
-                </Text>
+                  <Text style={tw`text-3xl font-bold text-white`}>
+                    Workouts
+                  </Text>
                 </View>
                 <View style={tw`flex-row mt-3`}>
                   <MaterialCommunityIcons
@@ -408,7 +428,6 @@ const WorkoutsMain = () => {
                   >{`${calculateDailyStreak(workoutDates)} day streak`}</Text>
                 </View>
               </View>
-             
             </View>
           </View>
           <ProfileBarGraph
@@ -417,8 +436,8 @@ const WorkoutsMain = () => {
             workoutTimes={workoutTimes}
             workoutDates={workoutDates}
             styles={styles}
-          /> 
-           {/*<UserProfileWorkoutGraph workoutDates={workoutDates} workoutTimes={workoutTimes} /> */}
+          />
+          {/*<UserProfileWorkoutGraph workoutDates={workoutDates} workoutTimes={workoutTimes} /> */}
 
           <View style={[tw`px-2 mt-2`, {}]}>
             <View style={tw`flex-row justify-between items-center mb-4`}>
@@ -446,7 +465,7 @@ const WorkoutsMain = () => {
                   <LinearGradient
                     key={workout.workout_id}
                     colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
-                    style={tw`border border-zinc-700 rounded-3xl p-6 mb-4`}
+                    style={tw`border border-zinc-800/50 rounded-3xl p-6 mb-4`}
                   >
                     <View
                       style={tw` flex-row justify-between items-start mb-4`}
@@ -493,7 +512,15 @@ const WorkoutsMain = () => {
                     </View>
 
                     <TouchableOpacity
-                      style={tw`bg-orange-500 py-3 rounded-xl`}
+                      style={[
+                        tw`bg-orange-500 py-3 rounded-xl`,
+                        {
+                          shadowColor: "#f97316",
+                          shadowOffset: { width: 0, height: 3 },
+                          shadowOpacity: 0.4,
+                          shadowRadius: 6,
+                        },
+                      ]}
                       onPress={() =>
                         handleStartRoutine(workout.workout_id, workout.title)
                       }

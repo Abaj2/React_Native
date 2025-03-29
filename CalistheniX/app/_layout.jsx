@@ -46,12 +46,12 @@ function TabNavigator() {
         headerShown: false,
         tabBarStyle: {
           display: "flex",
-          backgroundColor: "#000000",
+          backgroundColor: "#121212",
           height: 90,
           paddingBottom: 8,
           paddingTop: 8,
           borderTopWidth: 1,
-          borderTopColor: "black",
+          borderTopColor: "#121212",
           shadowOffset: {
             width: 0,
             height: -2,
@@ -68,16 +68,16 @@ function TabNavigator() {
           fontSize: 12,
           fontWeight: "500",
         },
-        tabBarBackground: () => (
+      /*  tabBarBackground: () => (
           <View style={{ flex: 1 }}>
             <LinearGradient
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              colors={["orange", "red"]}
+              colors={["#121212", "#121212"]}
               style={{ height: 3 }}
             />
           </View>
-        ),
+        ), */
       }}
     >
       <Tab.Screen

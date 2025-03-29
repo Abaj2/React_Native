@@ -29,6 +29,9 @@ const SUBMIT_WORKOUT_URL = Platform.select({
 const WorkoutSession = () => {
   const navigation = useNavigation();
   const [time, setTime] = useState(0);
+  const [restDuration, setRestDuration] = useState(0);
+  const [timerInterval, setTimerInterval] = useState(null);
+
   const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef(null);
   const [isTargetModalVisible, setTargetModalVisible] = useState(false);
@@ -229,40 +232,106 @@ const WorkoutSession = () => {
     console.log("Exercises 2", exercises2);
     console.log("Exercise Data:", JSON.stringify(exerciseData));
   }, [exercises2, JSON.stringify(exerciseData)]);
+
+  const startRestTimer = () => {
+    // Show options for rest duration selection
+    Alert.alert(
+      "Rest Timer",
+      "Select rest duration:",
+      [
+        { text: "15s", onPress: () => setRestTimerWithDuration(15) },
+        { text: "30s", onPress: () => setRestTimerWithDuration(30) },
+        { text: "45s", onPress: () => setRestTimerWithDuration(45) },
+        { text: "60s", onPress: () => setRestTimerWithDuration(60) },
+        { text: "75s", onPress: () => setRestTimerWithDuration(75) },
+        { text: "90s", onPress: () => setRestTimerWithDuration(90) },
+        { text: "Custom", onPress: showCustomRestInput },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const showCustomRestInput = () => {
+    // Show input for custom duration
+    Alert.prompt(
+      "Custom Rest Time",
+      "Enter rest time in seconds:",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "OK",
+          onPress: (seconds) => {
+            const duration = parseInt(seconds);
+            if (!isNaN(duration) && duration > 0) {
+              setRestTimerWithDuration(duration);
+            } else {
+              Alert.alert("Invalid Input", "Please enter a valid number.");
+            }
+          },
+        },
+      ],
+      "plain-text",
+      "",
+      "numeric"
+    );
+  };
+
+  const setRestTimerWithDuration = (duration) => {
+    setRestDuration(duration);
+    setTimer(duration);
+    setTargetModalVisible(true);
+
+    // Clear any existing interval
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+
+    // Set up new interval
+    const interval = setInterval(() => {
+      setTimer((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(interval);
+          setTargetModalVisible(false);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    setTimerInterval(interval);
+  };
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
-        <SafeAreaView style={tw`flex-1`}>
-          <View style={tw`w-full bg-black/30 border-b border-orange-500/30`}>
-            <View style={tw`flex-row justify-between items-center px-4 py-3`}>
-              <TouchableOpacity
-                style={tw`p-2`}
-                onPress={cancelWorkout}
-              >
-                <Ionicons name="close" size={24} color="white" />
-              </TouchableOpacity>
-              <View style={tw`items-center`}>
-                <Text style={tw`text-white font-semibold text-lg`}>
-                  {workout.title}
+    <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
+      <SafeAreaView style={tw`flex-1`}>
+        <View style={tw`w-full bg-black/30 border-b border-orange-500/30`}>
+          <View style={tw`flex-row justify-between items-center px-4 py-3`}>
+            <TouchableOpacity style={tw`p-2`} onPress={cancelWorkout}>
+              <Ionicons name="close" size={24} color="white" />
+            </TouchableOpacity>
+            <View style={tw`items-center`}>
+              <Text style={tw`text-white font-semibold text-lg`}>
+                {workout.title}
+              </Text>
+              {workout.level && (
+                <Text style={tw`text-orange-400 text-sm font-medium`}>
+                  {workout.level}
                 </Text>
-                {workout.level && (
-                  <Text style={tw`text-orange-400 text-sm font-medium`}>
-                    {workout.level}
-                  </Text>
-                )}
-              </View>
-              <TouchableOpacity
-                style={tw`px-4 py-2 bg-orange-500 rounded-lg`}
-                onPress={finishWorkout}
-              >
-                <Text style={tw`text-white font-semibold`}>Finish</Text>
-              </TouchableOpacity>
+              )}
             </View>
+            <TouchableOpacity
+              style={tw`px-4 py-2 bg-orange-500 rounded-lg`}
+              onPress={finishWorkout}
+            >
+              <Text style={tw`text-white font-semibold`}>Finish</Text>
+            </TouchableOpacity>
           </View>
-  
-          <ScrollView 
+        </View>
+        <View style={tw`flex-1`}>
+          <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={tw``}
+            contentContainerStyle={tw`pb-20`}
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled={true}
           >
             <View style={tw`border-b border-gray-800/50 bg-black/10`}>
               <ScrollView
@@ -293,7 +362,7 @@ const WorkoutSession = () => {
                 ))}
               </ScrollView>
             </View>
-  
+
             <View style={tw`p-4`}>
               {workout.level !== "Custom" && (
                 <View
@@ -304,7 +373,7 @@ const WorkoutSession = () => {
                       Workout Target
                     </Text>
                   </View>
-  
+
                   <View style={tw`p-4`}>
                     <View style={tw`flex-row flex-wrap`}>
                       {exercises2[currentExercise].sets && (
@@ -366,7 +435,7 @@ const WorkoutSession = () => {
                         </View>
                       )}
                     </View>
-  
+
                     {exercises2[currentExercise].notes && (
                       <View
                         style={tw`mt-3 p-3 rounded-lg border border-gray-800/50 bg-black/30`}
@@ -379,7 +448,7 @@ const WorkoutSession = () => {
                   </View>
                 </View>
               )}
-  
+
               {exerciseData[currentExercise].sets.map((set, setIndex) => (
                 <View
                   key={setIndex}
@@ -393,7 +462,7 @@ const WorkoutSession = () => {
                       <TouchableOpacity
                         style={tw`flex-row items-center bg-orange-500/10 px-3 py-1 rounded-lg border border-orange-500/30`}
                         onPress={() => {
-                          Alert.alert("Rest Timer", "Start 90s rest timer?");
+                          startRestTimer();
                         }}
                       >
                         <Ionicons
@@ -408,7 +477,7 @@ const WorkoutSession = () => {
                       </TouchableOpacity>
                     </View>
                   </View>
-  
+
                   <View style={tw`p-4`}>
                     <View style={tw`flex-row flex-wrap -mx-2`}>
                       {exercises2[currentExercise].reps && (
@@ -456,7 +525,7 @@ const WorkoutSession = () => {
                         </View>
                       )}
                     </View>
-  
+
                     <View>
                       <Text style={tw`text-gray-400 text-sm mb-1`}>Notes</Text>
                       <TextInput
@@ -465,7 +534,12 @@ const WorkoutSession = () => {
                         placeholderTextColor="#6b7280"
                         value={set.notes}
                         onChangeText={(value) =>
-                          updateSetData(currentExercise, setIndex, "notes", value)
+                          updateSetData(
+                            currentExercise,
+                            setIndex,
+                            "notes",
+                            value
+                          )
                         }
                         multiline
                       />
@@ -473,7 +547,42 @@ const WorkoutSession = () => {
                   </View>
                 </View>
               ))}
-  
+              {isTargetModalVisible && (
+                <View
+                  style={tw`w-full p-4 border border-gray-800/50 rounded-lg items-center`}
+                >
+                  <Text style={tw`text-white text-lg font-bold mb-1`}>
+                    Rest Timer
+                  </Text>
+
+                  <Text style={tw`text-orange-400 text-4xl font-bold my-3`}>
+                    {Math.floor(timer / 60)}:
+                    {timer % 60 < 10 ? `0${timer % 60}` : timer % 60}
+                  </Text>
+
+                  <View
+                    style={tw`w-full bg-gray-800/50 h-2 rounded-full mt-2 mb-4`}
+                  >
+                    <View
+                      style={[
+                        tw`bg-orange-500 h-2 rounded-full`,
+                        { width: `${(timer / restDuration) * 100}%` },
+                      ]}
+                    />
+                  </View>
+
+                  <TouchableOpacity
+                    style={tw`bg-orange-500 py-2 px-6 rounded-lg w-full items-center`}
+                    onPress={() => {
+                      clearInterval(timerInterval);
+                      setTargetModalVisible(false);
+                    }}
+                  >
+                    <Text style={tw`text-white font-bold text-base`}>Skip</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
               <View style={tw`flex-row justify-between mt-4`}>
                 <TouchableOpacity
                   style={tw`flex-1 mr-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-lg flex-row items-center justify-center`}
@@ -502,9 +611,9 @@ const WorkoutSession = () => {
               </View>
             </View>
           </ScrollView>
-        </SafeAreaView>
-      </LinearGradient>
-    </TouchableWithoutFeedback>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 

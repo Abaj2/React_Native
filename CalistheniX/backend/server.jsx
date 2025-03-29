@@ -893,6 +893,21 @@ app.post("/unfollowuser", verifyToken, async (req, res) => {
   }
 });
 
+app.post("/removefollower", verifyToken, async (req, res) => {
+  const { currentUsersId, followersUserId } = req.body;
+  console.log(currentUsersId, followersUserId);
+  try {
+    const deleteFollower = await pool.query(
+      `DELETE FROM followers WHERE follower_id = $1 AND following_id = $2`,
+      [followersUserId, currentUsersId]
+    );
+
+    res.status(200).json({ message: "Follower removed successfully" });
+  } catch (err) {
+    console.error("Error inserting follower", err);
+  }
+})
+
 app.get("/userdetails", async (req, res) => {
   const { user_id } = req.query;
 
@@ -957,6 +972,52 @@ app.post("/changepassword", verifyToken, async (req, res) => {
 
   res.status(200).json({ message: "Password changed successfully" });
   console.log(insertHashedNewPassword);
+});
+
+app.get("/getfollowstats", verifyToken, async (req, res) => {
+  try {
+  const { user_id } = req.query;
+
+  const followers = await pool.query(
+    `SELECT follower_id FROM followers WHERE following_id = $1`,
+    [user_id]
+  );
+
+  const following = await pool.query(
+    `SELECT following_id FROM followers WHERE follower_id = $1`,
+    [user_id]
+  );
+
+
+  const followerIds = followers.rows.map((row) => row.follower_id);
+  const followingIds = following.rows.map((row) => row.following_id);
+
+  let followerUsers = [];
+  let followingUsers = [];
+
+  if (followerIds.length > 0) {
+    followerUsers = await pool.query(
+      `SELECT * FROM users WHERE user_id = ANY($1)`,
+      [followerIds]
+    );
+  }
+  
+  if (followingIds.length > 0) {
+    followingUsers = await pool.query(
+      `SELECT * FROM users WHERE user_id = ANY($1)`,
+      [followingIds]
+    );
+  }
+  
+
+  res.status(200).json({
+    followers: followerUsers.rows,
+    following: followingUsers.rows
+  });
+} catch (error) {
+  console.error("Error getting follow stats:", error);
+  res.status(500).send({ message: "Failed to get data" });
+}
 });
 
 app.listen(port, () => {

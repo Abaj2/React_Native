@@ -68,7 +68,7 @@ const Skill = ({
     progressTrack: "#e5e7eb",
     progressFill: "#60a5fa",
   });
-
+  console.log(skillData)
   const [addProgression, setAddProgression] = useState("");
   const [addCurrent, setAddCurrent] = useState();
   const [addGoal, setAddGoal] = useState();
@@ -433,6 +433,7 @@ const Skill = ({
     onSendProgress(progressId);
   };
 
+  
   return (
     <SafeAreaView style={tw`flex-1 rounded-3xl`}>
       <StatusBar barStyle="light-content" />
@@ -441,16 +442,13 @@ const Skill = ({
         showsVerticalScrollIndicator={false}
       >*/}
       <View
-        style={[
-          tw`rounded-3xl mt-6 mx-2 self-center`,
-          { width: width * 0.94 },
-        ]}
+        style={[tw`rounded-3xl mt-6 mx-2 self-center`, { width: width * 0.95 }]}
       >
         <LinearGradient
           colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
-          style={tw`rounded-3xl border border-zinc-700`}
+          style={tw`py-1 rounded-2xl border border-zinc-800/50`}
         >
-          <View style={tw`p-4 rounded-3xl`}>
+          <View style={tw`p-4 rounded-2xl`}>
             <View style={tw`flex-row justify-between items-center`}>
               <View style={tw}>
                 <Text style={tw`mt-1 text-sm font-bold text-orange-400`}>
@@ -468,6 +466,12 @@ const Skill = ({
                   <MaterialIcons name="edit" size={22} color="#f97316" />
                 </TouchableOpacity>
                 <TouchableOpacity
+                  onPress={() => setProgressionModalVisible(true)}
+                  style={tw`p-2 bg-orange-500/10 rounded-full`}
+                  >
+                  <Icon name="edit" size={22} color="#f97316" />
+                  </TouchableOpacity>
+                <TouchableOpacity
                   onPress={handleSkillDelete}
                   style={tw`p-2 bg-red-500/10 rounded-full`}
                 >
@@ -480,7 +484,7 @@ const Skill = ({
               </View>
             </View>
           </View>
-          <View style={tw`border-b border-zinc-800 mb-4`} />
+          <View style={tw`border-b border-zinc-800/40 mb-4`} />
           <ProgressCircle
             current={
               skillData.current[selectedProgressionIndex]?.slice(-1)[0] || 0
@@ -488,7 +492,7 @@ const Skill = ({
             goal={skillData.goal[selectedProgressionIndex]?.slice(-1)[0] || 1}
           />
           <View>
-            <Text style={tw`text-orange-400 font-semibold text-sm ml-5`}>
+            <Text style={tw`mt-2 text-orange-400 font-semibold text-sm ml-5`}>
               SELECT PROGRESSION
             </Text>
           </View>
@@ -496,7 +500,7 @@ const Skill = ({
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={tw`px-4l mt-2`}
+            contentContainerStyle={tw`px-4l mt-4`}
           >
             {skillData.progressions.map((progression, index) => (
               <TouchableOpacity
@@ -535,9 +539,9 @@ const Skill = ({
             ))}
             <TouchableOpacity
               onPress={openProgressionModal}
-              style={tw`h-[42px] w-[42px] items-center justify-center rounded-full bg-zinc-800 border-2 border border-orange-500/50 mr-2`}
+              style={tw`h-[42px] w-[42px] items-center justify-center rounded-full bg-zinc-800 border-2 border border-orange-400 mr-2`}
             >
-              <Ionicons name="add" size={24} color="#f97316" />
+              <Ionicons name="add" size={24} color="#f98316" />
             </TouchableOpacity>
           </ScrollView>
 
@@ -545,29 +549,29 @@ const Skill = ({
             <View style={tw`flex-row gap-4 mb-4`}>
               <LinearGradient
                 colors={["#18181b", "#18181b"]}
-                style={tw`flex-1 p-4 rounded-xl border-l-4 border-orange-500`}
+                style={tw`flex-1 p-4 rounded-xl border-l-4 mt-2 border-orange-500`}
               >
                 <View style={tw`flex-row items-center gap-2 mb-1`}>
-                 {/* <Ionicons name="arrow-up" size={16} color="#f97316" /> */}
+                  {/* <Ionicons name="arrow-up" size={16} color="#f97316" /> */}
                   <Text style={tw`text-gray-400 text-sm font-medium`}>
                     Current (sec/rep)
                   </Text>
                 </View>
                 <View style={tw`flex-row items-center gap-2`}>
-                <Text style={tw`text-2xl font-bold text-orange-400`}>
-                  {skillData.current[selectedProgressionIndex]?.slice(-1)[0] ||
-                    0}
-                </Text>
-                
+                  <Text style={tw`text-2xl font-bold text-orange-400`}>
+                    {skillData.current[selectedProgressionIndex]?.slice(
+                      -1
+                    )[0] || 0}
+                  </Text>
                 </View>
               </LinearGradient>
 
               <LinearGradient
                 colors={["#18181b", "#18181b"]}
-                style={tw`flex-1 p-4 rounded-xl border-r-4 border-orange-500`}
+                style={tw`flex-1 p-4 mt-2 rounded-xl border-r-4 border-orange-500`}
               >
                 <View style={tw`flex-row items-center gap-2 mb-1`}>
-                {/*  <Ionicons name="flag" size={16} color="#f97316" /> */}
+                  {/*  <Ionicons name="flag" size={16} color="#f97316" /> */}
                   <Text style={tw`text-gray-400 text-sm font-medium`}>
                     Goal (sec/rep)
                   </Text>
@@ -578,18 +582,29 @@ const Skill = ({
               </LinearGradient>
             </View>
           </View>
-          <LinearGradient colors={["#f97316", "#d1580f"]} style={tw`w-[80] self-center mb-4 rounded-3xl p-4 `}>
-            <TouchableOpacity onPress={() => setEditModalVisible(true)}>
-            <Text
+          
+             {/*<TouchableOpacity
+              onPress={() => setEditModalVisible(true)}
               style={[
-                tw`text-white text-center font-extrabold`,
-                { fontSize: 15 },
+                tw`w-[80] self-center mb-4 rounded-3xl p-4 bg-orange-500`,
+                {
+                  shadowColor: "#f97316",
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 6,
+                },
               ]}
             >
-              UPDATE PROGRESSION
-            </Text>
-            </TouchableOpacity>
-          </LinearGradient>
+              <Text
+                style={[
+                  tw`text-white text-center font-extrabold`,
+                  { fontSize: 15 },
+                ]}
+              >
+                UPDATE PROGRESSION
+              </Text>
+            </TouchableOpacity> */}
+  
         </LinearGradient>
       </View>
 
@@ -742,7 +757,7 @@ const Skill = ({
                 value={editProgression}
                 onChange={handleEditModalChange}
                 placeholderStyle={tw`text-gray-500`}
-                selectedTextStyle={tw`text-white font-medium`}
+                selectedTextStyle={tw`text-sm p-2 text-white font-medium`}
                 itemTextStyle={tw`text-gray-300`}
                 style={[
                   tw`bg-zinc-800 text-white rounded-xl border p-2 border-orange-500/50`,

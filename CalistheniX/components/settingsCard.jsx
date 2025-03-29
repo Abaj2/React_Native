@@ -37,11 +37,11 @@ const SettingsCard = ({ iconName, cardName }) => {
       ]}
     >
         <View style={tw`flex-row`}>
-        <Ionicons style={tw`mr-3 ml-5`} name={iconName} size={20} color="orange" />
+        <Ionicons style={tw`mr-3 ml-5`} name={iconName} size={20} color="darkorange" />
       <Text style={[tw`text-white ml-3 font-bold`, {fontSize: 16}]}>{cardName}</Text>
       </View>
       <View>
-        <Ionicons style={tw`mr-3`} name="chevron-forward" size={24} color="orange" />
+        <Ionicons style={tw`mr-3`} name="chevron-forward" size={24} color="darkorange" />
       </View>
     </View>
   );

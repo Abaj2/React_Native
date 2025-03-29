@@ -89,76 +89,7 @@ const SettingsMain = () => {
         </View>
 
     
-        <View style={tw`px-5 mb-5`}>
-          <Text style={tw`text-gray-400 text-lg mb-2`}>Notifications</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("PushNotifications")}>
-            <SettingsCard iconName={"notifications-outline"} cardName={"Push Notifications"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("EmailNotifications")}>
-            <SettingsCard iconName={"mail-outline"} cardName={"Email Notifications"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("SMSNotifications")}>
-            <SettingsCard iconName={"chatbubble-ellipses-outline"} cardName={"SMS Notifications"} />
-          </TouchableOpacity>
-        </View>
-
-  
-        <View style={tw`px-5 mb-5`}>
-          <Text style={tw`text-gray-400 text-lg mb-2`}>Privacy & Security</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("PrivacyPolicy")}>
-            <SettingsCard iconName={"document-text-outline"} cardName={"Privacy Policy"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("DataUsage")}>
-            <SettingsCard iconName={"stats-chart-outline"} cardName={"Data Usage"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("BlockedUsers")}>
-            <SettingsCard iconName={"close-circle-outline"} cardName={"Blocked Users"} />
-          </TouchableOpacity>
-        </View>
-
-       
-        <View style={tw`px-5 mb-5`}>
-          <Text style={tw`text-gray-400 text-lg mb-2`}>Workout Preferences</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("WorkoutReminders")}>
-            <SettingsCard iconName={"alarm-outline"} cardName={"Workout Reminders"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("DefaultWorkoutDuration")}>
-            <SettingsCard iconName={"time-outline"} cardName={"Default Duration"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("EquipmentPreferences")}>
-            <SettingsCard iconName={"barbell-outline"} cardName={"Equipment Preferences"} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={tw`px-5 mb-5`}>
-          <Text style={tw`text-gray-400 text-lg mb-2`}>Data & Storage</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("DataUsageDetails")}>
-            <SettingsCard iconName={"download-outline"} cardName={"Data Usage"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("ClearCache")}>
-            <SettingsCard iconName={"trash-outline"} cardName={"Clear Cache"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("DownloadPreferences")}>
-            <SettingsCard iconName={"cloud-download-outline"} cardName={"Download Preferences"} />
-          </TouchableOpacity>
-        </View>
-
-
-        <View style={tw`px-5 mb-5`}>
-          <Text style={tw`text-gray-400 text-lg mb-2`}>Support & About</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("FAQ")}>
-            <SettingsCard iconName={"help-circle-outline"} cardName={"FAQ"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("ContactSupport")}>
-            <SettingsCard iconName={"chatbox-ellipses-outline"} cardName={"Contact Us"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("TermsOfService")}>
-            <SettingsCard iconName={"document-text-outline"} cardName={"Terms of Service"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("AboutApp")}>
-            <SettingsCard iconName={"information-circle-outline"} cardName={"About"} />
-          </TouchableOpacity>
-        </View>
+        
       </ScrollView>
 
  

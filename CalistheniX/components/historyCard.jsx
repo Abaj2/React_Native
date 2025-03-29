@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import Icon from "react-native-vector-icons/Feather";
 import {
   View,
   Text,
@@ -9,8 +9,10 @@ import {
   Platform,
   TouchableOpacity,
 } from "react-native";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import tw from "twrnc";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import axios from "axios";
 
 const { width } = Dimensions.get("window");
@@ -19,7 +21,13 @@ const GET_WORKOUTS_URL = Platform.select({
   ios: "http://192.168.1.155:4005/getworkouts",
 });
 
-const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber, fullBorder }) => {
+const HistoryCard = ({
+  isDarkMode,
+  onDataChange,
+  user_id,
+  widthNumber,
+  fullBorder,
+}) => {
   const [workoutsData, setWorkoutsData] = useState([]);
   const [exercisesData, setExercisesData] = useState([]);
   const [setsData, setSetsData] = useState([]);
@@ -33,7 +41,7 @@ const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber, fullBorde
         setLoading(true);
 
         const jwtToken = await AsyncStorage.getItem("jwtToken");
-        let finalUserId = user_id; 
+        let finalUserId = user_id;
 
         if (!finalUserId) {
           const storedUserData = await AsyncStorage.getItem("userData");
@@ -49,9 +57,12 @@ const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber, fullBorde
           return;
         }
 
-        const response = await axios.get(`${GET_WORKOUTS_URL}?user_id=${finalUserId}`, {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
+        const response = await axios.get(
+          `${GET_WORKOUTS_URL}?user_id=${finalUserId}`,
+          {
+            headers: { Authorization: `Bearer ${jwtToken}` },
+          }
+        );
 
         if (response.status === 200) {
           setWorkoutsData(response.data.workouts);
@@ -67,8 +78,7 @@ const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber, fullBorde
     };
 
     fetchUserDataAndWorkouts();
-  }, [user_id]); 
-
+  }, [user_id]);
 
   const toggleExpandWorkout = (workoutId) => {
     setExpandedWorkouts((prev) =>
@@ -116,6 +126,25 @@ const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber, fullBorde
       totalReps: sets.reduce((acc, set) => acc + (set.reps || 0), 0),
     };
   };
+
+  if (workoutsData.length === 0) {
+    return (
+      <View style={tw`flex-1 items-center justify-center mt-10`}>
+      <Icon
+        name="package"
+        size={60}
+        color="#ffa500"
+        style={tw`opacity-50 mb-4`}
+      />
+      <Text style={tw`text-orange-500 text-xl font-bold mb-2`}>
+        No Workout History Found
+      </Text>
+      <Text style={tw`text-zinc-500 text-center px-10`}>
+        Start your first workout to see your history
+      </Text>
+    </View>
+    );
+  }
 
   return (
     <SafeAreaView style={tw`flex-1 w-full`}>
@@ -173,31 +202,40 @@ const HistoryCard = ({ isDarkMode, onDataChange, user_id, widthNumber, fullBorde
 
               <View style={tw`flex-row justify-between mb-5`}>
                 <View style={tw`items-center`}>
-                  <Icon name="dumbbell" size={20} color="#f97316" />
+                <MaterialCommunityIcons name="dumbbell" size={20} color="#f97316" />
                   <Text style={tw`text-white font-bold mt-1`}>
                     {stats.totalExercises}
                   </Text>
-                  <Text style={tw`text-gray-400 text-xs`}>Exercises</Text>
+                  <Text style={tw`text-gray-400 text-xs`}>{`Exercise${stats.totalExercises === 1  ? '' : 's'}`}</Text>
                 </View>
                 <View style={tw`items-center`}>
-                  <Icon name="repeat" size={20} color="#f97316" />
+                <Icon name="bar-chart-2" size={20} color="#f97316" />
+                  
                   <Text style={tw`text-white font-bold mt-1`}>
                     {stats.totalSets}
                   </Text>
-                  <Text style={tw`text-gray-400 text-xs`}>Sets</Text>
+                  <Text style={tw`text-gray-400 text-xs`}>{`Set${stats.totalSets === 1 ? '' : 's'}`}</Text>
                 </View>
                 <View style={tw`items-center`}>
-                  <Icon name="chart-bar" size={20} color="#f97316" />
+                <Icon name="repeat" size={20} color="#f97316" />
                   <Text style={tw`text-white font-bold mt-1`}>
                     {stats.totalReps}
                   </Text>
-                  <Text style={tw`text-gray-400 text-xs`}>Reps</Text>
+                  <Text style={tw`text-gray-400 text-xs`}>{`Rep${stats.totalReps === 1 ? '' : 's'}`}</Text>
                 </View>
               </View>
 
               <TouchableOpacity
                 onPress={() => toggleExpandWorkout(workout.workout_id)}
-                style={tw`bg-orange-500 rounded-xl py-3`}
+                style={[
+                  tw`bg-orange-500 rounded-xl py-3`,
+                  {
+                    shadowColor: "#f97316",
+                    shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.4,
+                    shadowRadius: 6,
+                  },
+                ]}
               >
                 <View style={tw`flex-row justify-center items-center`}>
                   <Text style={tw`text-white font-medium mr-2`}>

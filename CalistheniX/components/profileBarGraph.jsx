@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
-  Alert,
   Modal,
   ScrollView,
 } from "react-native";
@@ -16,183 +15,204 @@ import { BarChart3, ChevronDown } from "lucide-react-native";
 const { width, height } = Dimensions.get("window");
 
 const ProfileBarGraph = ({ workoutDates = [], workoutTimes = [] }) => {
-  const [timeFilter, setTimeFilter] = useState('week'); // 'week' or 'month'
+  const [timeFilter, setTimeFilter] = useState("week"); // 'week' or 'month'
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   // Function to get filter display name
   const getFilterLabel = () => {
-    return timeFilter === 'week' ? 'Past Week' : 'Past Month';
+    return timeFilter === "week" ? "Past 7 Days" : "Past 30 Days";
   };
 
   // Process data based on selected time filter
   const processedData = useMemo(() => {
     const today = new Date();
+    today.setHours(23, 59, 59, 999); // Set to end of current day
+    
     let currentPeriodStart, previousPeriodStart, previousPeriodEnd;
     let periodLabel;
-    
-    if (timeFilter === 'week') {
-      // Get start of current week (Sunday)
-      const dayOfWeek = today.getDay();
+
+    if (timeFilter === "week") {
+      // Get start of past 7 days (including today)
       currentPeriodStart = new Date(today);
-      currentPeriodStart.setDate(today.getDate() - dayOfWeek);
+      currentPeriodStart.setDate(today.getDate() - 6); // 6 days ago + today = 7 days
       currentPeriodStart.setHours(0, 0, 0, 0);
-      
-      // Set end of current week (Saturday)
-      const currentPeriodEnd = new Date(currentPeriodStart);
-      currentPeriodEnd.setDate(currentPeriodStart.getDate() + 6);
-      currentPeriodEnd.setHours(23, 59, 59, 999);
-      
-      // Previous week period
+
+      // Previous 7-day period
       previousPeriodEnd = new Date(currentPeriodStart);
       previousPeriodEnd.setDate(previousPeriodEnd.getDate() - 1);
       previousPeriodStart = new Date(previousPeriodEnd);
       previousPeriodStart.setDate(previousPeriodEnd.getDate() - 6);
-      
-      periodLabel = 'This Week';
+
+      periodLabel = "Past 7 Days";
     } else {
-      // Get start of current 30-day period
+      // Get start of past 30 days (including today)
       currentPeriodStart = new Date(today);
-      currentPeriodStart.setDate(today.getDate() - 30);
+      currentPeriodStart.setDate(today.getDate() - 29); // 29 days ago + today = 30 days
       currentPeriodStart.setHours(0, 0, 0, 0);
-      
-      // Current period end is today
-      const currentPeriodEnd = today;
-      
+
       // Previous 30-day period
       previousPeriodEnd = new Date(currentPeriodStart);
       previousPeriodEnd.setDate(previousPeriodEnd.getDate() - 1);
       previousPeriodStart = new Date(previousPeriodEnd);
-      previousPeriodStart.setDate(previousPeriodEnd.getDate() - 30);
-      
-      periodLabel = 'Past 30 Days';
+      previousPeriodStart.setDate(previousPeriodEnd.getDate() - 29);
+
+      periodLabel = "Past 30 Days";
     }
-    
+
     // Function to extract workout minutes
     const getWorkoutMinutes = (timeStr) => {
-      const [hh, mm, ss] = timeStr.split(':').map(Number);
-      return (hh * 60) + mm + (ss / 60);
+      const [hh, mm, ss] = timeStr.split(":").map(Number);
+      return hh * 60 + mm + ss / 60;
     };
-    
+
     // Filter workouts for current and previous periods
     const currentPeriodWorkouts = [];
     const previousPeriodWorkouts = [];
-    
+
     for (let i = 0; i < workoutDates.length; i++) {
       const dateObj = new Date(workoutDates[i].date);
       const minutes = getWorkoutMinutes(workoutTimes[i].workout_time);
-      
+
       // Check if workout belongs to current period
       if (dateObj >= currentPeriodStart && dateObj <= today) {
         currentPeriodWorkouts.push({
           date: dateObj,
-          minutes: minutes
+          minutes: minutes,
         });
       }
-      
+
       // Check if workout belongs to previous period
       if (dateObj >= previousPeriodStart && dateObj <= previousPeriodEnd) {
         previousPeriodWorkouts.push({
           date: dateObj,
-          minutes: minutes
+          minutes: minutes,
         });
       }
     }
-    
+
     // Calculate total minutes for both periods
-    const currentTotalMinutes = currentPeriodWorkouts.reduce((sum, workout) => sum + workout.minutes, 0);
-    const previousTotalMinutes = previousPeriodWorkouts.reduce((sum, workout) => sum + workout.minutes, 0);
-    
+    const currentTotalMinutes = currentPeriodWorkouts.reduce(
+      (sum, workout) => sum + workout.minutes,
+      0
+    );
+    const previousTotalMinutes = previousPeriodWorkouts.reduce(
+      (sum, workout) => sum + workout.minutes,
+      0
+    );
+
     // Calculate percentage change
     let percentageChange = 0;
     let isPositive = false;
-    
+
     if (previousTotalMinutes > 0) {
-      percentageChange = ((currentTotalMinutes - previousTotalMinutes) / previousTotalMinutes) * 100;
+      percentageChange =
+        ((currentTotalMinutes - previousTotalMinutes) / previousTotalMinutes) *
+        100;
       isPositive = percentageChange > 0;
     } else if (currentTotalMinutes > 0) {
       percentageChange = 100;
       isPositive = true;
     }
-    
+
     // Create display data based on time filter
     let displayData = [];
-    
-    if (timeFilter === 'week') {
-      // Generate dates for current week
+
+    if (timeFilter === "week") {
+      // Generate dates for past 7 days (including today)
       const weekDates = [];
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      
+      // Start from 6 days ago
       let current = new Date(currentPeriodStart);
-      while (current <= today) {
-        weekDates.push(current.toISOString().split('T')[0]);
+      
+      for (let i = 0; i < 7; i++) {
+        weekDates.push({
+          date: current.toISOString().split("T")[0],
+          dayName: dayNames[current.getDay()],
+          displayDate: current.getDate(),
+        });
+        
+        // Move to next day
         current.setDate(current.getDate() + 1);
       }
-      
+
       // Group workout minutes by day
       const groupedData = {};
-      currentPeriodWorkouts.forEach(workout => {
-        const dateKey = workout.date.toISOString().split('T')[0];
+      currentPeriodWorkouts.forEach((workout) => {
+        const dateKey = workout.date.toISOString().split("T")[0];
         groupedData[dateKey] = (groupedData[dateKey] || 0) + workout.minutes;
       });
-      
+
       // Create data array for each day of the week
-      displayData = weekDates.map(date => {
-        const dayObj = new Date(date);
+      displayData = weekDates.map((dateInfo) => {
         return {
-          label: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dayObj.getDay()],
-          value: Math.round(groupedData[date] || 0),
-          date: date
+          label: dateInfo.dayName,
+          subLabel: dateInfo.displayDate.toString(),
+          value: Math.round(groupedData[dateInfo.date] || 0),
+          date: dateInfo.date,
         };
       });
     } else {
-      // For month view: group by week
-      const numWeeks = 4; // Show last 4 weeks
-      const endDate = new Date(today);
+      // For month view: divide 30 days into 6 periods of 5 days each
+      const periodCount = 6;
+      const daysPerPeriod = 5;
       
-      // Initialize array for each week
-      const monthData = Array(numWeeks).fill(0).map((_, index) => {
-        const weekEnd = new Date(endDate);
-        weekEnd.setDate(endDate.getDate() - (index * 7));
-        const weekStart = new Date(weekEnd);
-        weekStart.setDate(weekEnd.getDate() - 6);
+      // Create an array of date ranges
+      const dateRanges = [];
+      let rangeStart = new Date(currentPeriodStart);
+      
+      for (let i = 0; i < periodCount; i++) {
+        const rangeEnd = new Date(rangeStart);
+        rangeEnd.setDate(rangeStart.getDate() + daysPerPeriod - 1);
         
-        // Format: "Mar 1-7" or similar
-        const startMonth = weekStart.toLocaleString('default', { month: 'short' });
-        const endMonth = weekEnd.toLocaleString('default', { month: 'short' });
-        const label = startMonth === endMonth 
-          ? `${startMonth} ${weekStart.getDate()}-${weekEnd.getDate()}`
-          : `${startMonth} ${weekStart.getDate()}-${endMonth} ${weekEnd.getDate()}`;
-          
-        return {
-          label,
-          value: 0,
-          startDate: new Date(weekStart),
-          endDate: new Date(weekEnd)
-        };
-      }).reverse(); // Reverse to show oldest to newest
+        // Ensure we don't go beyond today
+        if (rangeEnd > today) {
+          rangeEnd.setTime(today.getTime());
+        }
+        
+        const startFormat = rangeStart.getDate();
+        const endFormat = rangeEnd.getDate();
+        const monthFormat = rangeStart.toLocaleString('default', { month: 'short' });
+        
+        dateRanges.push({
+          label: `${startFormat}-${endFormat}`,
+          subLabel: monthFormat,
+          startDate: new Date(rangeStart),
+          endDate: new Date(rangeEnd),
+          value: 0
+        });
+        
+        // Set start of next range
+        rangeStart = new Date(rangeEnd);
+        rangeStart.setDate(rangeEnd.getDate() + 1);
+        
+        // Break if we've reached today
+        if (rangeStart > today) break;
+      }
       
-      // Aggregate minutes by week
-      currentPeriodWorkouts.forEach(workout => {
-        for (let i = 0; i < monthData.length; i++) {
-          const week = monthData[i];
-          if (workout.date >= week.startDate && workout.date <= week.endDate) {
-            week.value += workout.minutes;
+      // Aggregate minutes by period
+      currentPeriodWorkouts.forEach((workout) => {
+        for (const range of dateRanges) {
+          if (workout.date >= range.startDate && workout.date <= range.endDate) {
+            range.value += workout.minutes;
             break;
           }
         }
       });
-      
-      displayData = monthData.map(week => ({
-        ...week,
-        value: Math.round(week.value)
+
+      displayData = dateRanges.map(range => ({
+        ...range,
+        value: Math.round(range.value)
       }));
     }
-    
+
     // Calculate hours and minutes from total minutes
     const hours = Math.floor(currentTotalMinutes / 60);
     const minutes = Math.round(currentTotalMinutes % 60);
-    
+
     // Find maximum value for scaling (minimum 60 to prevent empty graph)
-    const maxValue = Math.max(...displayData.map(d => d.value), 60);
-    
+    const maxValue = Math.max(...displayData.map((d) => d.value), 60);
+
     return {
       displayData,
       maxValue,
@@ -202,7 +222,7 @@ const ProfileBarGraph = ({ workoutDates = [], workoutTimes = [] }) => {
       isPositive,
       periodLabel,
       currentTotalMinutes,
-      previousTotalMinutes
+      previousTotalMinutes,
     };
   }, [timeFilter, workoutDates, workoutTimes]);
 
@@ -210,28 +230,30 @@ const ProfileBarGraph = ({ workoutDates = [], workoutTimes = [] }) => {
     <View style={tw`mx-2 mb-6`}>
       <LinearGradient
         colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
-        style={tw`rounded-2xl mt-5 p-5 border border-zinc-800`}
+        style={tw`rounded-2xl mt-5 p-5 border border-zinc-800/50`}
       >
         <View style={tw`flex-row justify-between items-center mb-4`}>
           <Text style={tw`font-bold text-lg text-white`}>
-            {timeFilter === 'week' ? 'Weekly Progress' : 'Monthly Progress'}
+            {timeFilter === "week" ? "Weekly Progress" : "Monthly Progress"}
           </Text>
-          
+
           {/* Time filter dropdown button */}
           <View style={tw`flex-row items-center`}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={tw`flex-row items-center bg-zinc-800/70 px-3 py-1.5 rounded-full mr-2`}
               onPress={() => setDropdownVisible(true)}
             >
-              <Text style={tw`text-zinc-300 text-sm mr-1.5`}>{getFilterLabel()}</Text>
+              <Text style={tw`text-zinc-300 text-sm mr-1.5`}>
+                {getFilterLabel()}
+              </Text>
               <ChevronDown size={16} color="#d4d4d4" />
             </TouchableOpacity>
-            
+
             <View style={tw`bg-orange-500/20 p-1 rounded-full`}>
               <BarChart3 size={18} color="#f97316" />
             </View>
           </View>
-          
+
           {/* Dropdown modal */}
           <Modal
             transparent={true}
@@ -239,58 +261,88 @@ const ProfileBarGraph = ({ workoutDates = [], workoutTimes = [] }) => {
             animationType="fade"
             onRequestClose={() => setDropdownVisible(false)}
           >
-            <TouchableOpacity 
-              style={tw`flex-1 bg-black/60`} 
-              activeOpacity={1} 
+            <TouchableOpacity
+              style={tw`flex-1 bg-black/60`}
+              activeOpacity={1}
               onPress={() => setDropdownVisible(false)}
             >
-              <View style={tw`absolute top-20 right-6 bg-zinc-800 rounded-lg shadow-xl overflow-hidden`}>
-                <TouchableOpacity 
-                  style={tw`px-6 py-3 border-b border-zinc-700 flex-row items-center ${timeFilter === 'week' ? 'bg-orange-500/10' : ''}`}
+              <View
+                style={tw`absolute top-20 right-6 bg-zinc-800 rounded-lg shadow-xl overflow-hidden`}
+              >
+                <TouchableOpacity
+                  style={tw`px-6 py-3 border-b border-zinc-700 flex-row items-center ${
+                    timeFilter === "week" ? "bg-orange-500/10" : ""
+                  }`}
                   onPress={() => {
-                    setTimeFilter('week');
+                    setTimeFilter("week");
                     setDropdownVisible(false);
                   }}
                 >
-                  {timeFilter === 'week' && (
-                    <Ionicons name="checkmark" size={18} color="#f97316" style={tw`mr-2`} />
+                  {timeFilter === "week" && (
+                    <Ionicons
+                      name="checkmark"
+                      size={18}
+                      color="#f97316"
+                      style={tw`mr-2`}
+                    />
                   )}
-                  <Text style={tw`text-white text-base ${timeFilter === 'week' ? 'font-bold text-orange-400' : ''}`}>Past Week</Text>
+                  <Text
+                    style={tw`text-white text-base ${
+                      timeFilter === "week" ? "font-bold text-orange-400" : ""
+                    }`}
+                  >
+                    Past 7 Days
+                  </Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  style={tw`px-6 py-3 flex-row items-center ${timeFilter === 'month' ? 'bg-orange-500/10' : ''}`}
+                <TouchableOpacity
+                  style={tw`px-6 py-3 flex-row items-center ${
+                    timeFilter === "month" ? "bg-orange-500/10" : ""
+                  }`}
                   onPress={() => {
-                    setTimeFilter('month');
+                    setTimeFilter("month");
                     setDropdownVisible(false);
                   }}
                 >
-                  {timeFilter === 'month' && (
-                    <Ionicons name="checkmark" size={18} color="#f97316" style={tw`mr-2`} />
+                  {timeFilter === "month" && (
+                    <Ionicons
+                      name="checkmark"
+                      size={18}
+                      color="#f97316"
+                      style={tw`mr-2`}
+                    />
                   )}
-                  <Text style={tw`text-white text-base ${timeFilter === 'month' ? 'font-bold text-orange-400' : ''}`}>Past Month</Text>
+                  <Text
+                    style={tw`text-white text-base ${
+                      timeFilter === "month" ? "font-bold text-orange-400" : ""
+                    }`}
+                  >
+                    Past 30 Days
+                  </Text>
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
           </Modal>
         </View>
-        
+
         {/* Graph Container */}
-        <ScrollView 
-          horizontal={timeFilter === 'month'} 
+        <ScrollView
+          horizontal={timeFilter === "month"}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={[
             tw`pb-3`,
-            timeFilter === 'month' ? { paddingRight: 20 } : { width: '100%' }
+            timeFilter === "month" ? { paddingRight: 20 } : { width: "100%" },
           ]}
         >
           <View style={tw`flex-row justify-between items-end h-32 mb-4`}>
             {processedData.displayData.map((item, index) => (
-              <TouchableOpacity 
+              <TouchableOpacity
                 key={index}
                 onPress={() => {
                   // Show tooltip logic here if needed
                 }}
-                style={tw`flex-col items-center ${timeFilter === 'month' ? 'mx-2.5 w-20' : ''}`}
+                style={tw`flex-col items-center ${
+                  timeFilter === "month" ? "mx-2.5 w-20" : ""
+                }`}
               >
                 {/* Value label above bar for non-zero values */}
                 <View style={tw`h-6 justify-end`}>
@@ -300,45 +352,52 @@ const ProfileBarGraph = ({ workoutDates = [], workoutTimes = [] }) => {
                     </Text>
                   )}
                 </View>
-                
+
                 <View style={tw`flex-grow flex items-end h-full justify-end`}>
-                  <View 
+                  <View
                     style={[
                       tw`w-10 rounded-t-sm`,
                       item.value > 0 ? tw`bg-orange-500` : tw`bg-zinc-700`,
                       {
                         height: `${(item.value / processedData.maxValue) * 100}%`,
-                        minHeight: item.value > 0 ? 4 : 2
-                      }
+                        minHeight: item.value > 0 ? 4 : 2,
+                      },
                     ]}
                   />
                 </View>
-                
-                {/* Day/Week label */}
-                <Text 
-                  style={tw`text-xs text-zinc-400 mt-2 text-center`}
-                  numberOfLines={timeFilter === 'month' ? 2 : 1}
-                >
-                  {item.label}
-                </Text>
+
+                {/* Day/Week label with day number for week view */}
+                <View style={tw`mt-2 items-center`}>
+                  <Text style={tw`text-xs text-zinc-400 text-center`}>
+                    {item.label}
+                  </Text>
+                  {item.subLabel && (
+                    <Text style={tw`text-xs text-zinc-500 text-center`}>
+                      {item.subLabel}
+                    </Text>
+                  )}
+                </View>
               </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
-        
+
         <View style={tw`flex-row justify-between mt-6 border-t border-zinc-700 pt-4`}>
           <View>
             <Text style={tw`text-xs text-zinc-400`}>{processedData.periodLabel}</Text>
             <Text style={tw`text-xl font-bold text-white`}>{`${processedData.hours}h ${processedData.minutes}m`}</Text>
-            
+
             {/* Additional insights */}
             {processedData.previousTotalMinutes > 0 && (
               <Text style={tw`text-xs text-zinc-500 mt-1`}>
-                {processedData.isPositive ? 'Up' : 'Down'} from {Math.floor(processedData.previousTotalMinutes / 60)}h {Math.round(processedData.previousTotalMinutes % 60)}m {timeFilter === 'week' ? 'last week' : 'previous month'}
+                {processedData.isPositive ? "Up" : "Down"} from{" "}
+                {Math.floor(processedData.previousTotalMinutes / 60)}h{" "}
+                {Math.round(processedData.previousTotalMinutes % 60)}m{" "}
+                {timeFilter === "week" ? "previous 7 days" : "previous 30 days"}
               </Text>
             )}
           </View>
-          
+
           <View style={tw`flex-row items-center`}>
             <View style={tw`flex-row items-center mt-2`}>
               {processedData.previousTotalMinutes > 0 && (
@@ -358,12 +417,14 @@ const ProfileBarGraph = ({ workoutDates = [], workoutTimes = [] }) => {
                   </Text>
                 </>
               )}
-              {processedData.previousTotalMinutes === 0 && processedData.currentTotalMinutes > 0 && (
-                <Text style={tw`text-green-500 text-sm font-bold`}>New</Text>
-              )}
-              {processedData.previousTotalMinutes === 0 && processedData.currentTotalMinutes === 0 && (
-                <Text style={tw`text-zinc-400 text-sm`}>No data</Text>
-              )}
+              {processedData.previousTotalMinutes === 0 &&
+                processedData.currentTotalMinutes > 0 && (
+                  <Text style={tw`text-green-500 text-sm font-bold`}>New</Text>
+                )}
+              {processedData.previousTotalMinutes === 0 &&
+                processedData.currentTotalMinutes === 0 && (
+                  <Text style={tw`text-zinc-400 text-sm`}>No data</Text>
+                )}
             </View>
           </View>
         </View>

@@ -186,8 +186,10 @@ const UserProfile = ({ navigation, route }) => {
   );
 
   return (
+    
     <View style={tw`flex-1 w-full`}>
       <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1 w-full`}>
+      <SafeAreaView style={tw`flex-1 bg-black`}>
         <View
           style={tw`flex-row items-center gap-26 px-4 pt-4 pb-2 border-b border-zinc-800`}
         >
@@ -365,6 +367,7 @@ const UserProfile = ({ navigation, route }) => {
             )}
           </View>
         </ScrollView>
+        </SafeAreaView>
       </LinearGradient>
     </View>
   );

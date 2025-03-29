@@ -669,7 +669,7 @@ const Workouts = ({ isDarkMode }) => {
                   >
                     <LinearGradient
                       colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
-                      style={tw`rounded-2xl absolute top-0 left-0 right-0 bottom-0 border border-zinc-800`}
+                      style={tw`rounded-2xl absolute top-0 left-0 right-0 bottom-0 border border-zinc-800/50`}
                     />
 
                     <View style={tw`p-4 relative z-10 h-full justify-between`}>
@@ -797,7 +797,7 @@ const Workouts = ({ isDarkMode }) => {
             >
               <LinearGradient
                 colors={["#18181b", "#09090b"]}
-                style={tw`border-b border-orange-800 p-6 rounded-t-3xl`}
+                style={tw`border-b border-orange-500 p-6 rounded-t-3xl`}
               >
                 <View style={tw`flex-row justify-between items-center`}>
                   <View>

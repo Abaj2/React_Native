@@ -11,6 +11,7 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -72,7 +73,7 @@ const ProfileScreen = () => {
   const navigation = useNavigation();
   const [username, setUsername] = useState();
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [imageKey, setImageKey] = useState(0);
 
@@ -86,10 +87,26 @@ const ProfileScreen = () => {
     totalWorkouts: 0,
     totalSkills: 0,
   });
-  const [isLoading, setIsLoading] = useState(true);
 
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
+
+  const fetchAllData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const userData = await fetchUserData();
+      if (userData) {
+        await fetchStats(userData);
+
+        const profilePicUrl = await getProfilePictureUrl(userData.user_id);
+        setProfilePicUrl(profilePicUrl);
+      }
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchUserData, fetchStats]);
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -98,7 +115,6 @@ const ProfileScreen = () => {
         const parsedUserData = JSON.parse(storedUserData);
         setUserData(parsedUserData);
         setUsername(parsedUserData.username);
-
         return parsedUserData;
       }
       return null;
@@ -108,56 +124,72 @@ const ProfileScreen = () => {
     }
   }, []);
 
-  const fetchStats = useCallback(async (userData) => {
-    if (!userData?.user_id) return;
+  const fetchStats = useCallback(
+    async (userData) => {
+      if (!userData?.user_id) return;
+      try {
+        const token = await AsyncStorage.getItem("jwtToken");
+        const response = await axios.get(
+          `${GET_STATS_URL}?user_id=${userData.user_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
+        if (response.status === 200 && response.data.stats) {
+          setStats({
+            totalWorkouts: response.data.stats.totalWorkouts || 0,
+            totalSkills: response.data.stats.totalSkills || 0,
+            totalDuration: response.data.stats.totalDuration || 0,
+          });
+          setFollowers(response.data.stats.followers);
+          setFollowing(response.data.stats.following);
+          setWorkoutDates(response.data.stats.workoutDates);
+        }
+      } catch (error) {
+        console.error("Error getting stats:", error);
+      }
+    },
+    [userData?.user_id]
+  );
+
+  const getProfilePictureUrl = async (userId) => {
     try {
       const token = await AsyncStorage.getItem("jwtToken");
-      const response = await axios.get(
-        `${GET_STATS_URL}?user_id=${userData.user_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200 && response.data.stats) {
-        setStats({
-          totalWorkouts: response.data.stats.totalWorkouts || 0,
-          totalSkills: response.data.stats.totalSkills || 0,
-          totalDuration: response.data.stats.totalDuration || 0,
-        });
-
-        setFollowers(response.data.stats.followers);
-        setFollowing(response.data.stats.following);
-        setWorkoutDates(response.data.stats.workoutDates);
-      }
+      const response = await axios.get(GET_PROFILE_PIC_URL, {
+        params: { user_id: userId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.status === 200 && response.data.profile_pic
+        ? response.data.profile_pic
+        : `https://calisthenix.s3.ap-southeast-2.amazonaws.com/profile_pics/blackDefaultProfilePic.png`;
     } catch (error) {
-      console.error("Error getting stats:", error);
-    } finally {
-      setIsLoading(false);
+      return `https://calisthenix.s3.ap-southeast-2.amazonaws.com/profile_pics/blackDefaultProfilePic.png`;
     }
-  }, []);
+  };
+  useEffect(() => {
+    fetchAllData();
 
-  useFocusEffect(
-    useCallback(() => {
-      const initializeData = async () => {
-        setIsLoading(true);
+    // Optional cleanup (this function will be called on unmount or when dependencies change)
+    return () => {
+      // Cleanup code here, if needed
+    };
+  }, [fetchAllData]); // Dependency array ensures that the effect runs only when `fetchAllData` changes
 
-        const userData = await fetchUserData();
-        if (userData) {
-          await fetchStats(userData);
-        } else {
-          setIsLoading(false);
-        }
-      };
+  // ... (keep all your other functions)
 
-      initializeData();
-
-      return () => {};
-    }, [fetchUserData, fetchStats])
-  );
+  if (isLoading) {
+    return (
+      <LinearGradient
+        colors={["#000", "#1a1a1a"]}
+        style={tw`flex-1 justify-center items-center`}
+      >
+        <ActivityIndicator size="large" color="gray" />
+      </LinearGradient>
+    );
+  }
 
   AWS.config.update({
     region: awsRegion,
@@ -262,32 +294,6 @@ const ProfileScreen = () => {
     } catch (error) {
       console.error("Error uploading profile picture:", error);
       throw new Error("Failed to upload profile picture");
-    }
-  };
-
-  const getProfilePictureUrl = async () => {
-    try {
-      const token = await AsyncStorage.getItem("jwtToken");
-      const response = await axios.get(GET_PROFILE_PIC_URL, {
-        params: {
-          user_id: userData.user_id,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 200 && response.data.profile_pic) {
-        console.log(response.data.profile_pic);
-        return response.data.profile_pic;
-      } else {
-        console.log("No profile pic found, returning default.");
-        return "https://calisthenix.s3.ap-southeast-2.amazonaws.com/profile_pics/blackDefaultProfilePic.png";
-      }
-    } catch (error) {
-      console.error("Error fetching profile picture:", error);
-
-      return "https://calisthenix.s3.ap-southeast-2.amazonaws.com/profile_pics/blackDefaultProfilePic.png";
     }
   };
 
@@ -531,29 +537,13 @@ const ProfileScreen = () => {
       calendarDays.push(day);
     }
 
-    useEffect(() => {
-      if (userData?.user_id) {
-        const fetchProfilePicture = async () => {
-          try {
-            const url = await getProfilePictureUrl();
-            setProfilePicUrl(url);
-          } catch (error) {
-            console.error("Error fetching profile picture:", error);
-          } finally {
-            setLoading(false);
-          }
-        };
-
-        fetchProfilePicture();
-      } else {
-        setLoading(false);
-      }
-    }, [userData?.user_id]);
     return (
       <View style={tw`mb-6`}>
         <View style={tw`flex-row items-center justify-between mb-4`}>
-          <Text style={tw`text-white text-xl font-bold`}>Workout Calendar</Text>
-          <View style={tw`flex-row items-center`}>
+          <Text style={tw`text-white text-xl font-bold ml-1`}>
+            Workout Calendar
+          </Text>
+          <View style={tw`flex-row items-center mr-2`}>
             <Ionicons name="flame" size={16} color="#f97316" />
             <Text style={tw`text-orange-500 text-xs font-bold ml-1`}>
               {workoutDates ? calculateDailyStreak(workoutDates) : 0} Day Streak
@@ -563,7 +553,7 @@ const ProfileScreen = () => {
 
         <View style={tw`p-4 rounded-3xl border border-zinc-700/20`}>
           {/* Weekday labels */}
-          <View style={tw`flex-row justify-between mb-3`}>
+          <View style={tw`ml-5 flex-row gap-10 mb-5`}>
             {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
               <Text key={index} style={tw`text-gray-400 text-center text-xs`}>
                 {day}
@@ -621,9 +611,7 @@ const ProfileScreen = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={tw`pb-30`}
         >
-          {/* Profile Header Section */}
-          <View style={tw`px-2 mt-5 pb-8 rounded-b-[40px]`}>
-            {/* User Info Row */}
+          <View style={tw`px-2 mt-5 pb-2 rounded-b-[40px]`}>
             <View style={tw`flex-row items-center mb-6`}>
               <TouchableOpacity
                 onPress={handleChangeProfilePicture}
@@ -656,12 +644,13 @@ const ProfileScreen = () => {
               </View>
             </View>
 
-            {/* Stats Cards Row */}
-            <View style={tw`flex-row justify-between gap-3`}>
+            {/*<View style={tw`flex-row justify-between gap-3`}>
               <View
                 style={tw`flex-1 bg-zinc-900/80 rounded-2xl p-4 border border-zinc-800`}
               >
-                <TouchableOpacity onPress={() => navigation.navigate('Followers')}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Followers")}
+                >
                   <Text style={tw`text-white text-xl font-bold text-center`}>
                     {followers.length || 0}
                   </Text>
@@ -674,7 +663,9 @@ const ProfileScreen = () => {
               <View
                 style={tw`flex-1 bg-zinc-900/80 rounded-2xl p-4 border border-zinc-800`}
               >
-                <TouchableOpacity onPress={() => navigation.navigate('Following')}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Following")}
+                >
                   <Text style={tw`text-white text-xl font-bold text-center`}>
                     {following.length || 0}
                   </Text>
@@ -683,18 +674,16 @@ const ProfileScreen = () => {
                   </Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </View> */}
           </View>
 
-          {/* Main Content Area */}
           <View style={tw`px-2`}>
-            {/* Progress Summary Section */}
             <View style={tw`mb-6`}>
               <View style={tw`flex-row items-center justify-between mb-4`}>
-                <Text style={tw`text-white text-xl font-bold`}>
+                <Text style={tw`ml-2 text-white text-xl font-bold`}>
                   Progress Summary
                 </Text>
-                <View style={tw`bg-orange-500/20 px-3 py-1 rounded-full`}>
+                <View style={tw`bg-orange-500/20 px-3 py-1 rounded-full mr-1`}>
                   <Text style={tw`text-orange-500 text-xs font-bold`}>
                     {new Date().toLocaleString("default", { month: "long" })}{" "}
                     {new Date().getFullYear()}
@@ -718,9 +707,6 @@ const ProfileScreen = () => {
                       <Text style={tw`text-white font-bold text-lg`}>
                         Workouts
                       </Text>
-                      <Text style={tw`text-gray-400 text-xs`}>
-                        Total Workouts
-                      </Text>
                     </View>
                   </View>
                   <Text style={tw`text-white text-2xl font-bold`}>
@@ -740,7 +726,6 @@ const ProfileScreen = () => {
                       <Text style={tw`text-white font-bold text-lg`}>
                         Training Time
                       </Text>
-                      <Text style={tw`text-gray-400 text-xs`}>Total hours</Text>
                     </View>
                   </View>
                   <Text style={tw`text-white text-2xl font-bold`}>
@@ -758,9 +743,6 @@ const ProfileScreen = () => {
                       <Text style={tw`text-white font-bold text-lg`}>
                         Skills
                       </Text>
-                      <Text style={tw`text-gray-400 text-xs`}>
-                        Total skills
-                      </Text>
                     </View>
                   </View>
                   <Text style={tw`text-white text-2xl font-bold`}>
@@ -774,8 +756,8 @@ const ProfileScreen = () => {
             {workoutCalender(workoutDates)}
 
             {/* Quick Actions Section */}
-            <View style={tw`mb-6 px-2`}>
-              <Text style={tw`text-white text-xl font-bold mb-4`}>
+            <View style={tw`mb-6`}>
+              <Text style={tw`ml-1 text-white text-xl font-bold mb-4`}>
                 Quick Actions
               </Text>
 
@@ -811,7 +793,7 @@ const ProfileScreen = () => {
             {/* Recent Workouts Section */}
             <View style={tw`mb-8`}>
               <View style={tw`flex-row items-center justify-between mb-4`}>
-                <Text style={tw`text-white text-xl font-bold`}>
+                <Text style={tw`ml-1 text-white text-xl font-bold`}>
                   Recent Workouts
                 </Text>
               </View>

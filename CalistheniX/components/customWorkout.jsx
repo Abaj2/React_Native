@@ -31,6 +31,10 @@ const CustomWorkout = () => {
   const [title, setTitle] = useState("");
   const [currentExercise, setCurrentExercise] = useState(0);
   const [newWorkoutSummary, setNewWorkoutSummary] = useState("");
+  const [isTargetModalVisible, setTargetModalVisible] = useState(false);
+  const [restDuration, setRestDuration] = useState(0);
+  const [timerInterval, setTimerInterval] = useState(null);
+  const [restTimer, setRestTimer] = useState(0);
   const [timer, setTimer] = useState(0);
   const [timerRunning, setTimerRunning] = useState(true);
 
@@ -60,7 +64,6 @@ const CustomWorkout = () => {
     }
     return [];
   });
-  
 
   useEffect(() => {
     let intervalId;
@@ -139,19 +142,18 @@ const CustomWorkout = () => {
   };
 
   const stopTimer = () => {
-    
     setTimerRunning(false);
   };
   const cancelWorkout = () => {
-      stopTimer();
-      Alert.alert("Exit Workout?", "Your progress will be lost.", [
-        {
-          text: "OK",
-          onPress: () => navigation.navigate("Home"),
-          style: "cancel",
-        },
-      ]);
-    };
+    stopTimer();
+    Alert.alert("Exit Workout?", "Your progress will be lost.", [
+      {
+        text: "OK",
+        onPress: () => navigation.navigate("Home"),
+        style: "cancel",
+      },
+    ]);
+  };
 
   const finishWorkout = async () => {
     try {
@@ -161,7 +163,7 @@ const CustomWorkout = () => {
       const user_id = parsedUserData.user_id;
 
       if (exercisesArray) {
-        console.log(exercisesArray)
+        console.log(exercisesArray);
         setTitle(workoutName);
       }
 
@@ -200,6 +202,74 @@ const CustomWorkout = () => {
     }
   };
 
+    const startRestTimer = () => {
+      // Show options for rest duration selection
+      Alert.alert(
+        "Rest Timer",
+        "Select rest duration:",
+        [
+          { text: "15s", onPress: () => setRestTimerWithDuration(15) },
+          { text: "30s", onPress: () => setRestTimerWithDuration(30) },
+          { text: "45s", onPress: () => setRestTimerWithDuration(45) },
+          { text: "60s", onPress: () => setRestTimerWithDuration(60) },
+          { text: "75s", onPress: () => setRestTimerWithDuration(75) },
+          { text: "90s", onPress: () => setRestTimerWithDuration(90) },
+          { text: "Custom", onPress: showCustomRestInput },
+        ],
+        { cancelable: true }
+      );
+    };
+  
+    const showCustomRestInput = () => {
+      // Show input for custom duration
+      Alert.prompt(
+        "Custom Rest Time",
+        "Enter rest time in seconds:",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "OK",
+            onPress: (seconds) => {
+              const duration = parseInt(seconds);
+              if (!isNaN(duration) && duration > 0) {
+                setRestTimerWithDuration(duration);
+              } else {
+                Alert.alert("Invalid Input", "Please enter a valid number.");
+              }
+            },
+          },
+        ],
+        "plain-text",
+        "",
+        "numeric"
+      );
+    };
+  
+    const setRestTimerWithDuration = (duration) => {
+      setRestDuration(duration);
+      setRestTimer(duration);
+      setTargetModalVisible(true);
+  
+      // Clear any existing interval
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+  
+      // Set up new interval
+      const interval = setInterval(() => {
+        setRestTimer((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(interval);
+            setTargetModalVisible(false);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+  
+      setTimerInterval(interval);
+    };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
@@ -209,12 +279,11 @@ const CustomWorkout = () => {
             contentContainerStyle={tw`flex-grow`}
           >
             {/* Header */}
-            <View style={tw`px-4 py-3 border-b border-orange-500/30 bg-black/20`}>
+            <View
+              style={tw`px-4 py-3 border-b border-orange-500/30 bg-black/20`}
+            >
               <View style={tw`flex-row items-center justify-between`}>
-                <TouchableOpacity
-                  style={tw`p-2`}
-                  onPress={cancelWorkout}
-                >
+                <TouchableOpacity style={tw`p-2`} onPress={cancelWorkout}>
                   <Ionicons name="close" size={24} color="white" />
                 </TouchableOpacity>
                 {!workoutName ? (
@@ -226,7 +295,9 @@ const CustomWorkout = () => {
                     onChangeText={setTitle}
                   />
                 ) : (
-                  <Text style={tw`flex-1 mx-4 text-white text-lg font-semibold text-center`}>
+                  <Text
+                    style={tw`flex-1 mx-4 text-white text-lg font-semibold text-center`}
+                  >
                     {workoutName}
                   </Text>
                 )}
@@ -238,7 +309,7 @@ const CustomWorkout = () => {
                 </TouchableOpacity>
               </View>
             </View>
-  
+
             {/* Add Exercise Input */}
             <View style={tw`px-4 py-3 border-b border-gray-800/50 bg-black/10`}>
               <View style={tw`flex-row items-center gap-2`}>
@@ -258,7 +329,7 @@ const CustomWorkout = () => {
                 </TouchableOpacity>
               </View>
             </View>
-  
+
             {/* Exercise List */}
             {workoutSummary.length > 0 && (
               <View style={tw`border-b border-gray-800/50 bg-black/10`}>
@@ -291,7 +362,7 @@ const CustomWorkout = () => {
                 </ScrollView>
               </View>
             )}
-  
+
             {/* Sets */}
             {workoutSummary.length > 0 && (
               <View style={tw`p-4`}>
@@ -300,60 +371,117 @@ const CustomWorkout = () => {
                     key={setIndex}
                     style={tw`mb-4 bg-black/20 rounded-lg border border-gray-800/50`}
                   >
-                    <View style={tw`px-4 py-3 border-b border-gray-800/50`}>
-                      <Text style={tw`text-white font-semibold`}>Set {setIndex + 1}</Text>
+                    <View style={tw`px-4 py-3 items-center flex-row justify-between border-b border-gray-800/50`}>
+                      <Text style={tw`text-white font-semibold`}>
+                        Set {setIndex + 1}
+                      </Text>
+                      <TouchableOpacity
+                        style={tw`flex-row items-center bg-orange-500/10 px-3 py-1 rounded-lg border border-orange-500/30`}
+                        onPress={() => {
+                          startRestTimer();
+                        }}
+                      >
+                        <Ionicons
+                          name="timer-outline"
+                          size={16}
+                          color="#f97316"
+                          style={tw`mr-1`}
+                        />
+                        <Text style={tw`text-orange-400 font-medium`}>
+                          Rest
+                        </Text>
+                      </TouchableOpacity>
                     </View>
                     <View style={tw`p-4`}>
-                      <View style={tw`flex-row mb-4 bg-black/30 rounded-lg border border-gray-800/50`}>
+                      <View
+                        style={tw`flex-row mb-4 bg-black/30 rounded-lg border border-gray-800/50`}
+                      >
                         <TouchableOpacity
                           style={tw`flex-1 py-2 ${
-                            set.type === "reps" ? "bg-orange-500" : "bg-transparent"
+                            set.type === "reps"
+                              ? "bg-orange-500"
+                              : "bg-transparent"
                           } rounded-lg`}
-                          onPress={() => updateSet(currentExercise, setIndex, "type", "reps")}
+                          onPress={() =>
+                            updateSet(currentExercise, setIndex, "type", "reps")
+                          }
                         >
-                          <Text style={tw`text-white font-semibold text-center`}>Reps</Text>
+                          <Text
+                            style={tw`text-white font-semibold text-center`}
+                          >
+                            Reps
+                          </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={tw`flex-1 py-2 ${
-                            set.type === "duration" ? "bg-orange-500" : "bg-transparent"
+                            set.type === "duration"
+                              ? "bg-orange-500"
+                              : "bg-transparent"
                           } rounded-lg`}
-                          onPress={() => updateSet(currentExercise, setIndex, "type", "duration")}
+                          onPress={() =>
+                            updateSet(
+                              currentExercise,
+                              setIndex,
+                              "type",
+                              "duration"
+                            )
+                          }
                         >
-                          <Text style={tw`text-white font-semibold text-center`}>Duration</Text>
+                          <Text
+                            style={tw`text-white font-semibold text-center`}
+                          >
+                            Duration
+                          </Text>
                         </TouchableOpacity>
                       </View>
-  
+
                       {set.type === "reps" ? (
                         <View style={tw`mb-4`}>
-                          <Text style={tw`text-gray-400 text-sm mb-1`}>Reps</Text>
+                          <Text style={tw`text-gray-400 text-sm mb-1`}>
+                            Reps
+                          </Text>
                           <TextInput
                             style={tw`bg-black/30 text-white px-4 py-2 rounded-lg border border-gray-800/50`}
                             placeholder="e.g. 12"
                             placeholderTextColor="#6b7280"
                             value={set.reps}
                             onChangeText={(value) =>
-                              updateSet(currentExercise, setIndex, "reps", value)
+                              updateSet(
+                                currentExercise,
+                                setIndex,
+                                "reps",
+                                value
+                              )
                             }
                             keyboardType="number-pad"
                           />
                         </View>
                       ) : (
                         <View style={tw`mb-4`}>
-                          <Text style={tw`text-gray-400 text-sm mb-1`}>Duration</Text>
+                          <Text style={tw`text-gray-400 text-sm mb-1`}>
+                            Duration
+                          </Text>
                           <TextInput
                             style={tw`bg-black/30 text-white px-4 py-2 rounded-lg border border-gray-800/50`}
                             placeholder="e.g. 30s"
                             placeholderTextColor="#6b7280"
                             value={set.duration}
                             onChangeText={(value) =>
-                              updateSet(currentExercise, setIndex, "duration", value)
+                              updateSet(
+                                currentExercise,
+                                setIndex,
+                                "duration",
+                                value
+                              )
                             }
                           />
                         </View>
                       )}
-  
+
                       <View>
-                        <Text style={tw`text-gray-400 text-sm mb-1`}>Notes</Text>
+                        <Text style={tw`text-gray-400 text-sm mb-1`}>
+                          Notes
+                        </Text>
                         <TextInput
                           style={tw`bg-black/30 text-white px-4 py-2 rounded-lg border border-gray-800/50`}
                           placeholder="Add notes for this set..."
@@ -368,26 +496,74 @@ const CustomWorkout = () => {
                     </View>
                   </View>
                 ))}
-  
+                 {isTargetModalVisible && (
+              <View
+                style={tw`w-full p-4 border border-gray-800/50 rounded-lg items-center`}
+              >
+                <Text style={tw`text-white text-lg font-bold mb-1`}>
+                  Rest Timer
+                </Text>
+
+                <Text style={tw`text-orange-400 text-4xl font-bold my-3`}>
+                  {Math.floor(restTimer / 60)}:
+                  {restTimer % 60 < 10 ? `0${restTimer % 60}` : restTimer % 60}
+                </Text>
+
+                <View
+                  style={tw`w-full bg-gray-800/50 h-2 rounded-full mt-2 mb-4`}
+                >
+                  <View
+                    style={[
+                      tw`bg-orange-500 h-2 rounded-full`,
+                      { width: `${(restTimer / restDuration) * 100}%` },
+                    ]}
+                  />
+                </View>
+
+                <TouchableOpacity
+                  style={tw`bg-orange-500 py-2 px-6 rounded-lg w-full items-center`}
+                  onPress={() => {
+                    clearInterval(timerInterval);
+                    setTargetModalVisible(false);
+                  }}
+                >
+                  <Text style={tw`text-white font-bold text-base`}>Skip</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
                 {/* Add/Remove Set Buttons */}
                 <View style={tw`flex-row justify-between mt-4`}>
                   <TouchableOpacity
                     style={tw`flex-1 mr-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-lg flex-row items-center justify-center`}
                     onPress={() => removeSet(currentExercise)}
                   >
-                    <Ionicons name="remove-circle-outline" size={20} color="#ef4444" style={tw`mr-2`} />
-                    <Text style={tw`text-red-400 font-semibold`}>Remove Set</Text>
+                    <Ionicons
+                      name="remove-circle-outline"
+                      size={20}
+                      color="#ef4444"
+                      style={tw`mr-2`}
+                    />
+                    <Text style={tw`text-red-400 font-semibold`}>
+                      Remove Set
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={tw`flex-1 ml-2 px-4 py-2 bg-orange-500 rounded-lg flex-row items-center justify-center`}
                     onPress={() => addSet(currentExercise)}
                   >
-                    <Ionicons name="add-circle-outline" size={20} color="white" style={tw`mr-2`} />
+                    <Ionicons
+                      name="add-circle-outline"
+                      size={20}
+                      color="white"
+                      style={tw`mr-2`}
+                    />
                     <Text style={tw`text-white font-semibold`}>Add Set</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
+           
           </ScrollView>
         </SafeAreaView>
       </LinearGradient>

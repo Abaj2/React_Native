@@ -92,7 +92,7 @@ const SignUp = () => {
           JSON.stringify({
             username: response.data.user.username,
             email: response.data.user.email,
-            userId: response.data.user.user_id,
+            user_id: response.data.user.user_id,
             name: response.data.user.name,
           })
         );

@@ -151,7 +151,13 @@ const ChangePassword = () => {
 
         <TouchableOpacity onPress={handleChangePassword} activeOpacity={0.8}>
           <View
-            style={tw`bg-orange-500 rounded-full py-3 mt-5 items-center shadow-lg shadow-orange-600/50`}
+            style={[tw`bg-orange-500 rounded-full py-3 mt-5 items-center shadow-lg shadow-orange-600/50`,  {
+                  
+              shadowColor: "#f97316",
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.4,
+              shadowRadius: 6,
+            },]}
           >
             <Text style={tw`text-white text-lg font-bold`}>
               Change Password
