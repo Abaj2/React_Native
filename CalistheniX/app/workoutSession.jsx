@@ -208,6 +208,7 @@ const WorkoutSession = () => {
         },
         {
           text: "Finish",
+          style: "destructive",
           onPress: () => {
             submitWorkout();
             navigation.navigate("Home");
@@ -220,13 +221,21 @@ const WorkoutSession = () => {
 
   const cancelWorkout = () => {
     stopTimer();
-    Alert.alert("Exit Workout?", "Your progress will be lost.", [
-      {
-        text: "OK",
-        onPress: () => navigation.navigate("Home"),
-        style: "cancel",
-      },
-    ]);
+    Alert.alert(
+      "Exit Workout?",
+      "Your progress will be lost.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Ok",
+          onPress: () => navigation.navigate("Home"),
+          style: "destructive", 
+        },
+      ]
+    );
   };
   useEffect(() => {
     console.log("Exercises 2", exercises2);
@@ -234,7 +243,7 @@ const WorkoutSession = () => {
   }, [exercises2, JSON.stringify(exerciseData)]);
 
   const startRestTimer = () => {
-    // Show options for rest duration selection
+   
     Alert.alert(
       "Rest Timer",
       "Select rest duration:",
@@ -252,7 +261,7 @@ const WorkoutSession = () => {
   };
 
   const showCustomRestInput = () => {
-    // Show input for custom duration
+
     Alert.prompt(
       "Custom Rest Time",
       "Enter rest time in seconds:",
@@ -281,12 +290,11 @@ const WorkoutSession = () => {
     setTimer(duration);
     setTargetModalVisible(true);
 
-    // Clear any existing interval
+    
     if (timerInterval) {
       clearInterval(timerInterval);
     }
 
-    // Set up new interval
     const interval = setInterval(() => {
       setTimer((prevTime) => {
         if (prevTime <= 1) {

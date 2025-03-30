@@ -74,7 +74,7 @@ const SignUp = () => {
     }
     setIsLoading(true);
 
-    // call backend
+
     try {
       const response = await axios.post(SERVER_URL, {
         email,
@@ -134,7 +134,7 @@ const SignUp = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={tw`flex-grow px-5 py-6`}
           >
-            {/* App Name */}
+           
             <View style={tw`items-center mb-6`}>
               <Text style={tw`text-4xl font-black text-white`}>
                 Calistheni<Text style={tw`text-orange-500`}>X</Text>
@@ -144,7 +144,7 @@ const SignUp = () => {
               </Text>
             </View>
 
-            {/* Sign Up Card */}
+          
             <View
               style={tw`bg-zinc-900 rounded-2xl p-5 border border-zinc-800 shadow-lg`}
             >
@@ -155,7 +155,7 @@ const SignUp = () => {
                 Enter your details to access your account
               </Text>
 
-              {/* Email Input */}
+             
               <Text style={tw`text-sm font-bold text-zinc-400 mb-1 ml-1`}>
                 Email
               </Text>
@@ -179,7 +179,6 @@ const SignUp = () => {
                 />
               </View>
 
-              {/* Name Input */}
               <Text style={tw`text-sm font-bold text-zinc-400 mb-1 ml-1`}>
                 Name
               </Text>
@@ -201,7 +200,7 @@ const SignUp = () => {
                 />
               </View>
 
-              {/* Username Input */}
+              
               <Text style={tw`text-sm font-bold text-zinc-400 mb-1 ml-1`}>
                 Username
               </Text>
@@ -223,7 +222,7 @@ const SignUp = () => {
                 />
               </View>
 
-              {/* Password Input */}
+             
               <Text style={tw`text-sm font-bold text-zinc-400 mb-1 ml-1`}>
                 Password
               </Text>
@@ -254,7 +253,7 @@ const SignUp = () => {
                 </TouchableOpacity>
               </View>
 
-              {/* Confirm Password Input */}
+              
               <Text style={tw`text-sm font-bold text-zinc-400 mb-1 ml-1`}>
                 Confirm Password
               </Text>
@@ -285,7 +284,7 @@ const SignUp = () => {
                 </TouchableOpacity>
               </View>
 
-              {/* Sign Up Button */}
+          
               <TouchableOpacity activeOpacity={0.8} onPress={handleSignUp}>
                 <LinearGradient
                   colors={["#f97316", "#ea580c"]}
@@ -304,7 +303,7 @@ const SignUp = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Sign In Link */}
+          
             <View style={tw`flex-row justify-center items-center mt-6`}>
               <Text style={tw`text-zinc-400 text-base`}>
                 Already have an account?
@@ -316,7 +315,7 @@ const SignUp = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Logo at bottom */}
+        
             <View
               style={tw`self-center mt-5 w-16 h-16 bg-zinc-900 rounded-full items-center justify-center border-2 border-orange-500`}
             >

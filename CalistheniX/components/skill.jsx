@@ -611,7 +611,7 @@ const Skill = ({
       <Modal transparent visible={progressionModalVisible} animationType="fade">
         <View style={tw`flex-1 bg-black/95 justify-center items-center p-5`}>
           <LinearGradient
-            colors={["#000", "#1a1a1a"]}
+            colors={["#121212", "#121212"]}
             style={[
               tw`rounded-3xl w-full max-w-md p-6`,
               { borderWidth: 1, borderColor: "#f97316/30" },
@@ -723,7 +723,7 @@ const Skill = ({
       <Modal transparent visible={editModalVisible} animationType="fade">
         <View style={tw`flex-1 bg-black/95 justify-center items-center p-5`}>
           <LinearGradient
-            colors={["#000", "#1a1a1a"]}
+            colors={["#121212", "#121212"]}
             style={[
               tw`rounded-3xl w-full max-w-md p-6`,
               { borderWidth: 1, borderColor: "#f97316/30" },

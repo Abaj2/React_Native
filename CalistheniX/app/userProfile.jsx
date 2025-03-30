@@ -40,14 +40,14 @@ const FETCH_SKILLS = Platform.select({
 });
 
 const UserProfile = ({ navigation, route }) => {
-  const { users_id } = route.params; // Profile being viewed
+  const { users_id } = route.params; 
   console.log(users_id);
 
   const [selectedTab, setSelectedTab] = useState("workouts");
   const [userDetails, setUserDetails] = useState();
   const [followers, setFollowers] = useState();
   const [following, setFollowing] = useState();
-  const [userData, setUserData] = useState(); // Current user's data
+  const [userData, setUserData] = useState(); 
   const [workoutDates, setWorkoutDates] = useState([]);
   const [workoutTimes, setWorkoutTimes] = useState([]);
 
@@ -55,7 +55,7 @@ const UserProfile = ({ navigation, route }) => {
   const [skills, setSkills] = useState([]);
   const [expandedSkills, setExpandedSkills] = useState({});
 
-  // Toggle skill expansion
+
   const toggleSkillExpansion = (skillId) => {
     setExpandedSkills((prev) => ({
       ...prev,
@@ -63,7 +63,6 @@ const UserProfile = ({ navigation, route }) => {
     }));
   };
 
-  // Fetch the current logged-in user's data
   const fetchUserData = useCallback(async () => {
     try {
       const storedUserData = await AsyncStorage.getItem("userData");
@@ -80,7 +79,7 @@ const UserProfile = ({ navigation, route }) => {
     }
   }, []);
 
-  // Fetch the profile of the user being viewed
+
   const fetchUserDetails = useCallback(async (user_id) => {
     try {
       const response = await axios.get(`${USER_DETAILS}?user_id=${user_id}`);
@@ -95,7 +94,6 @@ const UserProfile = ({ navigation, route }) => {
     }
   }, []);
 
-  // Fetch the workout profile graph for the viewed user
   const fetchProfileGraph = useCallback(async (user_id) => {
     if (!user_id) return;
 
@@ -272,7 +270,7 @@ const UserProfile = ({ navigation, route }) => {
                       {skill.skill}
                     </Text>
                     <View style={tw`flex-row items-center`}>
-                      {/* Show the current progression level */}
+               
                       <View style={tw`bg-zinc-800 px-2 py-1 rounded-lg mr-2`}>
                         <Text style={tw`text-orange-500 text-xs font-medium`}>
                           {skill.progressions[skill.current.length - 1]}

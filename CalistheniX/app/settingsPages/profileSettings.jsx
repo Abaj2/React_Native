@@ -184,7 +184,7 @@ const ProfileSettings = () => {
       <LinearGradient colors={["#000", "#1a1a1a"]} style={tw`flex-1`}>
         <StatusBar barStyle="light-content" />
         
-        {/* Header with proper SafeAreaView */}
+     
         <View style={tw`w-full bg-black border-b border-zinc-700`}>
           <SafeAreaView>
             <View style={tw`flex-row items-center px-4 py-3`}>
@@ -201,7 +201,7 @@ const ProfileSettings = () => {
         </View>
   
         <SafeAreaView style={tw`flex-1`} edges={['bottom', 'left', 'right']}>
-          {/* Form */}
+         
           <View style={tw`px-6 mt-8`}>
             <Text style={tw`text-gray-300 text-base mb-3`}>Email</Text>
             <TextInput
@@ -237,7 +237,7 @@ const ProfileSettings = () => {
             </TouchableOpacity>
           </View>
   
-          {/* Modal */}
+          
           <Modal animationType="fade" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
             <View style={tw`flex-1 justify-center items-center bg-black/80`}>
               <View style={tw`bg-zinc-900 p-6 rounded-3xl w-80`}>

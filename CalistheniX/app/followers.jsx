@@ -111,7 +111,6 @@ const Followers = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Followers List */}
       <ScrollView style={tw`flex-1`} showsVerticalScrollIndicator={false}>
         {followStats?.followers?.length > 0 ? (
           followStats.followers.map((user) => (

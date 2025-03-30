@@ -172,13 +172,13 @@ const ProfileScreen = () => {
   useEffect(() => {
     fetchAllData();
 
-    // Optional cleanup (this function will be called on unmount or when dependencies change)
+   
     return () => {
-      // Cleanup code here, if needed
+  
     };
-  }, [fetchAllData]); // Dependency array ensures that the effect runs only when `fetchAllData` changes
+  }, [fetchAllData]); 
 
-  // ... (keep all your other functions)
+
 
   if (isLoading) {
     return (
@@ -229,14 +229,14 @@ const ProfileScreen = () => {
       const fileName = `${userId}profilePic.${fileExtension}`;
       const filePath = `profile_pics/${fileName}`;
 
-      // ✅ Check if the profile picture already exists
+    
       const checkIfExists = await s3
         .headObject({
           Bucket: awsBucket,
           Key: filePath,
         })
         .promise()
-        .catch(() => null); // If not found, it returns null
+        .catch(() => null); 
 
       if (checkIfExists) {
         console.log("Profile picture exists, deleting old one...");
@@ -249,7 +249,6 @@ const ProfileScreen = () => {
         console.log("Old profile picture deleted.");
       }
 
-      // ✅ Upload the new profile picture
       const response = await fetch(uri);
       const blob = await response.blob();
 
@@ -413,14 +412,12 @@ const ProfileScreen = () => {
 
     const maxValue = Math.max(...dayData.map((d) => d.value), 60);
 
-    // Calculate total for the week
     const totalMinutes = dayData.reduce((sum, day) => sum + day.value, 0);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
-    // Check if the current week has more minutes than previous week (sample calculation)
-    // You'd need to implement logic to compare with previous week
-    const percentageChange = 15; // Sample value
+
+    const percentageChange = 15; 
     const isPositive = percentageChange > 0;
 
     return (
@@ -440,11 +437,8 @@ const ProfileScreen = () => {
 
           <View style={tw`flex-row justify-between items-end h-32 mb-4`}>
             {dayData.map((day, index) => (
-              <TouchableOpacity
+              <View
                 key={day.day}
-                onPress={() => {
-                  // Show tooltip logic here
-                }}
                 style={tw`flex-col items-center`}
               >
                 <View style={tw`flex-grow flex items-end h-full justify-end`}>
@@ -460,7 +454,7 @@ const ProfileScreen = () => {
                   />
                 </View>
                 <Text style={tw`text-xs text-zinc-400 mt-2`}>{day.day}</Text>
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
 
@@ -525,13 +519,12 @@ const ProfileScreen = () => {
 
     const workoutDays = new Set(currentMonthWorkouts);
 
-    const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Sunday
+    const firstDayOfMonth = new Date(year, month, 1).getDay(); 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Generate the calendar days
     const calendarDays = [];
     for (let i = 0; i < firstDayOfMonth; i++) {
-      calendarDays.push(null); // Empty slots before the first day
+      calendarDays.push(null); 
     }
     for (let day = 1; day <= daysInMonth; day++) {
       calendarDays.push(day);
@@ -552,7 +545,7 @@ const ProfileScreen = () => {
         </View>
 
         <View style={tw`p-4 rounded-3xl border border-zinc-700/20`}>
-          {/* Weekday labels */}
+   
           <View style={tw`ml-5 flex-row gap-10 mb-5`}>
             {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
               <Text key={index} style={tw`text-gray-400 text-center text-xs`}>
@@ -561,7 +554,7 @@ const ProfileScreen = () => {
             ))}
           </View>
 
-          {/* Calendar Grid */}
+        
           <View style={tw`flex-wrap flex-row justify-between`}>
             {calendarDays.map((day, index) => (
               <View key={index} style={tw`w-[13%] items-center mb-2`}>
@@ -569,9 +562,9 @@ const ProfileScreen = () => {
                   <View
                     style={tw`h-8 w-8 rounded-full items-center justify-center ${
                       day === today.getDate()
-                        ? "bg-orange-500" // Highlight today
+                        ? "bg-orange-500" 
                         : workoutDays.has(day)
-                        ? "bg-orange-500/20 border border-orange-500/50" // Highlight workout days
+                        ? "bg-orange-500/20 border border-orange-500/50"
                         : "bg-zinc-800"
                     }`}
                   >
@@ -584,7 +577,6 @@ const ProfileScreen = () => {
             ))}
           </View>
 
-          {/* Legend */}
           <View style={tw`flex-row justify-center mt-4`}>
             <View style={tw`flex-row items-center mr-4`}>
               <View style={tw`w-3 h-3 rounded-full bg-orange-500 mr-2`} />
@@ -695,7 +687,7 @@ const ProfileScreen = () => {
                 colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]}
                 style={tw`rounded-3xl overflow-hidden shadow-lg border border-zinc-800/50`}
               >
-                {/* Workouts */}
+            
                 <View
                   style={tw`flex-row justify-between items-center p-4 border-b border-zinc-800/50`}
                 >
@@ -714,7 +706,7 @@ const ProfileScreen = () => {
                   </Text>
                 </View>
 
-                {/* Training Time */}
+            
                 <View
                   style={tw`flex-row justify-between items-center p-4 border-b border-zinc-800/50`}
                 >
@@ -733,7 +725,7 @@ const ProfileScreen = () => {
                   </Text>
                 </View>
 
-                {/* Skills */}
+                
                 <View style={tw`flex-row justify-between items-center p-4`}>
                   <View style={tw`flex-row items-center`}>
                     <View style={tw`p-3 bg-orange-500 rounded-2xl`}>
@@ -752,10 +744,8 @@ const ProfileScreen = () => {
               </LinearGradient>
             </View>
 
-            {/* Workout Calendar - NEW */}
             {workoutCalender(workoutDates)}
 
-            {/* Quick Actions Section */}
             <View style={tw`mb-6`}>
               <Text style={tw`ml-1 text-white text-xl font-bold mb-4`}>
                 Quick Actions
@@ -790,7 +780,6 @@ const ProfileScreen = () => {
               </View>
             </View>
 
-            {/* Recent Workouts Section */}
             <View style={tw`mb-8`}>
               <View style={tw`flex-row items-center justify-between mb-4`}>
                 <Text style={tw`ml-1 text-white text-xl font-bold`}>

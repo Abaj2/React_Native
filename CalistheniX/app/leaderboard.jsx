@@ -40,13 +40,13 @@ const LEADERBOARD_STATS_URL = Platform.select({
   ios: "http://192.168.1.155:4005/leaderboardstats",
 });
 
-// Helper function to convert time string to total seconds
+
 const timeStringToSeconds = (timeString) => {
   const [hours, minutes, seconds] = timeString.split(":").map(Number);
   return hours * 3600 + minutes * 60 + seconds;
 };
 
-// Helper function to format seconds to HH:MM:SS
+
 const formatTime = (totalSeconds) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -165,7 +165,7 @@ const Leaderboard = () => {
           if (!workoutCount[workout.username]) {
             workoutCount[workout.username] = {
               count: 0,
-              user_id: workout.user_id, // Store user_id
+              user_id: workout.user_id, 
             };
           }
           workoutCount[workout.username].count += 1;
@@ -189,7 +189,7 @@ const Leaderboard = () => {
     const ranked = sortedEntries.map((entry, index) => ({
       username: entry[0],
       count: entry[1].count,
-      user_id: entry[1].user_id, // Include user_id
+      user_id: entry[1].user_id,
       rank: index + 1,
     }));
 
@@ -337,7 +337,6 @@ const Leaderboard = () => {
     <LinearGradient colors={["#000000", "#1a1a1a"]} style={tw`flex-1`}>
       <SafeAreaView style={tw`flex-1`}>
         <ScrollView showsVerticalScrollIndicator={false} style={tw`flex-1`}>
-          {/* Header */}
           <View style={tw`flex-row items-center py-6`}>
             <View style={tw`justify-between gap-30 flex-row items-center`}>
               <Text style={tw`ml-4 font-extrabold text-3xl text-white`}>
@@ -462,9 +461,6 @@ const Leaderboard = () => {
             </LinearGradient>
           </View>
 
-          {/* Tab navigation */}
-
-          {/* Leaderboard */}
           <View style={tw`mx-2 mb-6`}>
             <LinearGradient
               colors={["#000", "#1a1a1a"]}
@@ -481,11 +477,10 @@ const Leaderboard = () => {
                 </View>
               </View>
 
-              {/* Top 3 Winners */}
               {(selectedTab === "Tab1" ? rankedEntries : rankedTimeEntries)
                 .length >= 3 ? (
                 <View style={tw`flex-row justify-between mb-6`}>
-                  {/* 2nd Place */}
+              
                   <View style={tw`items-center w-1/3`}>
                     <View style={tw`relative`}>
                       <Image
@@ -519,7 +514,7 @@ const Leaderboard = () => {
                     </Text>
                   </View>
 
-                  {/* 1st Place */}
+                
                   <View style={tw`items-center w-1/3`}>
                     <View style={tw`relative`}>
                       <Image
@@ -557,7 +552,6 @@ const Leaderboard = () => {
                     </Text>
                   </View>
 
-                  {/* 3rd Place */}
                   <View style={tw`items-center w-1/3`}>
                     <View style={tw`relative`}>
                       <Image
@@ -605,7 +599,7 @@ const Leaderboard = () => {
                 </View>
               )}
 
-              {/* Rest of the leaderboard */}
+       
               <View style={tw`space-y-3`}>
                 {(selectedTab === "Tab1" ? rankedEntries : rankedTimeEntries)
                   .slice(3)

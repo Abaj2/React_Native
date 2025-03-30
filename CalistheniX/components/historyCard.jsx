@@ -130,19 +130,19 @@ const HistoryCard = ({
   if (workoutsData.length === 0) {
     return (
       <View style={tw`flex-1 items-center justify-center mt-10`}>
-      <Icon
-        name="package"
-        size={60}
-        color="#ffa500"
-        style={tw`opacity-50 mb-4`}
-      />
-      <Text style={tw`text-orange-500 text-xl font-bold mb-2`}>
-        No Workout History Found
-      </Text>
-      <Text style={tw`text-zinc-500 text-center px-10`}>
-        Start your first workout to see your history
-      </Text>
-    </View>
+        <Icon
+          name="package"
+          size={60}
+          color="#ffa500"
+          style={tw`opacity-50 mb-4`}
+        />
+        <Text style={tw`text-orange-500 text-xl font-bold mb-2`}>
+          No Workout History Found
+        </Text>
+        <Text style={tw`text-zinc-500 text-center px-10`}>
+          Start your first workout to see your history
+        </Text>
+      </View>
     );
   }
 
@@ -202,26 +202,36 @@ const HistoryCard = ({
 
               <View style={tw`flex-row justify-between mb-5`}>
                 <View style={tw`items-center`}>
-                <MaterialCommunityIcons name="dumbbell" size={20} color="#f97316" />
+                  <MaterialCommunityIcons
+                    name="dumbbell"
+                    size={20}
+                    color="#f97316"
+                  />
                   <Text style={tw`text-white font-bold mt-1`}>
                     {stats.totalExercises}
                   </Text>
-                  <Text style={tw`text-gray-400 text-xs`}>{`Exercise${stats.totalExercises === 1  ? '' : 's'}`}</Text>
+                  <Text style={tw`text-gray-400 text-xs`}>{`Exercise${
+                    stats.totalExercises === 1 ? "" : "s"
+                  }`}</Text>
                 </View>
                 <View style={tw`items-center`}>
-                <Icon name="bar-chart-2" size={20} color="#f97316" />
-                  
+                  <Icon name="bar-chart-2" size={20} color="#f97316" />
+
                   <Text style={tw`text-white font-bold mt-1`}>
                     {stats.totalSets}
                   </Text>
-                  <Text style={tw`text-gray-400 text-xs`}>{`Set${stats.totalSets === 1 ? '' : 's'}`}</Text>
+                  <Text style={tw`text-gray-400 text-xs`}>{`Set${
+                    stats.totalSets === 1 ? "" : "s"
+                  }`}</Text>
                 </View>
                 <View style={tw`items-center`}>
-                <Icon name="repeat" size={20} color="#f97316" />
+                  <Icon name="repeat" size={20} color="#f97316" />
                   <Text style={tw`text-white font-bold mt-1`}>
                     {stats.totalReps}
                   </Text>
-                  <Text style={tw`text-gray-400 text-xs`}>{`Rep${stats.totalReps === 1 ? '' : 's'}`}</Text>
+                  <Text style={tw`text-gray-400 text-xs`}>{`Rep${
+                    stats.totalReps === 1 ? "" : "s"
+                  }`}</Text>
                 </View>
               </View>
 
@@ -295,13 +305,13 @@ const HistoryCard = ({
                                       },
                                     ]}
                                   >
-                                    <Icon
+                                    <MaterialCommunityIcons
                                       name={
                                         set.duration
                                           ? "timer-outline"
                                           : "dumbbell"
                                       }
-                                      size={14}
+                                      size={18}
                                       color={
                                         set.duration ? "#34d399" : "#f97316"
                                       }

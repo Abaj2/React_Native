@@ -43,9 +43,9 @@ const LeaderboardCard = ({ username, workouts, rank, user_id, metric }) => {
           username === storageUsername ? "opacity-100" : "opacity-100"
         }`}
       >
-        {/* Left Section: Rank and Profile */}
+
         <View style={tw`flex-row items-center flex-1`}>
-          {/* Rank Badge */}
+  
           <View style={tw`mr-3 w-10 items-center justify-center`}>
             {rank === 1 && (
               <View style={tw`bg-yellow-500/20 p-1 rounded-full`}>
@@ -70,7 +70,7 @@ const LeaderboardCard = ({ username, workouts, rank, user_id, metric }) => {
                 <Ionicons
                   name="medal-outline"
                   size={26}
-                  color="#CD7F32" // Bronze color
+                  color="#CD7F32" 
                 />
               </View>
             )}
@@ -83,7 +83,7 @@ const LeaderboardCard = ({ username, workouts, rank, user_id, metric }) => {
             )}
           </View>
   
-          {/* Profile Image */}
+        
           <Image
             source={blackDefaultProfilePic}
             style={tw`w-10 h-10 rounded-full ${
@@ -91,7 +91,7 @@ const LeaderboardCard = ({ username, workouts, rank, user_id, metric }) => {
             }`}
           />
   
-          {/* Username */}
+    
           <View style={tw`ml-3 flex-1`}>
             <Text 
               style={tw`font-bold text-lg ${
@@ -103,8 +103,7 @@ const LeaderboardCard = ({ username, workouts, rank, user_id, metric }) => {
             </Text>
           </View>
         </View>
-  
-        {/* Right Section: Stats */}
+
         <View style={tw`${
           username === storageUsername 
             ? "bg-orange-500" 
@@ -131,8 +130,7 @@ const LeaderboardCard = ({ username, workouts, rank, user_id, metric }) => {
           )}
         </View>
       </View>
-      
-      {/* Highlight for current user */}
+
       {username === storageUsername && (
         <View style={tw`absolute left-0 top-0 bottom-0 w-1 bg-orange-500 rounded-r-full`} />
       )}

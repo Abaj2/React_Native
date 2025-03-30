@@ -148,62 +148,80 @@ const CustomWorkout = () => {
     stopTimer();
     Alert.alert("Exit Workout?", "Your progress will be lost.", [
       {
-        text: "OK",
-        onPress: () => navigation.navigate("Home"),
+        text: "Cancel",
         style: "cancel",
+      },
+      {
+        text: "Ok",
+        onPress: () => navigation.navigate("Home"),
+        style: "destructive", 
       },
     ]);
   };
 
   const finishWorkout = async () => {
-    try {
-      const token = await AsyncStorage.getItem("jwtToken");
-      const storedUserData = await AsyncStorage.getItem("userData");
-      const parsedUserData = JSON.parse(storedUserData);
-      const user_id = parsedUserData.user_id;
-
-      if (exercisesArray) {
-        console.log(exercisesArray);
-        setTitle(workoutName);
-      }
-
-      if (!workoutName) {
-        Alert.alert("Enter a title");
-        return;
-      }
-
-      setTimerRunning(false);
-
-      const response = await axios.post(
-        SERVER_URL,
+    Alert.alert(
+      "Finish Workout?",
+      "Are you sure you want to finish this workout?",
+      [
         {
-          workoutSummary,
-          title: workoutName || title,
-          user_id,
-          duration: formatTimer(timer),
+          text: "Cancel",
+          style: "cancel",
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
+          text: "Finish",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("jwtToken");
+              const storedUserData = await AsyncStorage.getItem("userData");
+              const parsedUserData = JSON.parse(storedUserData);
+              const user_id = parsedUserData.user_id;
+  
+              if (exercisesArray) {
+                console.log(exercisesArray);
+                setTitle(workoutName);
+              }
+  
+              if (!workoutName && !title) {
+                Alert.alert("Enter a title");
+                return;
+              }
+  
+              setTimerRunning(false);
+  
+              const response = await axios.post(
+                SERVER_URL,
+                {
+                  workoutSummary,
+                  title: workoutName || title,
+                  user_id,
+                  duration: formatTimer(timer),
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+  
+              if (response.status === 200) {
+                console.log("Sent data to backend");
+              }
+              navigation.navigate("Home");
+  
+              setTimeout(() => {
+                Alert.alert("Successfully completed workout");
+              }, 750);
+            } catch (err) {
+              console.error("Error:", err);
+            }
           },
-        }
-      );
-
-      if (response.status === 200) {
-        console.log("Sent data to backend");
-      }
-      navigation.navigate("Home");
-
-      setTimeout(() => {
-        Alert.alert("Successfully completed workout");
-      }, 750);
-    } catch (err) {
-      console.error("Error:", err);
-    }
+          style: "destructive",
+        },
+      ]
+    );
   };
-
     const startRestTimer = () => {
-      // Show options for rest duration selection
       Alert.alert(
         "Rest Timer",
         "Select rest duration:",
@@ -221,7 +239,6 @@ const CustomWorkout = () => {
     };
   
     const showCustomRestInput = () => {
-      // Show input for custom duration
       Alert.prompt(
         "Custom Rest Time",
         "Enter rest time in seconds:",
@@ -249,13 +266,12 @@ const CustomWorkout = () => {
       setRestDuration(duration);
       setRestTimer(duration);
       setTargetModalVisible(true);
-  
-      // Clear any existing interval
+
       if (timerInterval) {
         clearInterval(timerInterval);
       }
   
-      // Set up new interval
+
       const interval = setInterval(() => {
         setRestTimer((prevTime) => {
           if (prevTime <= 1) {
@@ -278,7 +294,7 @@ const CustomWorkout = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={tw`flex-grow`}
           >
-            {/* Header */}
+        
             <View
               style={tw`px-4 py-3 border-b border-orange-500/30 bg-black/20`}
             >
@@ -310,7 +326,7 @@ const CustomWorkout = () => {
               </View>
             </View>
 
-            {/* Add Exercise Input */}
+   
             <View style={tw`px-4 py-3 border-b border-gray-800/50 bg-black/10`}>
               <View style={tw`flex-row items-center gap-2`}>
                 <TextInput
@@ -330,7 +346,6 @@ const CustomWorkout = () => {
               </View>
             </View>
 
-            {/* Exercise List */}
             {workoutSummary.length > 0 && (
               <View style={tw`border-b border-gray-800/50 bg-black/10`}>
                 <ScrollView
@@ -363,7 +378,6 @@ const CustomWorkout = () => {
               </View>
             )}
 
-            {/* Sets */}
             {workoutSummary.length > 0 && (
               <View style={tw`p-4`}>
                 {workoutSummary[currentExercise].sets.map((set, setIndex) => (
@@ -532,7 +546,6 @@ const CustomWorkout = () => {
               </View>
             )}
 
-                {/* Add/Remove Set Buttons */}
                 <View style={tw`flex-row justify-between mt-4`}>
                   <TouchableOpacity
                     style={tw`flex-1 mr-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-lg flex-row items-center justify-center`}

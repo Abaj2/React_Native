@@ -327,6 +327,9 @@ const WorkoutsMain = () => {
         }
       );
       if (response.status === 200) {
+        setWorkouts((prevWorkouts) =>
+          prevWorkouts.filter((workout) => workout.workout_id !== workoutId)
+        );
         console.log("Routine deleted successfully");
       }
     } catch (err) {

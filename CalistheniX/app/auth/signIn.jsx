@@ -93,7 +93,7 @@ const SignIn = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={tw`flex-grow px-5 justify-center py-6`}
           >
-            {/* Logo and App Name */}
+          
             <View style={tw`items-center mb-8`}>
               
               <Text style={tw`text-4xl font-black text-white`}>
@@ -101,12 +101,11 @@ const SignIn = () => {
               </Text>  
               <Text style={tw`text-sm text-zinc-400 mt-1`}>Track your calisthenics progress</Text>
             </View>
-            
-            {/* Login Card */}
+      
             <View style={tw`bg-zinc-900 rounded-2xl p-5 border border-zinc-800 shadow-lg`}> 
               <Text style={tw`text-2xl font-bold text-white mb-5`}>Welcome Back</Text> 
               
-              {/* Email Input */}
+          
               <Text style={tw`text-sm font-bold text-zinc-400 mb-1 ml-1`}>Email</Text>
               <View style={tw`flex-row items-center bg-zinc-800 rounded-lg p-3 mb-4 border border-zinc-700`}> 
                 <MaterialIcons name="mail-outline" size={20} color="#f97316" style={tw`mr-3`} /> 
@@ -120,8 +119,7 @@ const SignIn = () => {
                   keyboardType="email-address"
                 />
               </View>
-              
-              {/* Password Input */}
+             
               <Text style={tw`text-sm font-bold text-zinc-400 mb-1 ml-1`}>Password</Text>
               <View style={tw`flex-row items-center bg-zinc-800 rounded-lg p-3 mb-2 border border-zinc-700`}> 
                 <MaterialIcons name="lock-outline" size={20} color="#f97316" style={tw`mr-3`} /> 
@@ -138,12 +136,12 @@ const SignIn = () => {
                 </TouchableOpacity>
               </View>
               
-              {/* Forgot Password */}
+          
               <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")} style={tw`mb-5`}> 
                 <Text style={tw`text-orange-500 text-sm font-semibold text-right`}>Forgot Password?</Text> 
               </TouchableOpacity>
               
-              {/* Sign In Button */}
+             
               <TouchableOpacity activeOpacity={0.8} onPress={handleSubmit}> 
                 <LinearGradient 
                   colors={["#f97316", "#ea580c"]} 
@@ -157,7 +155,7 @@ const SignIn = () => {
               </TouchableOpacity>
             </View>
             
-            {/* Sign Up Link */}
+    
             <View style={tw`flex-row justify-center items-center mt-6`}> 
               <Text style={tw`text-zinc-400 text-base`}>Don't have an account?</Text>
               <TouchableOpacity onPress={() => navigation.navigate("Sign-up")}>

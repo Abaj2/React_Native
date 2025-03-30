@@ -109,7 +109,7 @@ const Home = () => {
       });
 
       if (response.status === 200) {
-        setSkillsData(response.data.skills || []); // Default to empty array for new users
+        setSkillsData(response.data.skills || []);
       } else {
         console.log("Failed to fetch user data from server");
       }
@@ -222,9 +222,8 @@ const Home = () => {
   }));
 
   const getMostRecentDate = (skill) => {
-    // Flatten all dates from all progressions into one array
+  
     const allDates = skill.date.flat();
-    // Find the maximum date (most recent)
     return Math.max(...allDates);
   };
 
@@ -240,7 +239,6 @@ const Home = () => {
             >
               {skillsData.length > 0 ? (
                 skillsData
-                  // Create a new array with the skill and its creation date (oldest date in the array)
                   .map((skill) => ({
                     ...skill,
                     creationDate: Math.min(
@@ -251,12 +249,12 @@ const Home = () => {
                       )
                     ),
                   }))
-                  // Sort by creation date (oldest first)
+
                   .sort((a, b) => a.creationDate - b.creationDate)
-                  // Render the sorted skills
+        
                   .map((skillData, index) => (
                     <Skill
-                      key={skillData.id || index} // Prefer using skillData.id if available
+                      key={skillData.id || index}
                       isDarkMode={isDarkMode}
                       skillData={skillData}
                       loadUserData={loadUserData}
@@ -498,7 +496,7 @@ const Home = () => {
               >
                 <LinearGradient
                   colors={
-                    isDarkMode ? ["#000", "#1a1a1a"] : ["#FFFFFF", "#87CEEB"]
+                    isDarkMode ? ["#121212", "#121212"] : ["#FFFFFF", "#87CEEB"]
                   }
                   style={tw`w-full max-w-sm p-6 rounded-2xl border ${
                     isDarkMode ? "border-orange-500/40" : "border-sky-500/40"
